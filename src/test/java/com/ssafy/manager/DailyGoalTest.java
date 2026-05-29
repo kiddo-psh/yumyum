@@ -8,57 +8,27 @@ public class DailyGoalTest {
 
     @Test
     void 목표_기록보다_작으면_미달성() {
-        DailyGoal goal = new DailyGoal(2);
-        goal.progress();
+        DailyGoal goal = new DailyGoal(2000.0);
+        goal.recalculate(1999.0);
         assertFalse(goal.isAchieved());
     }
 
     @Test
     void 목표_기록보다_이상이면_달성() {
-        DailyGoal goal = new DailyGoal(2);
-        goal.progress();
-        goal.progress();
+        DailyGoal goal = new DailyGoal(2000.0);
+        goal.recalculate(2000.0);
 
         assertTrue(goal.isAchieved());
     }
 
     @Test
-    void 기록이_없는_상태에서_취소할_수_없다() {
-        DailyGoal goal = new DailyGoal(2);
+    void 달성_후_달성값이_낮아져도_달성_상태는_유지된다() {
+        DailyGoal goal = new DailyGoal(2000.0);
+        goal.recalculate(2000.0);
 
-        assertThrows(InvalidProgressException.class, () -> {
-            goal.cancel();
-        });
-    }
-
-    @Test
-    void 기록은_취소될_수_있다() {
-        DailyGoal goal = new DailyGoal(2);
-        goal.progress();
-
-        assertDoesNotThrow(() -> {
-            goal.cancel();
-        });
-    }
-
-    @Test
-    void 기록이_취소되어도_성취여부는_변경되지_않는다() {
-        DailyGoal goal = new DailyGoal(1);
-        goal.progress();
-
-        goal.cancel();
-        assertTrue(goal.isAchieved());
-    }
-
-    @Test
-    void 일일_목표_기본값은_하루_2끼이다() {
-        final int DEFAULT_GOAL_COUNT = 2;
-        DailyGoal goal = new DailyGoal();
-
-        for (int times = 0; times < DEFAULT_GOAL_COUNT; times++) {
-            goal.progress();
-        }
+        goal.recalculate(-1000.0);
 
         assertTrue(goal.isAchieved());
     }
+
 }

@@ -1,33 +1,21 @@
 package com.ssafy.manager;
 
+import lombok.Getter;
+
+@Getter
 public class DailyGoal {
-    private final int targetValue;
-    private int achievedCount = 0;
+    private final double targetValue;
+    private double achievedValue = 0;
     private boolean achieved = false;
 
-    public DailyGoal() {
-        this.targetValue = 2;
-    }
-
-    public DailyGoal(int targetValue) {
+    public DailyGoal(double targetValue) {
         this.targetValue = targetValue;
     }
 
-    public void progress() {
-        achievedCount += 1;
-        if (achievedCount >= targetValue) {
-            achieved = true;
+    public void recalculate(double value) {
+        achievedValue = value;
+        if (!achieved) {
+            achieved = targetValue <= achievedValue;
         }
-    }
-
-    public void cancel() {
-        if (achievedCount == 0) {
-            throw new InvalidProgressException("달성 횟수를 0보다 아래로 내릴 수 없습니다.");
-        }
-        achievedCount -= 1;
-    }
-
-    public boolean isAchieved() {
-        return achieved;
     }
 }

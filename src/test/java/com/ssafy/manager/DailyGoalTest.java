@@ -49,4 +49,16 @@ public class DailyGoalTest {
         goal.cancel();
         assertTrue(goal.isAchieved());
     }
+
+    @Test
+    void 일일_목표_기본값은_하루_2끼이다() {
+        final int DEFAULT_GOAL_COUNT = 2;
+        DailyGoal goal = new DailyGoal();
+
+        for (int times = 0; times < DEFAULT_GOAL_COUNT; times++) {
+            goal.progress();
+        }
+
+        assertTrue(goal.isAchieved());
+    }
 }

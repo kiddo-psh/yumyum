@@ -5,6 +5,10 @@ public class DailyGoal {
     private int achievedCount = 0;
     private boolean achieved = false;
 
+    public DailyGoal() {
+        this.targetValue = 2;
+    }
+
     public DailyGoal(int targetValue) {
         this.targetValue = targetValue;
     }

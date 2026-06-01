@@ -1,4 +1,4 @@
-package com.ssafy.manager;
+package com.ssafy.manager.program.domain;
 
 import lombok.Getter;
 

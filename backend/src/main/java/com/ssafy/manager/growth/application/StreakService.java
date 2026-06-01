@@ -1,5 +1,7 @@
-package com.ssafy.manager;
+package com.ssafy.manager.growth.application;
 
+import com.ssafy.manager.growth.domain.MemberStats;
+import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,5 +1,6 @@
-package com.ssafy.manager;
+package com.ssafy.manager.growth.infrastructure.persistence;
 
+import com.ssafy.manager.growth.domain.MemberStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

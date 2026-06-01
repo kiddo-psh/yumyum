@@ -1,5 +1,8 @@
 package com.ssafy.manager;
 
+import com.ssafy.manager.growth.domain.MemberStats;
+import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
+import com.ssafy.manager.growth.application.StreakService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,7 +13,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 

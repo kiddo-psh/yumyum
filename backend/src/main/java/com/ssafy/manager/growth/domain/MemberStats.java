@@ -1,4 +1,4 @@
-package com.ssafy.manager;
+package com.ssafy.manager.growth.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

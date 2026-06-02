@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,11 @@ public class MealService {
         if (!wasAchieved && goal.isAchieved()) {
             streakService.increment(memberId, effectiveDate);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Meal> listByDate(Long memberId, LocalDate date) {
+        return mealRepository.findAllByMemberIdAndDate(memberId, date);
     }
 
     private LocalDate effectiveDateOf(LocalDateTime recordedAt) {

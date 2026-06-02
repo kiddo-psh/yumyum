@@ -2,6 +2,8 @@ package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.domain.MemberStats;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
+import com.ssafy.manager.program.domain.DailyGoal;
+import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.verify;
 class StreakResetServiceTest {
 
     @Mock MemberStatsRepository memberStatsRepository;
+    @Mock DailyGoalRepository dailyGoalRepository;
 
     @InjectMocks StreakResetService streakResetService;
 
@@ -45,5 +48,22 @@ class StreakResetServiceTest {
         streakResetService.resetFor(List.of(99L));
 
         verify(memberStatsRepository, never()).save(any());
+    }
+
+    @Test
+    void 날짜_기준으로_미달성_Member의_Streak을_초기화한다() {
+        DailyGoal unachieved = DailyGoal.of(1L, YESTERDAY, 2000.0);
+        DailyGoal achieved   = DailyGoal.of(2L, YESTERDAY, 2000.0);
+        achieved.recalculate(2000.0);
+
+        given(dailyGoalRepository.findAllByDate(YESTERDAY)).willReturn(List.of(unachieved, achieved));
+
+        MemberStats stats = new MemberStats(3, 10, YESTERDAY.minusDays(1));
+        given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
+
+        streakResetService.resetUnachievedFor(YESTERDAY);
+
+        assertThat(stats.getCurrentStreak()).isZero();
+        verify(memberStatsRepository, never()).findByMemberId(2L);
     }
 }

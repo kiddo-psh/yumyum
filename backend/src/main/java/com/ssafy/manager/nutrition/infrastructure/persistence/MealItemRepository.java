@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface MealItemRepository extends JpaRepository<MealItem, Long> {
 
     @Query("SELECT COALESCE(SUM(mi.calories), 0.0) FROM MealItem mi JOIN mi.meal m WHERE m.memberId = :memberId AND m.effectiveDate = :effectiveDate")
     double sumCaloriesByMemberIdAndEffectiveDate(@Param("memberId") Long memberId, @Param("effectiveDate") LocalDate effectiveDate);
+
+    @Query("SELECT mi FROM MealItem mi JOIN mi.meal m WHERE m.memberId = :memberId AND m.effectiveDate = :date")
+    List<MealItem> findAllByMemberIdAndEffectiveDate(@Param("memberId") Long memberId, @Param("date") LocalDate date);
 }

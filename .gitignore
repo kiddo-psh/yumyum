@@ -75,3 +75,6 @@ pnpm-debug.log*
 **/.mypy_cache/
 **/.ruff_cache/
 **/.ipynb_checkpoints/
+
+### AI Agents ###
+.claude/

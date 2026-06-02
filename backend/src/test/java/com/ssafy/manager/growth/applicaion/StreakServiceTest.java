@@ -1,4 +1,4 @@
-package com.ssafy.manager;
+package com.ssafy.manager.growth.applicaion;
 
 import com.ssafy.manager.growth.domain.MemberStats;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;

@@ -21,7 +21,7 @@ public class ProgramService {
     private final ProgramRepository programRepository;
 
     @Transactional
-    public void create(Long memberId, ProgramType type, LocalDate startDate, LocalDate endDate) {
+    public Long create(Long memberId, ProgramType type, LocalDate startDate, LocalDate endDate) {
         programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
                 .ifPresent(p -> { throw new IllegalStateException("이미 활성화된 Program이 있습니다."); });
 
@@ -31,6 +31,7 @@ public class ProgramService {
                 member.getHeightCm(), member.getWeightKg(), member.getActivityLevel());
         int targetCalories = type.adjust(tdee);
 
-        programRepository.save(Program.create(memberId, type, startDate, endDate, targetCalories));
+        Program program = programRepository.save(Program.create(memberId, type, startDate, endDate, targetCalories));
+        return program.getId();
     }
 }

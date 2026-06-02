@@ -27,7 +27,7 @@ public class MealService {
     private final StreakService streakService;
 
     @Transactional
-    public void record(MealCommand command, LocalDateTime recordedAt) {
+    public Long record(MealCommand command, LocalDateTime recordedAt) {
         LocalDate effectiveDate = effectiveDateOf(recordedAt);
 
         Meal meal = new Meal(command.memberId(), command.type(), command.date(), effectiveDate);
@@ -41,6 +41,8 @@ public class MealService {
 
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
                 .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+
+        return meal.getId();
     }
 
     private void updateGoalAndStreak(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {

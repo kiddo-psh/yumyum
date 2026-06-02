@@ -4,8 +4,9 @@ import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,22 +20,26 @@ public class MealController {
     private final MealService mealService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void record(
+    public ResponseEntity<Void> record(
             @RequestHeader("X-Member-Id") Long memberId,
-            @RequestBody MealRequest request
+            @RequestBody MealRequest request,
+            UriComponentsBuilder uriBuilder
     ) {
-        mealService.record(request.toCommand(memberId), LocalDateTime.now());
+        Long mealId = mealService.record(request.toCommand(memberId), LocalDateTime.now());
+        return ResponseEntity.created(
+                uriBuilder.path("/meals/{id}").buildAndExpand(mealId).toUri()
+        ).build();
     }
 
     @GetMapping
-    public List<MealResponse> list(
+    public ResponseEntity<List<MealResponse>> list(
             @RequestHeader("X-Member-Id") Long memberId,
             @RequestParam(required = false) LocalDate date
     ) {
         LocalDate targetDate = date != null ? date : LocalDate.now();
-        return mealService.listByDate(memberId, targetDate).stream()
+        List<MealResponse> meals = mealService.listByDate(memberId, targetDate).stream()
                 .map(MealResponse::from)
                 .toList();
+        return ResponseEntity.ok(meals);
     }
 }

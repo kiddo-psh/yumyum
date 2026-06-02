@@ -13,8 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProgramController.class)
@@ -27,7 +28,10 @@ class ProgramControllerTest {
     private static final Long MEMBER_ID = 1L;
 
     @Test
-    void 프로그램을_생성하면_201을_반환한다() throws Exception {
+    void 프로그램을_생성하면_201과_Location_헤더를_반환한다() throws Exception {
+        given(programService.create(MEMBER_ID, ProgramType.DIET,
+                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30))).willReturn(1L);
+
         ProgramRequest request = new ProgramRequest(
                 ProgramType.DIET,
                 LocalDate.of(2026, 6, 1),
@@ -38,9 +42,7 @@ class ProgramControllerTest {
                         .header("X-Member-Id", MEMBER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
-
-        verify(programService).create(MEMBER_ID, ProgramType.DIET,
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30));
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/programs/1"));
     }
 }

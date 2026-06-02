@@ -22,6 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,7 +36,9 @@ class MealControllerTest {
     private static final Long MEMBER_ID = 1L;
 
     @Test
-    void 식사를_기록하면_201을_반환한다() throws Exception {
+    void 식사를_기록하면_201과_Location_헤더를_반환한다() throws Exception {
+        given(mealService.record(any(), any())).willReturn(1L);
+
         MealRequest request = new MealRequest(
                 MealType.LUNCH,
                 LocalDate.of(2026, 6, 1),
@@ -46,9 +49,8 @@ class MealControllerTest {
                         .header("X-Member-Id", MEMBER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
-
-        verify(mealService).record(any(), any());
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/meals/1"));
     }
 
     @Test

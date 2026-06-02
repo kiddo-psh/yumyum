@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -43,6 +44,7 @@ class ProgramServiceTest {
         given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
         given(programRepository.findByMemberIdAndStatus(MEMBER_ID, ProgramStatus.ACTIVE))
                 .willReturn(Optional.empty());
+        given(programRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         programService.create(MEMBER_ID, ProgramType.HEALTH, START, END);
 
@@ -56,6 +58,7 @@ class ProgramServiceTest {
         given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
         given(programRepository.findByMemberIdAndStatus(MEMBER_ID, ProgramStatus.ACTIVE))
                 .willReturn(Optional.empty());
+        given(programRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         programService.create(MEMBER_ID, ProgramType.DIET, START, END);
 

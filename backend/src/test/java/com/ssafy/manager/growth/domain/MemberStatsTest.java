@@ -1,6 +1,5 @@
-package com.ssafy.manager;
+package com.ssafy.manager.growth.domain;
 
-import com.ssafy.manager.growth.domain.MemberStats;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

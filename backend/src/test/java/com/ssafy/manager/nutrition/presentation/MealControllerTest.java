@@ -3,7 +3,6 @@ package com.ssafy.manager.nutrition.presentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.domain.MealType;
-import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ class MealControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @MockitoBean MealService mealService;
-    @MockitoBean MealRepository mealRepository;
 
     private static final Long MEMBER_ID = 1L;
 
@@ -56,7 +54,7 @@ class MealControllerTest {
     @Test
     void 날짜로_식사_목록을_조회한다() throws Exception {
         Meal meal = new Meal(MEMBER_ID, MealType.LUNCH, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 1));
-        given(mealRepository.findAllByMemberIdAndDate(MEMBER_ID, LocalDate.of(2026, 6, 1)))
+        given(mealService.listByDate(MEMBER_ID, LocalDate.of(2026, 6, 1)))
                 .willReturn(List.of(meal));
 
         mockMvc.perform(get("/meals")
@@ -65,5 +63,14 @@ class MealControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].type").value("LUNCH"));
+    }
+
+    @Test
+    void date_파라미터_없이_조회하면_오늘_기준으로_반환한다() throws Exception {
+        given(mealService.listByDate(any(), any())).willReturn(List.of());
+
+        mockMvc.perform(get("/meals")
+                        .header("X-Member-Id", MEMBER_ID))
+                .andExpect(status().isOk());
     }
 }

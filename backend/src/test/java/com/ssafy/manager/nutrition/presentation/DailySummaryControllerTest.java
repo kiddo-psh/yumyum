@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -21,6 +22,16 @@ class DailySummaryControllerTest {
     @MockitoBean DailySummaryService dailySummaryService;
 
     private static final Long MEMBER_ID = 1L;
+
+    @Test
+    void date_파라미터_없이_조회하면_오늘_기준으로_반환한다() throws Exception {
+        given(dailySummaryService.getSummary(any(), any()))
+                .willReturn(new DailySummaryResponse(2000, 0, false, 0, 0, 0, 0, 0));
+
+        mockMvc.perform(get("/daily-summary")
+                        .header("X-Member-Id", MEMBER_ID))
+                .andExpect(status().isOk());
+    }
 
     @Test
     void PRD_명세_구조로_일일_요약을_반환한다() throws Exception {

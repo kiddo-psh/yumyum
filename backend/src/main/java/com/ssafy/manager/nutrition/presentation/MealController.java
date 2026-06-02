@@ -1,7 +1,6 @@
 package com.ssafy.manager.nutrition.presentation;
 
 import com.ssafy.manager.nutrition.application.MealService;
-import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +12,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("meals")
+@RequestMapping("/meals")
 @RequiredArgsConstructor
 public class MealController {
 
     private final MealService mealService;
-    private final MealRepository mealRepository;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,9 +30,10 @@ public class MealController {
     @GetMapping
     public List<MealResponse> list(
             @RequestHeader("X-Member-Id") Long memberId,
-            @RequestParam LocalDate date
+            @RequestParam(required = false) LocalDate date
     ) {
-        return mealRepository.findAllByMemberIdAndDate(memberId, date).stream()
+        LocalDate targetDate = date != null ? date : LocalDate.now();
+        return mealService.listByDate(memberId, targetDate).stream()
                 .map(MealResponse::from)
                 .toList();
     }

@@ -18,8 +18,9 @@ public class DailySummaryController {
     @GetMapping
     public DailySummaryResponse get(
             @RequestHeader("X-Member-Id") Long memberId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        return dailySummaryService.getSummary(memberId, date);
+        LocalDate targetDate = date != null ? date : LocalDate.now();
+        return dailySummaryService.getSummary(memberId, targetDate);
     }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
+
+    final String AUTH_HEADER = "Authorization";
 
     @Mock JwtProvider jwtProvider;
     @Mock FilterChain filterChain;
@@ -43,7 +46,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void 유효한_Bearer_토큰이면_SecurityContext에_memberId가_설정된다() throws Exception {
-        request.addHeader("Authorization", "Bearer valid-token");
+        request.addHeader(AUTH_HEADER, "Bearer valid-token");
         given(jwtProvider.getMemberId("valid-token")).willReturn(42L);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -55,12 +58,12 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void 유효하지_않은_토큰이면_401을_반환하고_필터_체인을_중단한다() throws Exception {
-        request.addHeader("Authorization", "Bearer invalid-token");
+        request.addHeader(AUTH_HEADER, "Bearer invalid-token");
         willThrow(new JwtException("invalid")).given(jwtProvider).validate("invalid-token");
 
         filter.doFilterInternal(request, response, filterChain);
 
-        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         verify(filterChain, never()).doFilter(request, response);
     }
 }

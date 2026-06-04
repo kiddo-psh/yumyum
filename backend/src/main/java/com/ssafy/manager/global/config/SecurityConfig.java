@@ -1,7 +1,10 @@
 package com.ssafy.manager.global.config;
 
 import com.ssafy.manager.auth.infrastructure.JwtProvider;
+import com.ssafy.manager.auth.infrastructure.KakaoOAuth2UserService;
+import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
 import com.ssafy.manager.auth.presentation.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final KakaoOAuth2UserService kakaoOAuth2UserService;
+    private final KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 
     @Bean
     public JwtProvider jwtProvider(
@@ -34,9 +40,16 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .exceptionHandling(e -> e.authenticationEntryPoint(
+                        (request, response, ex) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                ))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(u -> u.userService(kakaoOAuth2UserService))
+                        .successHandler(kakaoOAuthSuccessHandler)
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 

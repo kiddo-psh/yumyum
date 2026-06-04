@@ -29,6 +29,20 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String createRefreshToken(Long memberId) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(String.valueOf(memberId))
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + refreshTokenExpiry))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public long getRefreshTokenExpiry() {
+        return refreshTokenExpiry;
+    }
+
     public Long getMemberId(String token) {
         String subject = Jwts.parser()
                 .verifyWith(secretKey)

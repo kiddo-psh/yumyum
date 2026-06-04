@@ -6,11 +6,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"oauthProvider", "oauthId"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
@@ -19,13 +22,31 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String oauthProvider;
+    private String oauthId;
+    private String email;
+    private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    private AccountStatus accountStatus;
+    private boolean onboardingCompleted;
+
     @Enumerated(EnumType.STRING)
     private Sex sex;
-    private int birthYear;
-    private double heightCm;
-    private double weightKg;
+    private Integer birthYear;
+    private Double heightCm;
+    private Double weightKg;
     @Enumerated(EnumType.STRING)
     private ActivityLevel activityLevel;
+
+    public Member(String oauthProvider, String oauthId, String email, String nickname) {
+        this.oauthProvider = oauthProvider;
+        this.oauthId = oauthId;
+        this.email = email;
+        this.nickname = nickname;
+        this.accountStatus = AccountStatus.ACTIVE;
+        this.onboardingCompleted = false;
+    }
 
     public Member(Sex sex, int birthYear, double heightCm, double weightKg, ActivityLevel activityLevel) {
         this.sex = sex;

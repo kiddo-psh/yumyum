@@ -6,7 +6,6 @@ import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
 import com.ssafy.manager.auth.presentation.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,15 +22,6 @@ public class SecurityConfig {
 
     private final KakaoOAuth2UserService kakaoOAuth2UserService;
     private final KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
-
-    @Bean
-    public JwtProvider jwtProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-expiry}") long accessTokenExpiry,
-            @Value("${jwt.refresh-token-expiry}") long refreshTokenExpiry
-    ) {
-        return new JwtProvider(secret, accessTokenExpiry, refreshTokenExpiry);
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtProvider jwtProvider) throws Exception {

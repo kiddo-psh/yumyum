@@ -1,0 +1,8 @@
+package com.ssafy.manager.auth.infrastructure;
+
+import com.ssafy.manager.auth.domain.RefreshToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+    void deleteAllByMemberId(Long memberId);
+}

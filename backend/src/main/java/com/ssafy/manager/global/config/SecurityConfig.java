@@ -34,7 +34,7 @@ public class SecurityConfig {
                         (request, response, ex) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                 ))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/reissue").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

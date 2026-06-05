@@ -5,6 +5,7 @@ import com.ssafy.manager.nutrition.presentation.dto.DailySummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ public class DailySummaryController {
 
     @GetMapping
     public ResponseEntity<DailySummaryResponse> get(
-            @RequestHeader("X-Member-Id") Long memberId,
+            @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         LocalDate targetDate = date != null ? date : LocalDate.now();

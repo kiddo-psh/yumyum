@@ -5,6 +5,7 @@ import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,7 +22,7 @@ public class MealController {
 
     @PostMapping
     public ResponseEntity<Void> record(
-            @RequestHeader("X-Member-Id") Long memberId,
+            @AuthenticationPrincipal Long memberId,
             @RequestBody MealRequest request,
             UriComponentsBuilder uriBuilder
     ) {
@@ -33,7 +34,7 @@ public class MealController {
 
     @GetMapping
     public ResponseEntity<List<MealResponse>> list(
-            @RequestHeader("X-Member-Id") Long memberId,
+            @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) LocalDate date
     ) {
         LocalDate targetDate = date != null ? date : LocalDate.now();

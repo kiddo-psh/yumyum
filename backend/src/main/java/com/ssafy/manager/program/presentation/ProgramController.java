@@ -4,6 +4,7 @@ import com.ssafy.manager.program.application.ProgramService;
 import com.ssafy.manager.program.presentation.dto.ProgramRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,7 +17,7 @@ public class ProgramController {
 
     @PostMapping
     public ResponseEntity<Void> create(
-            @RequestHeader("X-Member-Id") Long memberId,
+            @AuthenticationPrincipal Long memberId,
             @RequestBody ProgramRequest request,
             UriComponentsBuilder uriBuilder
     ) {

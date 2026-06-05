@@ -32,4 +32,8 @@ public class RefreshToken {
         this.expiresAt = expiresAt;
         this.createdAt = Instant.now();
     }
+
+    public boolean isExpired() {
+        return expiresAt.isBefore(Instant.now());
+    }
 }

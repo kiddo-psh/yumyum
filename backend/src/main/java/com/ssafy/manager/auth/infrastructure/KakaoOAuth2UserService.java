@@ -1,6 +1,7 @@
 package com.ssafy.manager.auth.infrastructure;
 
 import com.ssafy.manager.auth.application.MemberOAuthService;
+import com.ssafy.manager.auth.application.OAuthUserInfo;
 import com.ssafy.manager.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -23,21 +24,12 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        return processKakaoUser(oAuth2User.getAttributes());
-    }
+        String provider = userRequest.getClientRegistration().getRegistrationId();
 
-    private OAuth2User processKakaoUser(Map<String, Object> attributes) {
-        String oauthId = String.valueOf(attributes.get("id"));
+        OAuthUserInfo userInfo = OAuthAttributes.of(provider, oAuth2User.getAttributes()).toUserInfo();
+        Member member = memberOAuthService.getOrRegister(userInfo);
 
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
-
-        Map<String, Object> profile = kakaoAccount != null ? (Map<String, Object>) kakaoAccount.get("profile") : null;
-        String nickname = profile != null ? (String) profile.get("nickname") : null;
-
-        Member member = memberOAuthService.getOrRegister("kakao", oauthId, email, nickname);
-
-        Map<String, Object> attrs = new HashMap<>(attributes);
+        Map<String, Object> attrs = new HashMap<>(oAuth2User.getAttributes());
         attrs.put("memberId", member.getId());
 
         return new DefaultOAuth2User(List.of(), attrs, "id");

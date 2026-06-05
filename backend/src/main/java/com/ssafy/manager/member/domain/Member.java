@@ -25,7 +25,6 @@ public class Member {
     private String oauthProvider;
     private String oauthId;
     private String email;
-    private String nickname;
 
     @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
@@ -39,11 +38,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private ActivityLevel activityLevel;
 
-    public Member(String oauthProvider, String oauthId, String email, String nickname) {
+    public Member(String oauthProvider, String oauthId, String email) {
         this.oauthProvider = oauthProvider;
         this.oauthId = oauthId;
         this.email = email;
-        this.nickname = nickname;
         this.accountStatus = AccountStatus.ACTIVE;
         this.onboardingCompleted = false;
     }

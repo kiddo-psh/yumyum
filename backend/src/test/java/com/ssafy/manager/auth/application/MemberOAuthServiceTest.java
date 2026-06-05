@@ -28,22 +28,21 @@ class MemberOAuthServiceTest {
         given(memberRepository.findByOauthProviderAndOauthId("kakao", "12345")).willReturn(Optional.empty());
         given(memberRepository.save(any(Member.class))).willAnswer(inv -> inv.getArgument(0));
 
-        Member result = memberOAuthService.getOrRegister("kakao", "12345", "test@kakao.com", "테스터");
+        Member result = memberOAuthService.getOrRegister(new OAuthUserInfo("kakao", "12345", "test@kakao.com"));
 
         verify(memberRepository).save(any(Member.class));
         assertThat(result.getOauthProvider()).isEqualTo("kakao");
         assertThat(result.getOauthId()).isEqualTo("12345");
         assertThat(result.getEmail()).isEqualTo("test@kakao.com");
-        assertThat(result.getNickname()).isEqualTo("테스터");
         assertThat(result.isOnboardingCompleted()).isFalse();
     }
 
     @Test
     void 기존_OAuth_유저는_Member가_중복_생성되지_않는다() {
-        Member existing = new Member("kakao", "12345", "test@kakao.com", "테스터");
+        Member existing = new Member("kakao", "12345", "test@kakao.com");
         given(memberRepository.findByOauthProviderAndOauthId("kakao", "12345")).willReturn(Optional.of(existing));
 
-        Member result = memberOAuthService.getOrRegister("kakao", "12345", "test@kakao.com", "테스터");
+        Member result = memberOAuthService.getOrRegister(new OAuthUserInfo("kakao", "12345", "test@kakao.com"));
 
         verify(memberRepository, never()).save(any(Member.class));
         assertThat(result).isSameAs(existing);

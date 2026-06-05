@@ -11,8 +11,9 @@ public class MemberOAuthService {
 
     private final MemberRepository memberRepository;
 
-    public Member getOrRegister(String oauthProvider, String oauthId, String email, String nickname) {
-        return memberRepository.findByOauthProviderAndOauthId(oauthProvider, oauthId)
-                .orElseGet(() -> memberRepository.save(new Member(oauthProvider, oauthId, email, nickname)));
+    public Member getOrRegister(OAuthUserInfo userInfo) {
+        return memberRepository.findByOauthProviderAndOauthId(userInfo.provider(), userInfo.oauthId())
+                .orElseGet(() -> memberRepository.save(
+                        new Member(userInfo.provider(), userInfo.oauthId(), userInfo.email())));
     }
 }

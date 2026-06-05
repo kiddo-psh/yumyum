@@ -32,8 +32,8 @@ public class KakaoOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         String accessToken = jwtProvider.createAccessToken(memberId);
         String refreshToken = jwtProvider.createRefreshToken(memberId);
+        Instant expiresAt = jwtProvider.getRefreshTokenExpiry();
 
-        Instant expiresAt = Instant.now().plusMillis(jwtProvider.getRefreshTokenExpiry());
         refreshTokenRepository.save(new RefreshToken(memberId, refreshToken, expiresAt));
 
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)

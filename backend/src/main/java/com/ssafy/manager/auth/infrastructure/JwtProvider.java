@@ -3,6 +3,7 @@ package com.ssafy.manager.auth.infrastructure;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import java.time.Instant;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -39,8 +40,8 @@ public class JwtProvider {
                 .compact();
     }
 
-    public long getRefreshTokenExpiry() {
-        return refreshTokenExpiry;
+    public Instant getRefreshTokenExpiry() {
+        return Instant.now().plusMillis(refreshTokenExpiry);
     }
 
     public Long getMemberId(String token) {

@@ -24,6 +24,8 @@ public class DailyBatchJob {
         run(LocalDate.now());
     }
 
+    // package-visible: @SpringBootTest 없이 단위 테스트 가능
+    // 순서 중요: 만료 완료 → 전날 Streak 리셋 → 오늘 DailyGoal 생성 → WeeklyReport stub 생성
     void run(LocalDate today) {
         programCompletionService.completeExpired(today);
         streakResetService.resetUnachievedFor(today.minusDays(1));

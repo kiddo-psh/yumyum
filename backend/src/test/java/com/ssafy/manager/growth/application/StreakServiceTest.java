@@ -1,8 +1,7 @@
-package com.ssafy.manager.growth.applicaion;
+package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.domain.MemberStats;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
-import com.ssafy.manager.growth.application.StreakService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

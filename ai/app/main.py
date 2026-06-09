@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import ai_meal, ai_plan, food
+from app.routers import ai_meal, ai_plan, ai_routine, food
 
 app = FastAPI(
     title="냠냠코치 AI Server",
@@ -10,6 +10,7 @@ app = FastAPI(
 # 라우터 등록
 app.include_router(ai_meal.router)
 app.include_router(ai_plan.router)
+app.include_router(ai_routine.router)
 app.include_router(food.router)
 
 

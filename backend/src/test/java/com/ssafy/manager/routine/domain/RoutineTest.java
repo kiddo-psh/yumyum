@@ -1,6 +1,9 @@
 package com.ssafy.manager.routine.domain;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RoutineTest {
@@ -39,5 +42,19 @@ class RoutineTest {
         assertThat(ex.getTargetSets()).isEqualTo(3);
         assertThat(ex.getTargetReps()).isEqualTo(10);
         assertThat(ex.getTargetWeightKg()).isEqualTo(55.0);
+    }
+
+    @Test
+    void SplitType_findByDaysPerWeek_주4회_옵션을_반환한다() {
+        List<SplitType> options = SplitType.findByDaysPerWeek(4);
+
+        assertThat(options).hasSize(2);
+        assertThat(options).contains(SplitType.UPPER_LOWER_4, SplitType.PUSH_PULL_LEGS_UPPER);
+    }
+
+    @Test
+    void SplitType_getSplitLabels_레이블_개수가_daysPerWeek와_일치한다() {
+        assertThat(SplitType.UPPER_LOWER_4.getSplitLabels()).hasSize(4);
+        assertThat(SplitType.FULL_BODY_3.getSplitLabels()).hasSize(3);
     }
 }

@@ -34,7 +34,7 @@ class WeeklyReportServiceTest {
 
     @Test
     void Program_시작_7일_경과_시_WeeklyReport_stub이_생성된다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(7), TODAY.plusDays(21), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(7), TODAY.plusDays(21), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
         given(weeklyReportRepository.existsByProgramIdAndWeekNumber(null, 1)).willReturn(false);
 
@@ -48,7 +48,7 @@ class WeeklyReportServiceTest {
 
     @Test
     void WeeklyReport가_이미_있으면_중복_생성하지_않는다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(7), TODAY.plusDays(21), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(7), TODAY.plusDays(21), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
         given(weeklyReportRepository.existsByProgramIdAndWeekNumber(null, 1)).willReturn(true);
 
@@ -59,7 +59,7 @@ class WeeklyReportServiceTest {
 
     @Test
     void 경과일이_7일_미만이면_WeeklyReport를_생성하지_않는다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(6), TODAY.plusDays(21), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(6), TODAY.plusDays(21), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
 
         weeklyReportService.createStubs(TODAY);

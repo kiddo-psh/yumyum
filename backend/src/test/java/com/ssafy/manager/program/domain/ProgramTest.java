@@ -13,7 +13,7 @@ class ProgramTest {
 
     @Test
     void 생성된_Program은_ACTIVE_상태이며_targetCalories를_보관한다() {
-        Program program = Program.create(1L, ProgramType.DIET, START, END, 2164);
+        Program program = Program.create(1L, ProgramType.DIET, START, END, 2164, 0, 0, 0, null);
 
         assertThat(program.getStatus()).isEqualTo(ProgramStatus.ACTIVE);
         assertThat(program.getTargetCalories()).isEqualTo(2164);
@@ -21,7 +21,7 @@ class ProgramTest {
 
     @Test
     void complete_호출_시_COMPLETED_상태로_전환된다() {
-        Program program = Program.create(1L, ProgramType.DIET, START, END, 2164);
+        Program program = Program.create(1L, ProgramType.DIET, START, END, 2164, 0, 0, 0, null);
 
         program.complete();
 
@@ -30,14 +30,14 @@ class ProgramTest {
 
     @Test
     void ACTIVE_Program은_isActive가_true이다() {
-        Program program = Program.create(1L, ProgramType.MUSCLE, START, END, 2964);
+        Program program = Program.create(1L, ProgramType.MUSCLE, START, END, 2964, 0, 0, 0, null);
 
         assertThat(program.isActive()).isTrue();
     }
 
     @Test
     void COMPLETED_Program은_isActive가_false이다() {
-        Program program = Program.create(1L, ProgramType.MUSCLE, START, END, 2964);
+        Program program = Program.create(1L, ProgramType.MUSCLE, START, END, 2964, 0, 0, 0, null);
         program.complete();
 
         assertThat(program.isActive()).isFalse();

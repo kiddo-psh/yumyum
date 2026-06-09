@@ -1,3 +1,4 @@
+import json
 import httpx
 from app.config import settings
 
@@ -43,6 +44,46 @@ async def _call_gms(prompt: str, model: str, max_tokens: int) -> str:
 
 def _mock_response(prompt: str) -> str:
     """개발용 mock 응답 (크레딧 절약). JSON 요청 여부에 따라 형식 분리."""
+    if "루틴" in prompt or "routine" in prompt.lower():
+        return json.dumps({
+            "routine_name": "4일 상체/하체 분할 루틴",
+            "days": [
+                {
+                    "day_label": "상체",
+                    "exercises": [
+                        {"name": "벤치프레스", "sets": 4, "reps": 8, "weight_kg": 60.0},
+                        {"name": "덤벨 숄더프레스", "sets": 3, "reps": 10, "weight_kg": 18.0},
+                        {"name": "랫풀다운", "sets": 3, "reps": 10, "weight_kg": 45.0}
+                    ]
+                },
+                {
+                    "day_label": "하체",
+                    "exercises": [
+                        {"name": "바벨 스쿼트", "sets": 4, "reps": 8, "weight_kg": 80.0},
+                        {"name": "레그프레스", "sets": 3, "reps": 12, "weight_kg": 120.0},
+                        {"name": "루마니안 데드리프트", "sets": 3, "reps": 10, "weight_kg": 60.0}
+                    ]
+                },
+                {
+                    "day_label": "상체",
+                    "exercises": [
+                        {"name": "인클라인 벤치프레스", "sets": 3, "reps": 10, "weight_kg": 50.0},
+                        {"name": "바벨 로우", "sets": 4, "reps": 8, "weight_kg": 55.0},
+                        {"name": "바벨 컬", "sets": 3, "reps": 12, "weight_kg": 25.0}
+                    ]
+                },
+                {
+                    "day_label": "하체",
+                    "exercises": [
+                        {"name": "핵 스쿼트", "sets": 4, "reps": 10, "weight_kg": 70.0},
+                        {"name": "레그 컬", "sets": 3, "reps": 12, "weight_kg": 40.0},
+                        {"name": "카프레이즈", "sets": 4, "reps": 15, "weight_kg": 0.0}
+                    ]
+                }
+            ],
+            "ai_comment": "근육량 증가를 위해 복합운동 위주로 구성했습니다. 점진적으로 무게를 늘려보세요!"
+        }, ensure_ascii=False)
+
     if "JSON" in prompt or "json" in prompt:
         return (
             '[{"name":"닭가슴살 샐러드","kcal":380,"protein_g":42,"carb_g":18,"fat_g":12,'

@@ -34,7 +34,7 @@ class DailyGoalCreationServiceTest {
 
     @Test
     void 활성_Program이_있으면_오늘_DailyGoal이_생성된다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
         given(dailyGoalRepository.existsByMemberIdAndDate(1L, TODAY)).willReturn(false);
 
@@ -48,7 +48,7 @@ class DailyGoalCreationServiceTest {
 
     @Test
     void 오늘_DailyGoal이_이미_있으면_중복_생성하지_않는다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
         given(dailyGoalRepository.existsByMemberIdAndDate(1L, TODAY)).willReturn(true);
 

@@ -16,4 +16,13 @@ public class RestClientConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
+    @Bean
+    RestClient aiRoutineRestClient(
+            @Value("${ai.fastapi.url:http://localhost:8000}") String baseUrl) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 }

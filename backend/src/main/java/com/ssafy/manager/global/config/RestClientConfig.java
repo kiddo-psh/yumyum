@@ -10,7 +10,7 @@ public class RestClientConfig {
 
     @Bean
     RestClient aiPlanRestClient(
-            @Value("${ai.fastapi.url:http://localhost:8000}") String baseUrl) {
+            @Value("${ai.fastapi.url}") String baseUrl) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("Content-Type", "application/json")
@@ -19,7 +19,7 @@ public class RestClientConfig {
 
     @Bean
     RestClient aiRoutineRestClient(
-            @Value("${ai.fastapi.url:http://localhost:8000}") String baseUrl) {
+            @Value("${ai.fastapi.url}") String baseUrl) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("Content-Type", "application/json")

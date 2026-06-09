@@ -14,4 +14,6 @@ public interface DailyGoalRepository extends JpaRepository<DailyGoal, Long> {
     List<DailyGoal> findAllByDate(LocalDate date);
 
     boolean existsByMemberIdAndDate(Long memberId, LocalDate date);
+
+    List<DailyGoal> findAllByMemberIdAndDateBetween(Long memberId, LocalDate from, LocalDate to);
 }

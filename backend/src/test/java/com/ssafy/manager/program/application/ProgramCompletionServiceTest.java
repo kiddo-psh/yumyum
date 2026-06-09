@@ -29,7 +29,7 @@ class ProgramCompletionServiceTest {
 
     @Test
     void endDate가_오늘보다_이전인_Program은_COMPLETED로_전환된다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(28), TODAY.minusDays(1), 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(28), TODAY.minusDays(1), 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatusAndEndDateBefore(ProgramStatus.ACTIVE, TODAY))
                 .willReturn(List.of(program));
 
@@ -41,7 +41,7 @@ class ProgramCompletionServiceTest {
 
     @Test
     void endDate가_오늘인_Program은_COMPLETED로_전환되지_않는다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(28), TODAY, 2400);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(28), TODAY, 2400, 0, 0, 0, null);
         given(programRepository.findAllByStatusAndEndDateBefore(ProgramStatus.ACTIVE, TODAY))
                 .willReturn(List.of());
 

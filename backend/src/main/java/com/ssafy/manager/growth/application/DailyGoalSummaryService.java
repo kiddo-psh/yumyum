@@ -1,5 +1,6 @@
 package com.ssafy.manager.growth.application;
 
+import com.ssafy.manager.growth.domain.DailyProgress;
 import com.ssafy.manager.growth.domain.WeeklyAchievementSummary;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
@@ -26,5 +27,12 @@ public class DailyGoalSummaryService {
                 .findAllByMemberIdAndDateBetween(memberId, weekStart, weekEnd);
 
         return WeeklyAchievementSummary.of(today, goals);
+    }
+
+    @Transactional(readOnly = true)
+    public DailyProgress todayProgress(Long memberId, LocalDate today) {
+        return dailyGoalRepository.findByMemberIdAndDate(memberId, today)
+                .map(DailyProgress::from)
+                .orElse(DailyProgress.empty());
     }
 }

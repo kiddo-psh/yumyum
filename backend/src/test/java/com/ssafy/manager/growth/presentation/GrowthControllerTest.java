@@ -6,7 +6,7 @@ import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
 import com.ssafy.manager.growth.application.DailyGoalSummaryService;
-import com.ssafy.manager.growth.domain.DailyAchievementStatus;
+import com.ssafy.manager.growth.domain.DailyProgress;
 import com.ssafy.manager.growth.domain.WeeklyAchievementSummary;
 import com.ssafy.manager.program.domain.DailyGoal;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class GrowthControllerTest {
     }
 
     @Test
-    void 인증_후_주간_캘린더를_조회하면_200과_7일_항목을_반환한다() throws Exception {
+    void 주간_캘린더를_조회하면_7일_항목을_상태200으로_반환한다() throws Exception {
         LocalDate monday = LocalDate.of(2026, 6, 8);
         List<DailyGoal> goals = List.of(
                 DailyGoal.of(MEMBER_ID, monday, 2000),
@@ -63,5 +63,25 @@ class GrowthControllerTest {
                 .andExpect(jsonPath("$.weekEnd").value("2026-06-14"))
                 .andExpect(jsonPath("$.days").isArray())
                 .andExpect(jsonPath("$.days.length()").value(7));
+    }
+
+    @Test
+    void 인증_없이_진행바를_조회하면_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/growth/progress"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 진행바를_조회하면_200과_달성_현황을_반환한다() throws Exception {
+        given(dailyGoalSummaryService.todayProgress(any(), any()))
+                .willReturn(new DailyProgress(2000.0, 1350.0, 0.675, false));
+
+        mockMvc.perform(get("/growth/progress")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.targetKcal").value(2000.0))
+                .andExpect(jsonPath("$.achievedKcal").value(1350.0))
+                .andExpect(jsonPath("$.achievementRate").value(0.675))
+                .andExpect(jsonPath("$.achieved").value(false));
     }
 }

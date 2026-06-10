@@ -13,6 +13,7 @@ public record RoutineSessionResult(
         Long memberId,
         LocalDate sessionDate,
         LocalDateTime completedAt,
+        int caloriesBurned,
         List<SetResult> sets
 ) {
     public record SetResult(
@@ -34,6 +35,7 @@ public record RoutineSessionResult(
         return new RoutineSessionResult(
                 session.getId(), session.getRoutineId(), session.getMemberId(),
                 session.getSessionDate(), session.getCompletedAt(),
+                session.getCaloriesBurned(),
                 sets.stream().map(SetResult::from).toList()
         );
     }

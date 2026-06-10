@@ -27,6 +27,7 @@ public class RoutineSessionController {
                         s.setNumber(), s.actualReps(), s.actualWeightKg(), s.completed()))
                 .toList();
         return SessionResponse.from(routineSessionService.recordSession(
-                request.memberId(), request.routineId(), request.sessionDate(), inputs));
+                request.memberId(), request.routineId(), request.sessionDate(),
+                request.caloriesBurned(), inputs));
     }
 }

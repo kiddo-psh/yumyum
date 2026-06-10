@@ -7,6 +7,7 @@ public record CreateSessionRequest(
         Long memberId,
         Long routineId,
         LocalDate sessionDate,
+        int caloriesBurned,
         List<SetItem> sets
 ) {
     public record SetItem(

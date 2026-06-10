@@ -12,6 +12,7 @@ public record SessionResponse(
         Long memberId,
         LocalDate sessionDate,
         LocalDateTime completedAt,
+        int caloriesBurned,
         List<SetResponse> sets
 ) {
     public record SetResponse(
@@ -28,6 +29,7 @@ public record SessionResponse(
         return new SessionResponse(
                 result.sessionId(), result.routineId(), result.memberId(),
                 result.sessionDate(), result.completedAt(),
+                result.caloriesBurned(),
                 result.sets().stream()
                         .map(s -> new SetResponse(s.id(), s.exerciseId(), s.exerciseName(),
                                 s.setNumber(), s.actualReps(), s.actualWeightKg(), s.completed()))

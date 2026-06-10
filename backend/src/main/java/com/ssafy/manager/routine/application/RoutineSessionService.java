@@ -38,11 +38,18 @@ public class RoutineSessionService {
     public RoutineSessionResult recordSession(Long memberId, Long routineId,
                                                LocalDate sessionDate,
                                                List<SessionSetInput> setInputs) {
+        return recordSession(memberId, routineId, sessionDate, 0, setInputs);
+    }
+
+    @Transactional
+    public RoutineSessionResult recordSession(Long memberId, Long routineId,
+                                               LocalDate sessionDate, int caloriesBurned,
+                                               List<SessionSetInput> setInputs) {
         if (!routineRepository.existsById(routineId)) {
             throw new NoSuchElementException("루틴을 찾을 수 없습니다.");
         }
 
-        RoutineSession session = RoutineSession.create(routineId, memberId, sessionDate);
+        RoutineSession session = RoutineSession.create(routineId, memberId, sessionDate, caloriesBurned);
         routineSessionRepository.save(session);
 
         List<SessionSet> sets = setInputs.stream()

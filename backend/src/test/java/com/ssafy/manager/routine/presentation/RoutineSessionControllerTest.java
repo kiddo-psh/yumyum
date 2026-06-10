@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,12 +35,13 @@ class RoutineSessionControllerTest {
             1L, 1L, 2L,
             LocalDate.of(2026, 6, 10),
             LocalDateTime.of(2026, 6, 10, 20, 0),
+            0,
             List.of(new RoutineSessionResult.SetResult(1L, 10L, "벤치프레스", 1, 8, 60.0, true))
     );
 
     @Test
     void 세션_기록_성공시_201_반환() throws Exception {
-        given(routineSessionService.recordSession(any(), any(), any(), any())).willReturn(RESULT);
+        given(routineSessionService.recordSession(any(), any(), any(), anyInt(), any())).willReturn(RESULT);
 
         String body = """
                 {
@@ -64,7 +66,7 @@ class RoutineSessionControllerTest {
 
     @Test
     void 없는_루틴으로_세션_기록시_404_반환() throws Exception {
-        given(routineSessionService.recordSession(any(), any(), any(), any()))
+        given(routineSessionService.recordSession(any(), any(), any(), anyInt(), any()))
                 .willThrow(new NoSuchElementException("루틴을 찾을 수 없습니다."));
 
         String body = """

@@ -23,15 +23,21 @@ public class RoutineSession {
     private Long memberId;
     private LocalDate sessionDate;
     private LocalDateTime completedAt;
+    private int caloriesBurned;
 
-    private RoutineSession(Long routineId, Long memberId, LocalDate sessionDate) {
+    private RoutineSession(Long routineId, Long memberId, LocalDate sessionDate, int caloriesBurned) {
         this.routineId = routineId;
         this.memberId = memberId;
         this.sessionDate = sessionDate;
         this.completedAt = LocalDateTime.now();
+        this.caloriesBurned = caloriesBurned;
     }
 
     public static RoutineSession create(Long routineId, Long memberId, LocalDate sessionDate) {
-        return new RoutineSession(routineId, memberId, sessionDate);
+        return new RoutineSession(routineId, memberId, sessionDate, 0);
+    }
+
+    public static RoutineSession create(Long routineId, Long memberId, LocalDate sessionDate, int caloriesBurned) {
+        return new RoutineSession(routineId, memberId, sessionDate, caloriesBurned);
     }
 }

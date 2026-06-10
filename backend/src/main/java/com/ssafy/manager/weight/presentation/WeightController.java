@@ -3,8 +3,10 @@ package com.ssafy.manager.weight.presentation;
 import com.ssafy.manager.weight.application.WeightService;
 import com.ssafy.manager.weight.domain.Weight;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -16,21 +18,30 @@ public class WeightController {
     private final WeightService weightService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public WeightResponse record(@RequestBody CreateWeightRequest request) {
-        Weight saved = weightService.record(request.memberId(), request.weightKg(), request.recordedDate());
-        return WeightResponse.from(saved);
+    public ResponseEntity<WeightResponse> record(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody CreateWeightRequest request,
+            UriComponentsBuilder uriBuilder
+    ) {
+        Weight saved = weightService.record(memberId, request.weightKg(), request.recordedDate());
+        return ResponseEntity.created(
+                uriBuilder.path("/weights/{id}").buildAndExpand(saved.getId()).toUri()
+        ).body(WeightResponse.from(saved));
     }
 
     @GetMapping
-    public List<WeightResponse> list(@RequestParam Long memberId) {
-        return weightService.findByMember(memberId).stream()
+    public ResponseEntity<List<WeightResponse>> list(@AuthenticationPrincipal Long memberId) {
+        List<WeightResponse> result = weightService.findByMember(memberId).stream()
                 .map(WeightResponse::from).toList();
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id, @RequestParam Long memberId) {
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long id
+    ) {
         weightService.delete(memberId, id);
+        return ResponseEntity.noContent().build();
     }
 }

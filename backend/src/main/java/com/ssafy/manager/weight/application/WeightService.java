@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssafy.manager.global.exception.ForbiddenException;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,12 +29,13 @@ public class WeightService {
     }
 
     @Transactional
-    public void delete(Long memberId, Long weightId) {
+    public Weight delete(Long memberId, Long weightId) {
         Weight weight = weightRepository.findById(weightId)
                 .orElseThrow(() -> new NoSuchElementException("체중 기록을 찾을 수 없습니다."));
         if (!weight.getMemberId().equals(memberId)) {
-            throw new NoSuchElementException("체중 기록을 찾을 수 없습니다.");
+            throw new ForbiddenException("본인의 체중 기록만 삭제할 수 있습니다.");
         }
         weightRepository.delete(weight);
+        return weight;
     }
 }

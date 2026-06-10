@@ -1,6 +1,8 @@
 package com.ssafy.manager.growth.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,34 +21,45 @@ public class MemberStats {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true)
     private Long memberId;
-    private int currentStreak;
-    private int maxStreak;
+
+    @Embedded
+    @AttributeOverride(name = "count", column = @Column(name = "current_streak"))
+    private Streak currentStreak;
+
+    @Embedded
+    @AttributeOverride(name = "count", column = @Column(name = "max_streak"))
+    private Streak maxStreak;
+
     private LocalDate lastAchievedDate;
 
     public static MemberStats newFor(Long memberId) {
-        MemberStats stats = new MemberStats(0, 0, null);
+        MemberStats stats = new MemberStats(Streak.of(0), Streak.of(0), null);
         stats.memberId = memberId;
         return stats;
     }
 
-    public MemberStats(int currentStreak, int maxStreak, LocalDate lastAchievedDate) {
+    public MemberStats(Streak currentStreak, Streak maxStreak, LocalDate lastAchievedDate) {
         this.currentStreak = currentStreak;
         this.maxStreak = maxStreak;
         this.lastAchievedDate = lastAchievedDate;
     }
 
     public void incrementStreak(LocalDate achievedDate) {
-        currentStreak = isConsecutive(achievedDate) ? currentStreak + 1 : 1;
-        if (currentStreak > maxStreak) {
+        if (achievedDate.equals(lastAchievedDate)) {
+            return;
+        }
+        currentStreak = isConsecutive(achievedDate) ? currentStreak.increment() : Streak.of(1);
+        if (currentStreak.compareTo(maxStreak) > 0) {
             maxStreak = currentStreak;
         }
         lastAchievedDate = achievedDate;
     }
 
     public void resetStreak() {
-        currentStreak = 0;
+        currentStreak = Streak.of(0);
     }
 
     private boolean isConsecutive(LocalDate achievedDate) {

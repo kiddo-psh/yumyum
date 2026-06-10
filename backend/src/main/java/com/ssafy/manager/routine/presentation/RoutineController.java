@@ -64,5 +64,14 @@ public class RoutineController {
         return RoutineResponse.ExerciseResponse.from(result);
     }
 
+    @GetMapping("/{routineId}/weekly-plan/{week}")
+    public List<RoutineResponse.ExerciseResponse> getWeeklyPlan(
+            @PathVariable Long routineId,
+            @PathVariable int week) {
+        return routineService.getWeeklyPlan(routineId, week).stream()
+                .map(RoutineResponse.ExerciseResponse::from)
+                .toList();
+    }
+
     private record SplitOptionResponse(String splitType, String label) {}
 }

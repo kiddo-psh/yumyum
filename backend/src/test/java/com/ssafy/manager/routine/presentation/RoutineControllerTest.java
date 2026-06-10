@@ -123,4 +123,19 @@ class RoutineControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }
+
+    @Test
+    void 주차별_플랜_조회_성공시_200_반환() throws Exception {
+        List<RoutineResult.ExerciseResult> weeklyPlan = List.of(
+                new RoutineResult.ExerciseResult(1L, "상체", "벤치프레스", 4, 8, 62.5, 0, 2)
+        );
+        given(routineService.getWeeklyPlan(1L, 2)).willReturn(weeklyPlan);
+
+        mockMvc.perform(get("/routines/1/weekly-plan/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].exerciseName").value("벤치프레스"))
+                .andExpect(jsonPath("$[0].weekNumber").value(2))
+                .andExpect(jsonPath("$[0].targetWeightKg").value(62.5));
+    }
 }

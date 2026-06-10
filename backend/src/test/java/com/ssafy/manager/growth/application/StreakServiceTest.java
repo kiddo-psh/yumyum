@@ -1,6 +1,7 @@
 package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.domain.MemberStats;
+import com.ssafy.manager.growth.domain.Streak;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +29,13 @@ class StreakServiceTest {
 
     @Test
     void increment_호출_시_streak이_증가한_상태로_저장된다() {
-        MemberStats stats = new MemberStats(3, 3, today.minusDays(1));
+        MemberStats stats = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(1));
         given(memberStatsRepository.findByMemberId(1L))
                 .willReturn(Optional.of(stats));
 
         streakService.increment(1L, today);
 
-        assertThat(stats.getCurrentStreak()).isEqualTo(4);
+        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(4));
         verify(memberStatsRepository).save(stats);
     }
 }

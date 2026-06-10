@@ -1,6 +1,7 @@
 package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.domain.MemberStats;
+import com.ssafy.manager.growth.domain.Streak;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
@@ -32,12 +33,12 @@ class StreakResetServiceTest {
 
     @Test
     void memberId_목록을_받아_각_streak을_초기화한다() {
-        MemberStats stats = new MemberStats(5, 10, YESTERDAY);
+        MemberStats stats = new MemberStats(Streak.of(5), Streak.of(10), YESTERDAY);
         given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
 
         streakResetService.resetFor(List.of(1L));
 
-        assertThat(stats.getCurrentStreak()).isZero();
+        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(0));
         verify(memberStatsRepository).save(stats);
     }
 
@@ -58,12 +59,12 @@ class StreakResetServiceTest {
 
         given(dailyGoalRepository.findAllByDate(YESTERDAY)).willReturn(List.of(unachieved, achieved));
 
-        MemberStats stats = new MemberStats(3, 10, YESTERDAY.minusDays(1));
+        MemberStats stats = new MemberStats(Streak.of(3), Streak.of(10), YESTERDAY.minusDays(1));
         given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
 
         streakResetService.resetUnachievedFor(YESTERDAY);
 
-        assertThat(stats.getCurrentStreak()).isZero();
+        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(0));
         verify(memberStatsRepository, never()).findByMemberId(2L);
     }
 }

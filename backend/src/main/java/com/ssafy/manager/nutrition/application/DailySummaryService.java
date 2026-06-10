@@ -38,8 +38,8 @@ public class DailySummaryService {
                 (int) goal.getTargetValue(),
                 goal.getAchievedValue(),
                 goal.isAchieved(),
-                stats.getCurrentStreak(),
-                stats.getMaxStreak(),
+                stats.getCurrentStreak().count(),
+                stats.getMaxStreak().count(),
                 totalCarbs,
                 totalProtein,
                 totalFat

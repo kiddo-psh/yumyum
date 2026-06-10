@@ -17,4 +17,12 @@ public class AiRoutineClient {
                 .retrieve()
                 .body(AiRoutineClientResponse.class);
     }
+
+    public AiRoutineAdjustClientResponse adjust(AiRoutineAdjustClientRequest request) {
+        return aiRoutineRestClient.post()
+                .uri("/ai/routine/adjust")
+                .body(request)
+                .retrieve()
+                .body(AiRoutineAdjustClientResponse.class);
+    }
 }

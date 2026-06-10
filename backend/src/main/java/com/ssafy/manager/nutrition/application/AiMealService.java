@@ -39,6 +39,10 @@ public class AiMealService {
         double totalFat     = items.stream().mapToDouble(MealItem::getFat).sum();
         int mealCount = mealRepository.countByMemberIdAndEffectiveDate(memberId, effectiveDate);
 
+        if (mealCount == 0) {
+            throw new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다.");
+        }
+
         AiMealLastRecommendClientResponse resp = aiMealClient.lastRecommend(
                 new AiMealLastRecommendClientRequest(
                         totalKcal, totalProtein, totalCarb, totalFat,

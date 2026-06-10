@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -75,5 +76,16 @@ class AiMealControllerTest {
     void 인증_없이_끼니_추천하면_401_반환() throws Exception {
         mockMvc.perform(post("/ai/meals/last-recommend").with(csrf()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 활성_프로그램_없으면_404_반환() throws Exception {
+        given(aiMealService.lastRecommend(any(), any()))
+                .willThrow(new NoSuchElementException("활성 프로그램이 없습니다."));
+
+        mockMvc.perform(post("/ai/meals/last-recommend")
+                        .with(authentication(AUTH))
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }

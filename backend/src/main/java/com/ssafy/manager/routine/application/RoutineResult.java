@@ -20,22 +20,21 @@ public record RoutineResult(
             int targetSets,
             int targetReps,
             double targetWeightKg,
-            int orderIndex
+            int orderIndex,
+            int weekNumber
     ) {
         public static ExerciseResult from(RoutineExercise ex) {
             return new ExerciseResult(
                     ex.getId(), ex.getDayLabel(), ex.getExerciseName(),
                     ex.getTargetSets(), ex.getTargetReps(), ex.getTargetWeightKg(),
-                    ex.getOrderIndex()
+                    ex.getOrderIndex(), ex.getWeekNumber()
             );
         }
     }
 
     public static RoutineResult from(Routine routine, List<RoutineExercise> exercises, String aiComment) {
         return new RoutineResult(
-                routine.getId(),
-                routine.getName(),
-                routine.getDaysPerWeek(),
+                routine.getId(), routine.getName(), routine.getDaysPerWeek(),
                 routine.isAiGenerated(),
                 exercises.stream().map(ExerciseResult::from).toList(),
                 aiComment

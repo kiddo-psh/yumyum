@@ -37,7 +37,7 @@ class RoutineControllerTest {
 
     private static final RoutineResult RESULT = new RoutineResult(
             1L, "4일 상체/하체 분할 루틴", 4, true,
-            List.of(new RoutineResult.ExerciseResult(1L, "상체", "벤치프레스", 4, 8, 60.0, 0)),
+            List.of(new RoutineResult.ExerciseResult(1L, "상체", "벤치프레스", 4, 8, 60.0, 0, 1)),
             "열심히 해봐요!"
     );
 
@@ -60,7 +60,7 @@ class RoutineControllerTest {
     void 수동_루틴_생성_성공시_201_반환() throws Exception {
         RoutineResult manualResult = new RoutineResult(
                 2L, "내 루틴", 3, false,
-                List.of(new RoutineResult.ExerciseResult(2L, "상체", "벤치프레스", 4, 8, 70.0, 0)),
+                List.of(new RoutineResult.ExerciseResult(2L, "상체", "벤치프레스", 4, 8, 70.0, 0, 1)),
                 null
         );
         given(routineService.createManual(anyLong(), anyString(), anyInt(), any()))
@@ -97,7 +97,7 @@ class RoutineControllerTest {
     @Test
     void 운동_수정_성공시_200_반환() throws Exception {
         RoutineResult.ExerciseResult updated = new RoutineResult.ExerciseResult(
-                1L, "상체", "인클라인 벤치프레스", 3, 10, 55.0, 0
+                1L, "상체", "인클라인 벤치프레스", 3, 10, 55.0, 0, 1
         );
         given(routineService.updateExercise(anyLong(), anyLong(), anyString(), anyInt(), anyInt(), anyDouble()))
                 .willReturn(updated);

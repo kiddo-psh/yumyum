@@ -32,16 +32,16 @@ public class AiMealService {
         Program program = programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
                 .orElseThrow(() -> new NoSuchElementException("활성 프로그램이 없습니다."));
 
+        int mealCount = mealRepository.countByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        if (mealCount == 0) {
+            throw new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다.");
+        }
+
         List<MealItem> items = mealItemRepository.findAllByMemberIdAndEffectiveDate(memberId, effectiveDate);
         double totalKcal    = items.stream().mapToDouble(MealItem::getCalories).sum();
         double totalProtein = items.stream().mapToDouble(MealItem::getProtein).sum();
         double totalCarb    = items.stream().mapToDouble(MealItem::getCarbs).sum();
         double totalFat     = items.stream().mapToDouble(MealItem::getFat).sum();
-        int mealCount = mealRepository.countByMemberIdAndEffectiveDate(memberId, effectiveDate);
-
-        if (mealCount == 0) {
-            throw new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다.");
-        }
 
         AiMealLastRecommendClientResponse resp = aiMealClient.lastRecommend(
                 new AiMealLastRecommendClientRequest(

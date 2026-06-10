@@ -88,4 +88,15 @@ class AiMealControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void 식사_기록_없으면_409_반환() throws Exception {
+        given(aiMealService.lastRecommend(any(), any()))
+                .willThrow(new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다."));
+
+        mockMvc.perform(post("/ai/meals/last-recommend")
+                        .with(authentication(AUTH))
+                        .with(csrf()))
+                .andExpect(status().isConflict());
+    }
 }

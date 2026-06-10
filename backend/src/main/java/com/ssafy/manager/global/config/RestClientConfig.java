@@ -25,4 +25,13 @@ public class RestClientConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
+    @Bean
+    RestClient aiMealRestClient(
+            @Value("${ai.fastapi.url}") String baseUrl) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 }

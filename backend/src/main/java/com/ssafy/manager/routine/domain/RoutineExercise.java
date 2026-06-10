@@ -41,7 +41,7 @@ public class RoutineExercise {
     public static RoutineExercise create(Long routineId, String dayLabel, String exerciseName,
                                           int targetSets, int targetReps, double targetWeightKg,
                                           int orderIndex) {
-        return new RoutineExercise(routineId, dayLabel, exerciseName,
+        return create(routineId, dayLabel, exerciseName,
                 targetSets, targetReps, targetWeightKg, orderIndex, 1);
     }
 

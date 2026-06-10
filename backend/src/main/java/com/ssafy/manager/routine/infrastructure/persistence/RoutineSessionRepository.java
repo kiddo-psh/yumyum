@@ -12,5 +12,5 @@ public interface RoutineSessionRepository extends JpaRepository<RoutineSession, 
     List<RoutineSession> findTop4ByRoutineIdOrderBySessionDateDesc(Long routineId);
 
     @Query("SELECT COALESCE(SUM(rs.caloriesBurned), 0) FROM RoutineSession rs WHERE rs.memberId = :memberId AND rs.sessionDate = :date")
-    int sumCaloriesBurnedByMemberIdAndDate(@Param("memberId") Long memberId, @Param("date") LocalDate date);
+    long sumCaloriesBurnedByMemberIdAndDate(@Param("memberId") Long memberId, @Param("date") LocalDate date);
 }

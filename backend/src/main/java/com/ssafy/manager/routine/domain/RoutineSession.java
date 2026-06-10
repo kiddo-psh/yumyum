@@ -1,5 +1,6 @@
 package com.ssafy.manager.routine.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,7 @@ public class RoutineSession {
     private Long memberId;
     private LocalDate sessionDate;
     private LocalDateTime completedAt;
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private int caloriesBurned;
 
     private RoutineSession(Long routineId, Long memberId, LocalDate sessionDate, int caloriesBurned) {

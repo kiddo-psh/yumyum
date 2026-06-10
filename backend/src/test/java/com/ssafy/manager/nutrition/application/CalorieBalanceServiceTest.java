@@ -54,7 +54,7 @@ class CalorieBalanceServiceTest {
 
         // remaining = 2000 + 300 - 1500 = 800
         assertThat(resp.remainingCalories()).isEqualTo(800.0);
-        assertThat(resp.burnedCalories()).isEqualTo(300L);
+        assertThat(resp.burnedCalories()).isEqualTo(300);
     }
 
     @Test

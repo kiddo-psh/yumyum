@@ -26,14 +26,14 @@ public class CalorieBalanceService {
     public CalorieBalanceResponse getBalance(Long memberId, LocalDate date, LocalTime currentTime) {
         DailyGoal goal = dailyGoalRepository.findByMemberIdAndDate(memberId, date).orElse(null);
         if (goal == null) {
-            return new CalorieBalanceResponse(0, 0.0, 0L, 0.0, 0, false);
+            return new CalorieBalanceResponse(0, 0.0, 0, 0.0, 0, false);
         }
 
         double intakeCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(memberId, date);
-        long burnedCalories = routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(memberId, date);
+        int burnedCalories = (int) routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(memberId, date);
         int mealCount = mealRepository.countByMemberIdAndEffectiveDate(memberId, date);
 
-        int targetCalories = (int) goal.getTargetValue();
+        int targetCalories = (int) Math.round(goal.getTargetValue());
         double remainingCalories = targetCalories + burnedCalories - intakeCalories;
 
         boolean trigger = false;

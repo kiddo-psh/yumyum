@@ -6,7 +6,6 @@ import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClie
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientResponse;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
-import com.ssafy.manager.nutrition.presentation.dto.LastMealRecommendResponse;
 import com.ssafy.manager.program.domain.Program;
 import com.ssafy.manager.program.domain.ProgramStatus;
 import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
@@ -28,7 +27,7 @@ public class AiMealService {
     private final AiMealClient aiMealClient;
 
     @Transactional(readOnly = true)
-    public LastMealRecommendResponse lastRecommend(Long memberId, LocalDate effectiveDate) {
+    public AiMealLastRecommendResult lastRecommend(Long memberId, LocalDate effectiveDate) {
         Program program = programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
                 .orElseThrow(() -> new NoSuchElementException("활성 프로그램이 없습니다."));
 
@@ -51,6 +50,10 @@ public class AiMealService {
                         mealCount
                 )
         );
-        return LastMealRecommendResponse.from(resp);
+        List<AiMealLastRecommendResult.Recommendation> recs = resp.recommendations().stream()
+                .map(r -> new AiMealLastRecommendResult.Recommendation(
+                        r.name(), r.kcal(), r.proteinG(), r.carbG(), r.fatG(), r.reason()))
+                .toList();
+        return new AiMealLastRecommendResult(recs, resp.priorityNutrient(), resp.aiComment());
     }
 }

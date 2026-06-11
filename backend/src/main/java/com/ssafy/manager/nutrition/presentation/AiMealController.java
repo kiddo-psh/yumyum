@@ -22,6 +22,6 @@ public class AiMealController {
     public ResponseEntity<LastMealRecommendResponse> lastRecommend(
             @AuthenticationPrincipal Long memberId
     ) {
-        return ResponseEntity.ok(aiMealService.lastRecommend(memberId, LocalDate.now()));
+        return ResponseEntity.ok(LastMealRecommendResponse.from(aiMealService.lastRecommend(memberId, LocalDate.now())));
     }
 }

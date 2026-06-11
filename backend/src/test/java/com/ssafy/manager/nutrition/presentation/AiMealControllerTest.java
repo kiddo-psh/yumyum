@@ -5,8 +5,8 @@ import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
 import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
+import com.ssafy.manager.nutrition.application.AiMealLastRecommendResult;
 import com.ssafy.manager.nutrition.application.AiMealService;
-import com.ssafy.manager.nutrition.presentation.dto.LastMealRecommendResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,8 +40,8 @@ class AiMealControllerTest {
     private static final UsernamePasswordAuthenticationToken AUTH =
             new UsernamePasswordAuthenticationToken(MEMBER_ID, null, List.of());
 
-    private static final LastMealRecommendResponse RESULT = new LastMealRecommendResponse(
-            List.of(new LastMealRecommendResponse.MealRecommendation(
+    private static final AiMealLastRecommendResult RESULT = new AiMealLastRecommendResult(
+            List.of(new AiMealLastRecommendResult.Recommendation(
                     "닭가슴살 샐러드", 380.0, 42.0, 18.0, 12.0, "단백질 보충")),
             "protein",
             "단백질이 부족합니다."
@@ -51,7 +51,7 @@ class AiMealControllerTest {
     void 끼니_추천_성공시_200과_추천_목록_반환() throws Exception {
         given(aiMealService.lastRecommend(any(), any())).willReturn(RESULT);
 
-        mockMvc.perform(post("/ai/meals/last-recommend")
+        mockMvc.perform(post("/meals/last-recommend")
                         .with(authentication(AUTH))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -66,7 +66,7 @@ class AiMealControllerTest {
         given(aiMealService.lastRecommend(any(), any()))
                 .willThrow(new RestClientException("FastAPI 연결 실패"));
 
-        mockMvc.perform(post("/ai/meals/last-recommend")
+        mockMvc.perform(post("/meals/last-recommend")
                         .with(authentication(AUTH))
                         .with(csrf()))
                 .andExpect(status().isServiceUnavailable());
@@ -74,7 +74,7 @@ class AiMealControllerTest {
 
     @Test
     void 인증_없이_끼니_추천하면_401_반환() throws Exception {
-        mockMvc.perform(post("/ai/meals/last-recommend").with(csrf()))
+        mockMvc.perform(post("/meals/last-recommend").with(csrf()))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -83,7 +83,7 @@ class AiMealControllerTest {
         given(aiMealService.lastRecommend(any(), any()))
                 .willThrow(new NoSuchElementException("활성 프로그램이 없습니다."));
 
-        mockMvc.perform(post("/ai/meals/last-recommend")
+        mockMvc.perform(post("/meals/last-recommend")
                         .with(authentication(AUTH))
                         .with(csrf()))
                 .andExpect(status().isNotFound());
@@ -94,7 +94,7 @@ class AiMealControllerTest {
         given(aiMealService.lastRecommend(any(), any()))
                 .willThrow(new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다."));
 
-        mockMvc.perform(post("/ai/meals/last-recommend")
+        mockMvc.perform(post("/meals/last-recommend")
                         .with(authentication(AUTH))
                         .with(csrf()))
                 .andExpect(status().isConflict());

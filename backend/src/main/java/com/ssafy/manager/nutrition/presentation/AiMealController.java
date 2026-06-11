@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/ai/meals")
+@RequestMapping("/meals")
 @RequiredArgsConstructor
 public class AiMealController {
 

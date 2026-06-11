@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -48,18 +47,9 @@ public class RoutineSessionService {
         if (!routineRepository.existsById(routineId)) {
             throw new NoSuchElementException("루틴을 찾을 수 없습니다.");
         }
-
-        RoutineSession session = RoutineSession.create(routineId, memberId, sessionDate, caloriesBurned);
-        routineSessionRepository.save(session);
-
-        List<SessionSet> sets = setInputs.stream()
-                .map(i -> SessionSet.create(session.getId(), i.exerciseId(), i.exerciseName(),
-                        i.setNumber(), i.actualReps(), i.actualWeightKg(), i.completed()))
-                .toList();
-        sessionSetRepository.saveAll(sets);
-
+        RoutineSessionResult result = saveSessionAndSets(memberId, routineId, sessionDate, caloriesBurned, setInputs);
         adjustAndSave(routineId);
-        return RoutineSessionResult.from(session, sets);
+        return result;
     }
 
     @Async
@@ -78,67 +68,87 @@ public class RoutineSessionService {
             List<SessionSet> allSets = sessionIds.isEmpty()
                     ? List.of()
                     : sessionSetRepository.findBySessionIdIn(sessionIds);
-
             Map<Long, List<SessionSet>> setsBySession =
                     allSets.stream().collect(Collectors.groupingBy(SessionSet::getSessionId));
 
-            List<AiRoutineAdjustClientRequest.RecentSession> recentSessionData =
-                    recentSessions.stream().map(rs -> {
-                        List<SessionSet> sessionSets =
-                                setsBySession.getOrDefault(rs.getId(), List.of());
-                        Map<Long, List<SessionSet>> byExercise = sessionSets.stream()
-                                .collect(Collectors.groupingBy(SessionSet::getExerciseId));
-                        List<AiRoutineAdjustClientRequest.SessionSetData> setData =
-                                byExercise.entrySet().stream().map(e -> {
-                                    List<SessionSet> exSets = e.getValue();
-                                    long completed = exSets.stream()
-                                            .filter(SessionSet::isCompleted).count();
-                                    double avgReps = exSets.stream()
-                                            .mapToInt(SessionSet::getActualReps).average().orElse(0);
-                                    double avgWeight = exSets.stream()
-                                            .mapToDouble(SessionSet::getActualWeightKg).average().orElse(0);
-                                    return new AiRoutineAdjustClientRequest.SessionSetData(
-                                            e.getKey(), exSets.get(0).getExerciseName(),
-                                            exSets.size(), (int) completed, avgReps, avgWeight
-                                    );
-                                }).toList();
-                        return new AiRoutineAdjustClientRequest.RecentSession(
-                                rs.getSessionDate().toString(), setData
-                        );
-                    }).toList();
-
-            List<AiRoutineAdjustClientRequest.ExerciseInfo> exerciseInfos = exercises.stream()
-                    .map(ex -> new AiRoutineAdjustClientRequest.ExerciseInfo(
-                            ex.getId(), ex.getDayLabel(), ex.getExerciseName(),
-                            ex.getTargetSets(), ex.getTargetReps(), ex.getTargetWeightKg(),
-                            ex.getOrderIndex()
-                    )).toList();
-
             AiRoutineAdjustClientResponse response = aiRoutineClient.adjust(
-                    new AiRoutineAdjustClientRequest(routineId, currentWeek,
-                            exerciseInfos, recentSessionData)
+                    new AiRoutineAdjustClientRequest(
+                            routineId, currentWeek,
+                            buildExerciseInfos(exercises),
+                            buildRecentSessionData(recentSessions, setsBySession)
+                    )
             );
 
-            Map<Long, AiRoutineAdjustClientResponse.Adjustment> adjustMap =
-                    response.adjustments().stream()
-                            .collect(Collectors.toMap(
-                                    AiRoutineAdjustClientResponse.Adjustment::exerciseId, a -> a));
-
-            List<RoutineExercise> newExercises = new ArrayList<>();
-            for (RoutineExercise ex : exercises) {
-                AiRoutineAdjustClientResponse.Adjustment adj = adjustMap.get(ex.getId());
-                double w = adj != null ? adj.newWeightKg() : ex.getTargetWeightKg();
-                int s = adj != null ? adj.newSets() : ex.getTargetSets();
-                int r = adj != null ? adj.newReps() : ex.getTargetReps();
-                newExercises.add(RoutineExercise.create(
-                        routineId, ex.getDayLabel(), ex.getExerciseName(),
-                        s, r, w, ex.getOrderIndex(), response.nextWeekNumber()
-                ));
-            }
-            routineExerciseRepository.saveAll(newExercises);
+            routineExerciseRepository.saveAll(createNextWeekExercises(exercises, response));
 
         } catch (Exception e) {
             log.warn("루틴 자동 조정 실패 routineId={}: {}", routineId, e.getMessage());
         }
+    }
+
+    private RoutineSessionResult saveSessionAndSets(Long memberId, Long routineId,
+                                                     LocalDate sessionDate, int caloriesBurned,
+                                                     List<SessionSetInput> setInputs) {
+        RoutineSession session = RoutineSession.create(routineId, memberId, sessionDate, caloriesBurned);
+        routineSessionRepository.save(session);
+        List<SessionSet> sets = setInputs.stream()
+                .map(i -> SessionSet.create(session.getId(), i.exerciseId(), i.exerciseName(),
+                        i.setNumber(), i.actualReps(), i.actualWeightKg(), i.completed()))
+                .toList();
+        sessionSetRepository.saveAll(sets);
+        return RoutineSessionResult.from(session, sets);
+    }
+
+    private List<AiRoutineAdjustClientRequest.ExerciseInfo> buildExerciseInfos(
+            List<RoutineExercise> exercises) {
+        return exercises.stream()
+                .map(ex -> new AiRoutineAdjustClientRequest.ExerciseInfo(
+                        ex.getId(), ex.getDayLabel(), ex.getExerciseName(),
+                        ex.getTargetSets(), ex.getTargetReps(), ex.getTargetWeightKg(),
+                        ex.getOrderIndex()))
+                .toList();
+    }
+
+    private List<AiRoutineAdjustClientRequest.RecentSession> buildRecentSessionData(
+            List<RoutineSession> recentSessions, Map<Long, List<SessionSet>> setsBySession) {
+        return recentSessions.stream()
+                .map(rs -> {
+                    List<SessionSet> sessionSets = setsBySession.getOrDefault(rs.getId(), List.of());
+                    Map<Long, List<SessionSet>> byExercise = sessionSets.stream()
+                            .collect(Collectors.groupingBy(SessionSet::getExerciseId));
+                    List<AiRoutineAdjustClientRequest.SessionSetData> setData = byExercise.entrySet().stream()
+                            .map(e -> buildSessionSetData(e.getKey(), e.getValue()))
+                            .toList();
+                    return new AiRoutineAdjustClientRequest.RecentSession(
+                            rs.getSessionDate().toString(), setData);
+                })
+                .toList();
+    }
+
+    private AiRoutineAdjustClientRequest.SessionSetData buildSessionSetData(
+            Long exerciseId, List<SessionSet> sets) {
+        long completed = sets.stream().filter(SessionSet::isCompleted).count();
+        double avgReps = sets.stream().mapToInt(SessionSet::getActualReps).average().orElse(0);
+        double avgWeight = sets.stream().mapToDouble(SessionSet::getActualWeightKg).average().orElse(0);
+        return new AiRoutineAdjustClientRequest.SessionSetData(
+                exerciseId, sets.get(0).getExerciseName(),
+                sets.size(), (int) completed, avgReps, avgWeight);
+    }
+
+    private List<RoutineExercise> createNextWeekExercises(
+            List<RoutineExercise> exercises, AiRoutineAdjustClientResponse response) {
+        Map<Long, AiRoutineAdjustClientResponse.Adjustment> adjustMap = response.adjustments().stream()
+                .collect(Collectors.toMap(AiRoutineAdjustClientResponse.Adjustment::exerciseId, a -> a));
+        return exercises.stream()
+                .map(ex -> {
+                    AiRoutineAdjustClientResponse.Adjustment adj = adjustMap.get(ex.getId());
+                    double w = adj != null ? adj.newWeightKg() : ex.getTargetWeightKg();
+                    int s = adj != null ? adj.newSets() : ex.getTargetSets();
+                    int r = adj != null ? adj.newReps() : ex.getTargetReps();
+                    return RoutineExercise.create(
+                            ex.getRoutineId(), ex.getDayLabel(), ex.getExerciseName(),
+                            s, r, w, ex.getOrderIndex(), response.nextWeekNumber());
+                })
+                .toList();
     }
 }

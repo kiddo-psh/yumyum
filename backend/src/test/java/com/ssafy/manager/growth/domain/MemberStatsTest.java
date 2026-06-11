@@ -52,6 +52,27 @@ class MemberStatsTest {
     }
 
     @Test
+    void lastAchievedDate가_null이면_스트릭이_만료된다() {
+        MemberStats fresh = new MemberStats(Streak.of(0), Streak.of(0), null);
+
+        assertThat(fresh.isStreakExpired(today)).isTrue();
+    }
+
+    @Test
+    void lastAchievedDate가_어제면_스트릭이_만료되지_않는다() {
+        MemberStats achieved = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(1));
+
+        assertThat(achieved.isStreakExpired(today)).isFalse();
+    }
+
+    @Test
+    void lastAchievedDate가_어제가_아니면_스트릭이_만료된다() {
+        MemberStats old = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(2));
+
+        assertThat(old.isStreakExpired(today)).isTrue();
+    }
+
+    @Test
     void 같은_날_다시_달성해도_스트릭은_변하지_않는다() {
         MemberStats sameDay = new MemberStats(Streak.of(5), Streak.of(5), today);
 

@@ -55,7 +55,7 @@ class StreakResetServiceTest {
     void 날짜_기준으로_미달성_Member의_Streak을_초기화한다() {
         DailyGoal unachieved = DailyGoal.of(1L, YESTERDAY, 2000.0);
         DailyGoal achieved   = DailyGoal.of(2L, YESTERDAY, 2000.0);
-        achieved.recalculate(2000.0);
+        achieved.recalculate(2000.0, 0, 0, 0);
 
         given(dailyGoalRepository.findAllByDate(YESTERDAY)).willReturn(List.of(unachieved, achieved));
 

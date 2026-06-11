@@ -28,23 +28,48 @@ public class DailyGoal {
 
     private double targetValue;
     private double achievedValue = 0;
+
+    private double targetProteinG;
+    private double achievedProteinG;
+    private double targetCarbG;
+    private double achievedCarbG;
+    private double targetFatG;
+    private double achievedFatG;
+
     private boolean achieved = false;
 
-    public DailyGoal(double targetValue) {
+    private DailyGoal(double targetValue, double targetProteinG, double targetCarbG, double targetFatG) {
         this.targetValue = targetValue;
+        this.targetProteinG = targetProteinG;
+        this.targetCarbG = targetCarbG;
+        this.targetFatG = targetFatG;
     }
 
     public static DailyGoal of(Long memberId, LocalDate date, double targetValue) {
-        DailyGoal goal = new DailyGoal(targetValue);
+        return of(memberId, date, targetValue, 0, 0, 0);
+    }
+
+    public static DailyGoal of(Long memberId, LocalDate date,
+                                double targetValue, double targetProteinG,
+                                double targetCarbG, double targetFatG) {
+        DailyGoal goal = new DailyGoal(targetValue, targetProteinG, targetCarbG, targetFatG);
         goal.memberId = memberId;
         goal.date = date;
         return goal;
     }
 
-    public void recalculate(double value) {
-        achievedValue = value;
-        if (!achieved) {
-            achieved = targetValue <= achievedValue;
-        }
+    public void recalculate(double calories, double proteinG, double carbG, double fatG) {
+        achievedValue = calories;
+        achievedProteinG = proteinG;
+        achievedCarbG = carbG;
+        achievedFatG = fatG;
+        achieved = isWithin(targetValue, calories)
+                && isWithin(targetProteinG, proteinG)
+                && isWithin(targetCarbG, carbG)
+                && isWithin(targetFatG, fatG);
+    }
+
+    private boolean isWithin(double target, double achieved) {
+        return target * 0.9 <= achieved && achieved <= target * 1.1;
     }
 }

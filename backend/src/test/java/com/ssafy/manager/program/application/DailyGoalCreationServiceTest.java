@@ -34,7 +34,7 @@ class DailyGoalCreationServiceTest {
 
     @Test
     void 활성_Program이_있으면_오늘_DailyGoal이_생성된다() {
-        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400, 0, 0, 0, null);
+        Program program = Program.create(1L, ProgramType.HEALTH, TODAY.minusDays(1), TODAY.plusDays(27), 2400, 120.0, 300.0, 80.0, null);
         given(programRepository.findAllByStatus(ProgramStatus.ACTIVE)).willReturn(List.of(program));
         given(dailyGoalRepository.existsByMemberIdAndDate(1L, TODAY)).willReturn(false);
 
@@ -43,6 +43,9 @@ class DailyGoalCreationServiceTest {
         ArgumentCaptor<DailyGoal> captor = ArgumentCaptor.forClass(DailyGoal.class);
         verify(dailyGoalRepository).save(captor.capture());
         assertThat(captor.getValue().getTargetValue()).isEqualTo(2400.0);
+        assertThat(captor.getValue().getTargetProteinG()).isEqualTo(120.0);
+        assertThat(captor.getValue().getTargetCarbG()).isEqualTo(300.0);
+        assertThat(captor.getValue().getTargetFatG()).isEqualTo(80.0);
         assertThat(captor.getValue().getMemberId()).isEqualTo(1L);
     }
 

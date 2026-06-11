@@ -44,7 +44,7 @@ class MealServiceTest {
         given(foodRepository.findById(1L)).willReturn(Optional.of(food));
         given(mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(MEMBER_ID, TODAY)).willReturn(2000.0);
 
-        DailyGoal goal = new DailyGoal(2000.0); // 목표 2000, 아직 미달성
+        DailyGoal goal = DailyGoal.of(MEMBER_ID, TODAY, 2000.0); // 목표 2000, 아직 미달성
         given(dailyGoalRepository.findByMemberIdAndDate(MEMBER_ID, TODAY)).willReturn(Optional.of(goal));
 
         mealService.record(
@@ -61,8 +61,8 @@ class MealServiceTest {
         given(foodRepository.findById(1L)).willReturn(Optional.of(food));
         given(mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(MEMBER_ID, TODAY)).willReturn(2500.0);
 
-        DailyGoal goal = new DailyGoal(2000.0);
-        goal.recalculate(2000.0); // 이미 달성 상태
+        DailyGoal goal = DailyGoal.of(MEMBER_ID, TODAY, 2000.0);
+        goal.recalculate(2000.0, 0, 0, 0); // 이미 달성 상태
         given(dailyGoalRepository.findByMemberIdAndDate(MEMBER_ID, TODAY)).willReturn(Optional.of(goal));
 
         mealService.record(

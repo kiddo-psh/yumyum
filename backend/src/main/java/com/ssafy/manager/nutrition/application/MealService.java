@@ -3,7 +3,7 @@ package com.ssafy.manager.nutrition.application;
 import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.Meal;
-import com.ssafy.manager.nutrition.infrastructure.persistence.FoodRepository;
+import com.ssafy.manager.nutrition.domain.FoodRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.program.domain.DailyGoal;
@@ -32,7 +32,7 @@ public class MealService {
 
         Meal meal = new Meal(command.memberId(), command.type(), command.date(), effectiveDate);
         for (MealItemCommand itemCmd : command.items()) {
-            Food food = foodRepository.findById(itemCmd.foodId()).orElseThrow();
+            Food food = foodRepository.findByCode(itemCmd.foodCode()).orElseThrow();
             meal.addItem(food, itemCmd.amountGrams());
         }
         mealRepository.save(meal);

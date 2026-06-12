@@ -1,6 +1,6 @@
 package com.ssafy.manager.nutrition.presentation;
 
-import com.ssafy.manager.nutrition.infrastructure.persistence.FoodRepository;
+import com.ssafy.manager.nutrition.application.FoodService;
 import com.ssafy.manager.nutrition.presentation.dto.FoodResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FoodController {
 
-    private final FoodRepository foodRepository;
+    private final FoodService foodService;
 
     @GetMapping
     public ResponseEntity<List<FoodResponse>> search(@RequestParam(defaultValue = "") String query) {
-        List<FoodResponse> foods = foodRepository.findByNameContaining(query).stream()
+        List<FoodResponse> foods = foodService.search(query).stream()
                 .map(FoodResponse::from)
                 .toList();
         return ResponseEntity.ok(foods);

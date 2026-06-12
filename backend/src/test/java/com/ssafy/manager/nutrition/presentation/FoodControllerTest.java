@@ -5,8 +5,8 @@ import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
 import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
+import com.ssafy.manager.nutrition.application.FoodService;
 import com.ssafy.manager.nutrition.domain.Food;
-import com.ssafy.manager.nutrition.infrastructure.persistence.FoodRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FoodControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @MockitoBean FoodRepository foodRepository;
+    @MockitoBean FoodService foodService;
     @MockitoBean KakaoOAuth2UserService kakaoOAuth2UserService;
     @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 
@@ -36,9 +36,9 @@ class FoodControllerTest {
 
     @Test
     void query가_없으면_전체_목록을_반환한다() throws Exception {
-        given(foodRepository.findByNameContaining("")).willReturn(List.of(
-                new Food("닭가슴살", 165.0, 0.0, 31.0, 3.6, 0.0),
-                new Food("현미밥", 100.0, 22.0, 2.5, 0.8, 1.5)
+        given(foodService.search("")).willReturn(List.of(
+                new Food("D000001", "닭가슴살", 165.0, 0.0, 31.0, 3.6, 0.0),
+                new Food("D000002", "현미밥", 100.0, 22.0, 2.5, 0.8, 1.5)
         ));
 
         mockMvc.perform(get("/foods")
@@ -49,14 +49,15 @@ class FoodControllerTest {
 
     @Test
     void 키워드로_음식_목록을_반환한다() throws Exception {
-        given(foodRepository.findByNameContaining("닭")).willReturn(List.of(
-                new Food("닭가슴살", 165.0, 0.0, 31.0, 3.6, 0.0)
+        given(foodService.search("닭")).willReturn(List.of(
+                new Food("D000001", "닭가슴살", 165.0, 0.0, 31.0, 3.6, 0.0)
         ));
 
         mockMvc.perform(get("/foods")
                         .with(authentication(AUTH))
                         .param("query", "닭"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].foodCode").value("D000001"))
                 .andExpect(jsonPath("$[0].name").value("닭가슴살"))
                 .andExpect(jsonPath("$[0].caloriesPer100g").value(165.0));
     }

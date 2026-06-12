@@ -26,7 +26,7 @@ Claude API를 통해 개인화된 코멘트와 식단 추천을 제공합니다.
       ↓
 [Spring Boot :8080]  ←→  [Redis :6379]  (JWT 블랙리스트, 세션 캐시)
       ↓ 내부 HTTP         ↓
-[FastAPI :8000]      [PostgreSQL :5432]  (공용 DB)
+[FastAPI :8000]      [MySQL :3306]  (공용 DB)
       ↓
 [Claude API (Anthropic)]
 ```
@@ -34,7 +34,7 @@ Claude API를 통해 개인화된 코멘트와 식단 추천을 제공합니다.
 ### 핵심 원칙
 - **앱(Vue)은 Spring Boot 하나만 바라봅니다.** FastAPI는 외부에 노출되지 않습니다.
 - **FastAPI는 AI 기능만 담당합니다.** 비즈니스 CRUD는 Spring Boot에 있습니다.
-- **DB는 공용 PostgreSQL 1개입니다.** Spring이 읽기·쓰기, FastAPI는 읽기만 합니다.
+- **DB는 공용 MySQL 1개입니다.** Spring이 읽기·쓰기, FastAPI는 읽기만 합니다.
 - **FastAPI URL:** Spring Boot 환경변수 `FASTAPI_INTERNAL_URL=http://fastapi:8000`으로 주입됩니다.
 
 ---
@@ -47,7 +47,7 @@ Claude API를 통해 개인화된 코멘트와 식단 추천을 제공합니다.
 | 메인 백엔드 | Spring Boot 3.3, Java 21, Spring Security, JPA, Redis |
 | AI 백엔드 | Python 3.11, FastAPI, uvicorn, SQLAlchemy, Alembic |
 | AI | Claude API (`claude-haiku-4-5` 기본, `claude-opus-4-5` RAG/Multi-Agent) |
-| DB | PostgreSQL 16, Redis 7 |
+| DB | MySQL 8, Redis 7 |
 | 인프라 | Docker Compose, Nginx |
 
 ### Claude 모델 사용 기준
@@ -362,7 +362,7 @@ FOOD_DB_API_KEY=...         # 식품안전처 공공데이터포털
 
 ### FastAPI `.env`
 ```
-DATABASE_URL=postgresql+asyncpg://...
+DATABASE_URL=mysql+aiomysql://...
 ANTHROPIC_API_KEY=sk-ant-...
 FOOD_DB_API_KEY=...
 ENV=dev                     # dev: mock 모드 / prod: 실제 Claude 호출

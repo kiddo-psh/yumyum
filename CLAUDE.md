@@ -411,8 +411,21 @@ Vue 앱:          http://localhost (nginx 경유)
 - 패키지: `com.nyamnyam.domain.{도메인명}.{레이어명}`
 - 예외 처리: `global/exception/` 아래 공통 핸들러 사용
 - FastAPI 호출: `domain/ai/service/` 아래에만 위치. 다른 도메인이 FastAPI를 직접 알지 않도록 합니다.
-- DTO 클래스명: `{기능}Request`, `{기능}Response`
 - 응답 래퍼: `ApiResponse<T>` 공통 응답 포맷 사용
+
+#### DTO 클래스명 규칙
+레이어 경계를 기준으로 접미사를 구분한다.
+
+| 레이어 | 역할 | 접미사 | 예시 |
+|---|---|---|---|
+| `presentation/dto/` | HTTP 요청 바디 | `{기능}Request` | `MealRequest` |
+| `presentation/dto/` | HTTP 응답 바디 | `{기능}Response` | `MealResponse` |
+| `application/` | 서비스 메서드 입력 | `{기능}Command` | `MealCommand` |
+| `application/` | 서비스 메서드 반환 | `{기능}Result` | `ProgramResult` |
+| `infrastructure/client/` | 외부 서비스 송신 | `{기능}ClientRequest` | `AiPlanClientRequest` |
+| `infrastructure/client/` | 외부 서비스 수신 | `{기능}ClientResponse` | `AiPlanClientResponse` |
+
+- presentation DTO는 항상 `presentation/dto/` 패키지에 위치한다. `presentation/` 직접 위치는 금지.
 
 #### 레이어 의존 방향
 - `application` 레이어 서비스는 `presentation` DTO를 반환하지 않는다.

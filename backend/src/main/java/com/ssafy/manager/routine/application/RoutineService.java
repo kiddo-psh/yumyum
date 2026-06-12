@@ -105,6 +105,14 @@ public class RoutineService {
         return RoutineResult.ExerciseResult.from(exercise);
     }
 
+    public List<RoutineResult.ExerciseResult> getWeeklyPlan(Long routineId, int week) {
+        return routineExerciseRepository
+                .findByRoutineIdAndWeekNumberOrderByDayLabelAscOrderIndexAsc(routineId, week)
+                .stream()
+                .map(RoutineResult.ExerciseResult::from)
+                .toList();
+    }
+
     private String toHealthGoal(ProgramType type) {
         return switch (type) {
             case DIET -> "WEIGHT_LOSS";

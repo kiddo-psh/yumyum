@@ -45,6 +45,21 @@ Kakao OAuth2 → JWT (stateless). `@AuthenticationPrincipal Long memberId`로 Co
 - **Nyam**: stateless — 매 요청마다 `DailyGoal` 달성률 + `Member.healthGoal`로 계산. DB 저장 없음.
 - **FastAPI 호출** (`/ai/routine/adjust`, `/ai/routine/generate`): `@Async`로 비동기 처리.
 
+## DTO 클래스명 규칙
+
+레이어 경계를 기준으로 접미사를 구분한다.
+
+| 레이어 | 역할 | 접미사 | 예시 |
+|---|---|---|---|
+| `presentation/dto/` | HTTP 요청 바디 | `{기능}Request` | `MealRequest` |
+| `presentation/dto/` | HTTP 응답 바디 | `{기능}Response` | `MealResponse` |
+| `application/` | 서비스 메서드 입력 | `{기능}Command` | `MealCommand` |
+| `application/` | 서비스 메서드 반환 | `{기능}Result` | `ProgramResult` |
+| `infrastructure/client/` | 외부 서비스 송신 | `{기능}ClientRequest` | `AiPlanClientRequest` |
+| `infrastructure/client/` | 외부 서비스 수신 | `{기능}ClientResponse` | `AiPlanClientResponse` |
+
+- presentation DTO는 항상 `presentation/dto/` 패키지에 위치한다. `presentation/` 직접 위치는 금지.
+
 ## REST API 규칙
 
 URI 설계, Controller 응답, 에러 처리, 페이지네이션 규칙: `docs/rest-api.md` 참조.

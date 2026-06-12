@@ -23,9 +23,11 @@ public class RoutineExercise {
     private int targetReps;
     private double targetWeightKg;
     private int orderIndex;
+    private int weekNumber;
 
     private RoutineExercise(Long routineId, String dayLabel, String exerciseName,
-                             int targetSets, int targetReps, double targetWeightKg, int orderIndex) {
+                             int targetSets, int targetReps, double targetWeightKg,
+                             int orderIndex, int weekNumber) {
         this.routineId = routineId;
         this.dayLabel = dayLabel;
         this.exerciseName = exerciseName;
@@ -33,13 +35,21 @@ public class RoutineExercise {
         this.targetReps = targetReps;
         this.targetWeightKg = targetWeightKg;
         this.orderIndex = orderIndex;
+        this.weekNumber = weekNumber;
     }
 
     public static RoutineExercise create(Long routineId, String dayLabel, String exerciseName,
                                           int targetSets, int targetReps, double targetWeightKg,
                                           int orderIndex) {
+        return create(routineId, dayLabel, exerciseName,
+                targetSets, targetReps, targetWeightKg, orderIndex, 1);
+    }
+
+    public static RoutineExercise create(Long routineId, String dayLabel, String exerciseName,
+                                          int targetSets, int targetReps, double targetWeightKg,
+                                          int orderIndex, int weekNumber) {
         return new RoutineExercise(routineId, dayLabel, exerciseName,
-                targetSets, targetReps, targetWeightKg, orderIndex);
+                targetSets, targetReps, targetWeightKg, orderIndex, weekNumber);
     }
 
     public void update(String exerciseName, int targetSets, int targetReps, double targetWeightKg) {

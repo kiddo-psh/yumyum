@@ -26,6 +26,12 @@ public class GlobalExceptionHandler {
         return ErrorResponse.of(409, "Conflict", e.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbidden(ForbiddenException e) {
+        return ErrorResponse.of(403, "Forbidden", e.getMessage());
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(NoSuchElementException e) {

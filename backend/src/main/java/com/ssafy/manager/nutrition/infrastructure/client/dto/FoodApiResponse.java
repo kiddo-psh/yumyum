@@ -1,4 +1,4 @@
-package com.ssafy.manager.nutrition.infrastructure.client;
+package com.ssafy.manager.nutrition.infrastructure.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;

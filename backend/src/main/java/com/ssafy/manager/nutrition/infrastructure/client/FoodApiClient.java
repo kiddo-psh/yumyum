@@ -3,6 +3,7 @@ package com.ssafy.manager.nutrition.infrastructure.client;
 import com.ssafy.manager.global.config.FoodApiProperties;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
+import com.ssafy.manager.nutrition.infrastructure.client.dto.FoodApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

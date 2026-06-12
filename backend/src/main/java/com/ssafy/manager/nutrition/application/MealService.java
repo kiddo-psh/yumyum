@@ -47,7 +47,11 @@ public class MealService {
 
     private void updateGoalAndStreak(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {
         boolean wasAchieved = goal.isAchieved();
-        goal.recalculate(totalCalories);
+        double totalProtein = mealItemRepository.sumProteinByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        double totalCarbs   = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        double totalFat     = mealItemRepository.sumFatByMemberIdAndEffectiveDate(memberId, effectiveDate);
+
+        goal.recalculate(totalCalories, totalProtein, totalCarbs, totalFat);
         if (!wasAchieved && goal.isAchieved()) {
             streakService.increment(memberId, effectiveDate);
         }

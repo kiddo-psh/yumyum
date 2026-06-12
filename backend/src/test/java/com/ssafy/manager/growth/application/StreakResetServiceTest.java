@@ -3,8 +3,6 @@ package com.ssafy.manager.growth.application;
 import com.ssafy.manager.growth.domain.MemberStats;
 import com.ssafy.manager.growth.domain.Streak;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
-import com.ssafy.manager.program.domain.DailyGoal;
-import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,15 +23,14 @@ import static org.mockito.Mockito.verify;
 class StreakResetServiceTest {
 
     @Mock MemberStatsRepository memberStatsRepository;
-    @Mock DailyGoalRepository dailyGoalRepository;
 
     @InjectMocks StreakResetService streakResetService;
 
-    private static final LocalDate YESTERDAY = LocalDate.of(2026, 6, 1);
+    private static final LocalDate TODAY = LocalDate.of(2026, 6, 11);
 
     @Test
     void memberId_목록을_받아_각_streak을_초기화한다() {
-        MemberStats stats = new MemberStats(Streak.of(5), Streak.of(10), YESTERDAY);
+        MemberStats stats = new MemberStats(Streak.of(5), Streak.of(10), TODAY.minusDays(1));
         given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
 
         streakResetService.resetFor(List.of(1L));
@@ -52,19 +49,22 @@ class StreakResetServiceTest {
     }
 
     @Test
-    void 날짜_기준으로_미달성_Member의_Streak을_초기화한다() {
-        DailyGoal unachieved = DailyGoal.of(1L, YESTERDAY, 2000.0);
-        DailyGoal achieved   = DailyGoal.of(2L, YESTERDAY, 2000.0);
-        achieved.recalculate(2000.0);
+    void 어제_달성하지_않은_회원의_Streak이_리셋된다() {
+        MemberStats expired = new MemberStats(Streak.of(3), Streak.of(10), TODAY.minusDays(2));
+        given(memberStatsRepository.findAllWithExpiredStreak(TODAY.minusDays(1))).willReturn(List.of(expired));
 
-        given(dailyGoalRepository.findAllByDate(YESTERDAY)).willReturn(List.of(unachieved, achieved));
+        streakResetService.resetUnachievedFor(TODAY);
 
-        MemberStats stats = new MemberStats(Streak.of(3), Streak.of(10), YESTERDAY.minusDays(1));
-        given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
+        assertThat(expired.getCurrentStreak()).isEqualTo(Streak.of(0));
+        verify(memberStatsRepository).save(expired);
+    }
 
-        streakResetService.resetUnachievedFor(YESTERDAY);
+    @Test
+    void 어제_달성한_회원의_Streak은_리셋되지_않는다() {
+        given(memberStatsRepository.findAllWithExpiredStreak(TODAY.minusDays(1))).willReturn(List.of());
 
-        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(0));
-        verify(memberStatsRepository, never()).findByMemberId(2L);
+        streakResetService.resetUnachievedFor(TODAY);
+
+        verify(memberStatsRepository, never()).save(any());
     }
 }

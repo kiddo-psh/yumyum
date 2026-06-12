@@ -58,6 +58,10 @@ public class MemberStats {
         lastAchievedDate = achievedDate;
     }
 
+    public boolean isStreakExpired(LocalDate today) {
+        return lastAchievedDate == null || !lastAchievedDate.equals(today.minusDays(1));
+    }
+
     public void resetStreak() {
         currentStreak = Streak.of(0);
     }

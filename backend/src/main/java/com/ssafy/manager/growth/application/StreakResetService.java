@@ -1,7 +1,6 @@
 package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
-import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,15 +13,14 @@ import java.util.List;
 public class StreakResetService {
 
     private final MemberStatsRepository memberStatsRepository;
-    private final DailyGoalRepository dailyGoalRepository;
 
     @Transactional
     public void resetUnachievedFor(LocalDate date) {
-        List<Long> unachievedIds = dailyGoalRepository.findAllByDate(date).stream()
-                .filter(g -> !g.isAchieved())
-                .map(g -> g.getMemberId())
-                .toList();
-        resetFor(unachievedIds);
+        // TODO: 회원 수가 대용량으로 늘어나면 Spring Batch 청크 처리로 교체 필요
+        memberStatsRepository.findAllWithExpiredStreak(date.minusDays(1)).forEach(stats -> {
+            stats.resetStreak();
+            memberStatsRepository.save(stats);
+        });
     }
 
     @Transactional

@@ -37,7 +37,7 @@ class DailyGoalSummaryServiceTest {
         final double achievementRate = (double) achievedCal / targetCal;
         LocalDate wednesday = LocalDate.of(2026, 6, 10);
         DailyGoal mondayGoal = DailyGoal.of(MEMBER_ID, MONDAY, targetCal);
-        mondayGoal.recalculate(achievedCal);
+        mondayGoal.recalculate(achievedCal, 0, 0, 0);
 
         given(dailyGoalRepository.findAllByMemberIdAndDateBetween(MEMBER_ID, MONDAY, SUNDAY))
                 .willReturn(List.of(mondayGoal));
@@ -51,7 +51,7 @@ class DailyGoalSummaryServiceTest {
     @Test
     void 오늘_DailyGoal_기록이_있으면_달성_현황을_반환한다() {
         DailyGoal goal = DailyGoal.of(MEMBER_ID, MONDAY, 2000);
-        goal.recalculate(1350);
+        goal.recalculate(1350, 0, 0, 0);
         given(dailyGoalRepository.findByMemberIdAndDate(MEMBER_ID, MONDAY))
                 .willReturn(Optional.of(goal));
 

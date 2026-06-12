@@ -58,7 +58,7 @@ class WeeklyAchievementSummaryTest {
     @Test
     void 기록이_있는_날짜의_달성률을_반환한다() {
         DailyGoal goal = DailyGoal.of(1L, MONDAY, 2000);
-        goal.recalculate(1500);
+        goal.recalculate(1500, 0, 0, 0);
 
         WeeklyAchievementSummary summary = WeeklyAchievementSummary.of(TODAY, List.of(goal));
 

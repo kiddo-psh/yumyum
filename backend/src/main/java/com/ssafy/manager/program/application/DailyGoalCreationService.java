@@ -21,7 +21,12 @@ public class DailyGoalCreationService {
     public void createForActivePrograms(LocalDate today) {
         programRepository.findAllByStatus(ProgramStatus.ACTIVE).forEach(p -> {
             if (!dailyGoalRepository.existsByMemberIdAndDate(p.getMemberId(), today)) {
-                dailyGoalRepository.save(DailyGoal.of(p.getMemberId(), today, p.getTargetCalories()));
+                dailyGoalRepository.save(DailyGoal.of(
+                        p.getMemberId(), today,
+                        p.getTargetCalories(),
+                        p.getTargetProteinG(),
+                        p.getTargetCarbG(),
+                        p.getTargetFatG()));
             }
         });
     }

@@ -1,6 +1,5 @@
 package com.ssafy.manager.nutrition.application;
 
-import com.ssafy.manager.nutrition.domain.MealItem;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealClient;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientRequest;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientResponse;
@@ -36,11 +35,13 @@ public class AiMealService {
             throw new IllegalStateException("오늘 식사 기록이 없어 추천을 생성할 수 없습니다.");
         }
 
-        List<MealItem> items = mealItemRepository.findAllByMemberIdAndEffectiveDate(memberId, effectiveDate);
-        double totalKcal    = items.stream().mapToDouble(MealItem::getCalories).sum();
-        double totalProtein = items.stream().mapToDouble(MealItem::getProtein).sum();
-        double totalCarb    = items.stream().mapToDouble(MealItem::getCarbs).sum();
-        double totalFat     = items.stream().mapToDouble(MealItem::getFat).sum();
+        double totalKcal    = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        double totalProtein = mealItemRepository.sumProteinByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        double totalCarb    = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        double totalFat     = mealItemRepository.sumFatByMemberIdAndEffectiveDate(memberId, effectiveDate);
+        if (totalKcal == 0.0 && totalProtein == 0.0 && totalCarb == 0.0 && totalFat == 0.0) {
+            throw new IllegalStateException("오늘 식단 내 음식 정보가 없어 추천을 생성할 수 없습니다.");
+        }
 
         AiMealLastRecommendClientResponse resp = aiMealClient.lastRecommend(
                 new AiMealLastRecommendClientRequest(

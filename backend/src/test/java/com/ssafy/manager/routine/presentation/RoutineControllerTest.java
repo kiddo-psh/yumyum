@@ -1,14 +1,20 @@
 package com.ssafy.manager.routine.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.manager.auth.infrastructure.KakaoOAuth2UserService;
+import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
+import com.ssafy.manager.global.config.JwtConfig;
+import com.ssafy.manager.global.config.SecurityConfig;
+import com.ssafy.manager.global.exception.GlobalExceptionHandler;
 import com.ssafy.manager.routine.application.RoutineResult;
 import com.ssafy.manager.routine.application.RoutineService;
 import com.ssafy.manager.routine.domain.SplitType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,6 +27,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,12 +36,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RoutineController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@Import({SecurityConfig.class, JwtConfig.class, GlobalExceptionHandler.class})
 class RoutineControllerTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @MockitoBean RoutineService routineService;
+    @MockitoBean KakaoOAuth2UserService kakaoOAuth2UserService;
+    @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
+
+    private static final Long MEMBER_ID = 1L;
+    private static final UsernamePasswordAuthenticationToken AUTH =
+            new UsernamePasswordAuthenticationToken(MEMBER_ID, null, List.of());
 
     private static final RoutineResult RESULT = new RoutineResult(
             1L, "4일 상체/하체 분할 루틴", 4, true,
@@ -46,9 +60,11 @@ class RoutineControllerTest {
         given(routineService.createAi(anyLong(), anyInt(), any())).willReturn(RESULT);
 
         mockMvc.perform(post("/routines/ai")
+                        .with(authentication(AUTH))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateAiRoutineRequest(1L, 4, SplitType.UPPER_LOWER_4))))
+                                new CreateAiRoutineRequest(4, SplitType.UPPER_LOWER_4))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.routineId").value(1))
                 .andExpect(jsonPath("$.aiGenerated").value(true))
@@ -68,7 +84,6 @@ class RoutineControllerTest {
 
         String body = """
                 {
-                  "memberId": 1,
                   "name": "내 루틴",
                   "daysPerWeek": 3,
                   "exercises": [
@@ -78,6 +93,8 @@ class RoutineControllerTest {
                 """;
 
         mockMvc.perform(post("/routines")
+                        .with(authentication(AUTH))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -87,7 +104,9 @@ class RoutineControllerTest {
 
     @Test
     void split_options_조회_성공() throws Exception {
-        mockMvc.perform(get("/routines/split-options").param("daysPerWeek", "4"))
+        mockMvc.perform(get("/routines/split-options")
+                        .with(authentication(AUTH))
+                        .param("daysPerWeek", "4"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].splitType").exists())
@@ -99,10 +118,12 @@ class RoutineControllerTest {
         RoutineResult.ExerciseResult updated = new RoutineResult.ExerciseResult(
                 1L, "상체", "인클라인 벤치프레스", 3, 10, 55.0, 0, 1
         );
-        given(routineService.updateExercise(anyLong(), anyLong(), anyString(), anyInt(), anyInt(), anyDouble()))
+        given(routineService.updateExercise(anyLong(), anyLong(), anyLong(), anyString(), anyInt(), anyInt(), anyDouble()))
                 .willReturn(updated);
 
         mockMvc.perform(patch("/routines/1/exercises/1")
+                        .with(authentication(AUTH))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new UpdateRoutineExerciseRequest("인클라인 벤치프레스", 3, 10, 55.0))))
@@ -113,10 +134,12 @@ class RoutineControllerTest {
 
     @Test
     void 없는_루틴_수정시_404_반환() throws Exception {
-        given(routineService.updateExercise(anyLong(), anyLong(), anyString(), anyInt(), anyInt(), anyDouble()))
+        given(routineService.updateExercise(anyLong(), anyLong(), anyLong(), anyString(), anyInt(), anyInt(), anyDouble()))
                 .willThrow(new NoSuchElementException("루틴을 찾을 수 없습니다."));
 
         mockMvc.perform(patch("/routines/99/exercises/1")
+                        .with(authentication(AUTH))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new UpdateRoutineExerciseRequest("벤치프레스", 4, 8, 60.0))))
@@ -129,9 +152,10 @@ class RoutineControllerTest {
         List<RoutineResult.ExerciseResult> weeklyPlan = List.of(
                 new RoutineResult.ExerciseResult(1L, "상체", "벤치프레스", 4, 8, 62.5, 0, 2)
         );
-        given(routineService.getWeeklyPlan(1L, 2)).willReturn(weeklyPlan);
+        given(routineService.getWeeklyPlan(anyLong(), anyLong(), anyInt())).willReturn(weeklyPlan);
 
-        mockMvc.perform(get("/routines/1/weekly-plan/2"))
+        mockMvc.perform(get("/routines/1/weekly-plan/2")
+                        .with(authentication(AUTH)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].exerciseName").value("벤치프레스"))

@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,21 +30,21 @@ class StreakResetServiceTest {
     @Test
     void memberId_목록을_받아_각_streak을_초기화한다() {
         MemberStats stats = new MemberStats(Streak.of(5), Streak.of(10), TODAY.minusDays(1));
-        given(memberStatsRepository.findByMemberId(1L)).willReturn(Optional.of(stats));
+        given(memberStatsRepository.findAllByMemberIdIn(List.of(1L))).willReturn(List.of(stats));
 
         streakResetService.resetFor(List.of(1L));
 
         assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(0));
-        verify(memberStatsRepository).save(stats);
+        verify(memberStatsRepository).saveAll(List.of(stats));
     }
 
     @Test
     void MemberStats가_없는_memberId는_무시된다() {
-        given(memberStatsRepository.findByMemberId(99L)).willReturn(Optional.empty());
+        given(memberStatsRepository.findAllByMemberIdIn(List.of(99L))).willReturn(List.of());
 
         streakResetService.resetFor(List.of(99L));
 
-        verify(memberStatsRepository, never()).save(any());
+        verify(memberStatsRepository, never()).saveAll(any());
     }
 
     @Test
@@ -56,7 +55,7 @@ class StreakResetServiceTest {
         streakResetService.resetUnachievedFor(TODAY);
 
         assertThat(expired.getCurrentStreak()).isEqualTo(Streak.of(0));
-        verify(memberStatsRepository).save(expired);
+        verify(memberStatsRepository).saveAll(List.of(expired));
     }
 
     @Test
@@ -65,6 +64,6 @@ class StreakResetServiceTest {
 
         streakResetService.resetUnachievedFor(TODAY);
 
-        verify(memberStatsRepository, never()).save(any());
+        verify(memberStatsRepository, never()).saveAll(any());
     }
 }

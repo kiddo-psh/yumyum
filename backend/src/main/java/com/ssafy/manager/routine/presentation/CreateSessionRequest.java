@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record CreateSessionRequest(
-        Long memberId,
         Long routineId,
         LocalDate sessionDate,
         int caloriesBurned,

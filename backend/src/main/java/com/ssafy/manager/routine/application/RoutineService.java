@@ -1,5 +1,6 @@
 package com.ssafy.manager.routine.application;
 
+import com.ssafy.manager.global.exception.ForbiddenException;
 import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.domain.Sex;
 import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
@@ -93,11 +94,13 @@ public class RoutineService {
     }
 
     @Transactional
-    public RoutineResult.ExerciseResult updateExercise(Long routineId, Long exerciseId,
+    public RoutineResult.ExerciseResult updateExercise(Long memberId, Long routineId, Long exerciseId,
                                                        String exerciseName, int targetSets,
                                                        int targetReps, double targetWeightKg) {
-        if (!routineRepository.existsById(routineId)) {
-            throw new NoSuchElementException("루틴을 찾을 수 없습니다.");
+        Routine routine = routineRepository.findById(routineId)
+                .orElseThrow(() -> new NoSuchElementException("루틴을 찾을 수 없습니다."));
+        if (!routine.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("본인의 루틴만 수정할 수 있습니다.");
         }
         RoutineExercise exercise = routineExerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new NoSuchElementException("운동을 찾을 수 없습니다."));
@@ -105,7 +108,12 @@ public class RoutineService {
         return RoutineResult.ExerciseResult.from(exercise);
     }
 
-    public List<RoutineResult.ExerciseResult> getWeeklyPlan(Long routineId, int week) {
+    public List<RoutineResult.ExerciseResult> getWeeklyPlan(Long memberId, Long routineId, int week) {
+        Routine routine = routineRepository.findById(routineId)
+                .orElseThrow(() -> new NoSuchElementException("루틴을 찾을 수 없습니다."));
+        if (!routine.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("본인의 루틴만 조회할 수 있습니다.");
+        }
         return routineExerciseRepository
                 .findByRoutineIdAndWeekNumberOrderByDayLabelAscOrderIndexAsc(routineId, week)
                 .stream()

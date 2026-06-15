@@ -81,4 +81,15 @@ class MemberStatsTest {
         assertThat(sameDay.getCurrentStreak()).isEqualTo(Streak.of(5));
         assertThat(sameDay.getLastAchievedDate()).isEqualTo(today);
     }
+
+    @Test
+    void 과거_날짜로_달성하면_현재_스트릭이_변하지_않는다() {
+        // 오늘(lastAchievedDate=오늘) 달성 후 이틀 전 식단 수정 → 과거 날짜로 increment 호출
+        MemberStats live = new MemberStats(Streak.of(10), Streak.of(10), today);
+
+        live.incrementStreak(today.minusDays(2));
+
+        assertThat(live.getCurrentStreak()).isEqualTo(Streak.of(10));
+        assertThat(live.getLastAchievedDate()).isEqualTo(today);
+    }
 }

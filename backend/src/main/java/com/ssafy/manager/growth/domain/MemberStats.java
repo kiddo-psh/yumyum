@@ -48,7 +48,7 @@ public class MemberStats {
     }
 
     public void incrementStreak(LocalDate achievedDate) {
-        if (achievedDate.equals(lastAchievedDate)) {
+        if (lastAchievedDate != null && !achievedDate.isAfter(lastAchievedDate)) {
             return;
         }
         currentStreak = isConsecutive(achievedDate) ? currentStreak.increment() : Streak.of(1);

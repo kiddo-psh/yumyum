@@ -28,7 +28,7 @@ public class DailyBatchJob {
     // 순서 중요: 만료 완료 → 전날 Streak 리셋 → 오늘 DailyGoal 생성 → WeeklyReport stub 생성
     void run(LocalDate today) {
         programCompletionService.completeExpired(today);
-        streakResetService.resetUnachievedFor(today.minusDays(1));
+        streakResetService.resetUnachievedFor(today);
         dailyGoalCreationService.createForActivePrograms(today);
         weeklyReportService.createStubs(today);
     }

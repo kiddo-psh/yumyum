@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface MemberStatsRepository extends JpaRepository<MemberStats, Long> {
     Optional<MemberStats> findByMemberId(Long memberId);
 
+    List<MemberStats> findAllByMemberIdIn(List<Long> memberIds);
+
     @Query("SELECT ms FROM MemberStats ms WHERE ms.lastAchievedDate IS NULL OR ms.lastAchievedDate < :yesterday")
     List<MemberStats> findAllWithExpiredStreak(@Param("yesterday") LocalDate yesterday);
 }

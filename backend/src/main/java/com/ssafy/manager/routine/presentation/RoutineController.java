@@ -7,6 +7,7 @@ import com.ssafy.manager.routine.domain.SplitType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,30 +35,34 @@ public class RoutineController {
     }
 
     @PostMapping("/ai")
-    public ResponseEntity<RoutineResponse> createAi(@RequestBody CreateAiRoutineRequest request) {
-        RoutineResult result = routineService.createAi(
-                request.memberId(), request.daysPerWeek(), request.splitType());
+    public ResponseEntity<RoutineResponse> createAi(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody CreateAiRoutineRequest request) {
+        RoutineResult result = routineService.createAi(memberId, request.daysPerWeek(), request.splitType());
         return ResponseEntity.status(HttpStatus.CREATED).body(RoutineResponse.from(result));
     }
 
     @PostMapping
-    public ResponseEntity<RoutineResponse> createManual(@RequestBody CreateManualRoutineRequest request) {
+    public ResponseEntity<RoutineResponse> createManual(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody CreateManualRoutineRequest request) {
         List<ExerciseInput> inputs = request.exercises().stream()
                 .map(e -> new ExerciseInput(e.dayLabel(), e.exerciseName(),
                         e.targetSets(), e.targetReps(), e.targetWeightKg(), e.orderIndex()))
                 .toList();
         RoutineResult result = routineService.createManual(
-                request.memberId(), request.name(), request.daysPerWeek(), inputs);
+                memberId, request.name(), request.daysPerWeek(), inputs);
         return ResponseEntity.status(HttpStatus.CREATED).body(RoutineResponse.from(result));
     }
 
     @PatchMapping("/{routineId}/exercises/{exerciseId}")
     public ResponseEntity<RoutineResponse.ExerciseResponse> updateExercise(
+            @AuthenticationPrincipal Long memberId,
             @PathVariable Long routineId,
             @PathVariable Long exerciseId,
             @RequestBody UpdateRoutineExerciseRequest request) {
         RoutineResult.ExerciseResult result = routineService.updateExercise(
-                routineId, exerciseId,
+                memberId, routineId, exerciseId,
                 request.exerciseName(), request.targetSets(),
                 request.targetReps(), request.targetWeightKg());
         return ResponseEntity.ok(RoutineResponse.ExerciseResponse.from(result));
@@ -65,9 +70,10 @@ public class RoutineController {
 
     @GetMapping("/{routineId}/weekly-plan/{week}")
     public ResponseEntity<List<RoutineResponse.ExerciseResponse>> getWeeklyPlan(
+            @AuthenticationPrincipal Long memberId,
             @PathVariable Long routineId,
             @PathVariable int week) {
-        List<RoutineResponse.ExerciseResponse> body = routineService.getWeeklyPlan(routineId, week).stream()
+        List<RoutineResponse.ExerciseResponse> body = routineService.getWeeklyPlan(memberId, routineId, week).stream()
                 .map(RoutineResponse.ExerciseResponse::from)
                 .toList();
         return ResponseEntity.ok(body);

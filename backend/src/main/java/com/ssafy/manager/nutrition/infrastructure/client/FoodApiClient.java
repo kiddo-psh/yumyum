@@ -40,24 +40,10 @@ public class FoodApiClient implements FoodRepository {
         }
     }
 
+    // TODO: 식품영양처 API엔 code를 통해 음식을 가져올 순 없음. 이 메서드는 DB에 접근하는 Repository만 사용해야할듯.
     @Override
     public Optional<Food> findByCode(String foodCode) {
-        try {
-            FoodApiResponse response = foodApiRestClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", properties.serviceKey())
-                            .queryParam("type", properties.responseType())
-                            .queryParam("numOfRows", 1)
-                            .queryParam("pageNo", 1)
-                            .queryParam("FOOD_CD", foodCode)
-                            .build())
-                    .retrieve()
-                    .body(FoodApiResponse.class);
-            return toFoods(response).stream().findFirst();
-        } catch (Exception e) {
-            log.warn("Food lookup failed: code={}", foodCode, e);
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     private List<Food> toFoods(FoodApiResponse response) {

@@ -4,6 +4,9 @@ import com.ssafy.manager.global.config.FoodApiProperties;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
 import com.ssafy.manager.nutrition.infrastructure.client.dto.FoodApiResponse;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,6 +14,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.util.UriBuilder;
 
 @Slf4j
 @Component
@@ -24,13 +28,7 @@ public class FoodApiClient implements FoodRepository {
     public List<Food> search(String keyword) {
         try {
             FoodApiResponse response = foodApiRestClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .queryParam("serviceKey", properties.serviceKey())
-                            .queryParam("type", properties.responseType())
-                            .queryParam("numOfRows", properties.pageSize())
-                            .queryParam("pageNo", 1)
-                            .queryParam("FOOD_NM_KR", keyword)
-                            .build())
+                    .uri(uriBuilder -> buildUri(uriBuilder, Map.of("FOOD_NM_KR", keyword)))
                     .retrieve()
                     .body(FoodApiResponse.class);
             return toFoods(response);
@@ -46,13 +44,29 @@ public class FoodApiClient implements FoodRepository {
         return Optional.empty();
     }
 
+    private URI buildUri(UriBuilder uriBuilder, Map<String, String> extraParams) {
+        uriBuilder.queryParam("serviceKey", "{serviceKey}")
+                .queryParam("type", properties.responseType())
+                .queryParam("numOfRows", properties.pageSize())
+                .queryParam("pageNo", 1);
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("serviceKey", properties.serviceKey());
+
+        extraParams.forEach((name, value) -> {
+            uriBuilder.queryParam(name, "{" + name + "}");
+            variables.put(name, value);
+        });
+
+        return uriBuilder.build(variables);
+    }
+
     private List<Food> toFoods(FoodApiResponse response) {
         if (response == null || response.getBody() == null
-                || response.getBody().getItems() == null
-                || response.getBody().getItems().getItem() == null) {
+                || response.getBody().getItems() == null) {
             return List.of();
         }
-        return response.getBody().getItems().getItem().stream()
+        return response.getBody().getItems().stream()
                 .map(this::toFood)
                 .toList();
     }

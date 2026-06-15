@@ -44,6 +44,9 @@ async def _call_gms(prompt: str, model: str, max_tokens: int) -> str:
 
 def _mock_response(prompt: str) -> str:
     """개발용 mock 응답 (크레딧 절약). JSON 요청 여부에 따라 형식 분리."""
+    if "영양 균형" in prompt or "diet" in prompt.lower():
+        return "오늘 식단을 분석한 결과, 전반적으로 균형 잡힌 하루를 보내셨네요! 단백질 섭취를 조금 더 늘리면 목표 달성에 가까워질 거예요."
+
     if "조정" in prompt or "adjust" in prompt.lower():
         return "분석 결과를 반영했습니다. 꾸준한 노력이 빛을 발하고 있어요! 다음 주도 현재 강도를 유지하며 도전해보세요."
 

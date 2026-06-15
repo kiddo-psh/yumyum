@@ -8,6 +8,9 @@ def calculate_diet_analysis(
     target_carb_g: float, target_fat_g: float,
 ) -> Tuple[Dict[str, float], float, List[str], List[str]]:
     """
+    Args:
+        total_*: 실제 섭취량 — 0 이상이어야 한다 (Spring Boot에서 합산된 값).
+        target_*: 목표값 — 0 이하이면 달성률을 100%로 처리한다.
     Returns:
         rates: {"calorie_rate": float, "protein_rate": float, "carb_rate": float, "fat_rate": float}
         balance_score: 0~100 (100 = 완벽한 균형)

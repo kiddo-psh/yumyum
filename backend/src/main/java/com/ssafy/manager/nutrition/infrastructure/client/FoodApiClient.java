@@ -1,6 +1,7 @@
 package com.ssafy.manager.nutrition.infrastructure.client;
 
 import com.ssafy.manager.global.config.FoodApiProperties;
+import com.ssafy.manager.global.exception.FoodApiException;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
 import com.ssafy.manager.nutrition.infrastructure.client.dto.FoodApiResponse;
@@ -9,8 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.UnknownContentTypeException;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +35,25 @@ public class FoodApiClient implements FoodRepository {
             FoodApiResponse response = foodApiRestClient.get()
                     .uri(uriBuilder -> buildUri(uriBuilder, Map.of("FOOD_NM_KR", keyword)))
                     .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, ((req, res) -> {
+                        throw new FoodApiException("인증키 또는 요청 파라미터 오류: " + res.getStatusCode());
+                    }))
+                    .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
+                        throw new FoodApiException("공공 데이터 포털에서 오류 발생: " + res.getStatusCode());
+                    })
                     .body(FoodApiResponse.class);
             return toFoods(response);
-        } catch (Exception e) {
-            log.warn("Food search failed: keyword={}", keyword, e);
+        } catch (FoodApiException e) {
+            log.warn("Food API 상태 코드 오류: keyword={}", keyword, e);
+            return List.of();
+        } catch (ResourceAccessException e) {
+            log.warn("Food API 연결 실패(타임아웃/네트워크): keyword={}", keyword, e);
+            return List.of();
+        } catch (UnknownContentTypeException e) {
+            log.warn("Food API 응답 형식 오류(역직렬화 실패): keyword={}", keyword, e);
+            return List.of();
+        } catch (RestClientException e) {
+            log.warn("Food API 호출 실패(기타): keyword={}", keyword, e);
             return List.of();
         }
     }

@@ -1,11 +1,11 @@
 package com.ssafy.manager.routine.application;
 
 import com.ssafy.manager.member.domain.ActivityLevel;
+import com.ssafy.manager.member.domain.HealthGoal;
 import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.domain.Sex;
 import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
 import com.ssafy.manager.program.domain.ProgramStatus;
-import com.ssafy.manager.program.domain.ProgramType;
 import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
 import com.ssafy.manager.routine.domain.Routine;
 import com.ssafy.manager.routine.domain.RoutineExercise;
@@ -44,7 +44,13 @@ class RoutineServiceTest {
     @InjectMocks RoutineService routineService;
 
     private static final Long MEMBER_ID = 1L;
-    private final Member member = new Member(Sex.MALE, 1995, 178.0, 75.0, ActivityLevel.MODERATELY_ACTIVE);
+    private final Member member = createOnboardedMember();
+
+    private static Member createOnboardedMember() {
+        Member member = new Member("kakao", "12345", "test@kakao.com");
+        member.completeOnboarding(Sex.MALE, 1995, 178.0, 75.0, ActivityLevel.MODERATELY_ACTIVE, HealthGoal.MUSCLE);
+        return member;
+    }
 
     private static final AiRoutineClientResponse AI_RESPONSE = new AiRoutineClientResponse(
             "4일 상체/하체 분할 루틴",

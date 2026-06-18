@@ -28,7 +28,6 @@ public class ProgramController {
     ) {
         ProgramResult result = programService.create(
                 request.memberId(),
-                request.healthGoal(),
                 request.startDate(),
                 request.durationWeeks()
         );

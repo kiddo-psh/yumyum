@@ -1,6 +1,7 @@
 package com.ssafy.manager.global.exception;
 
 import com.ssafy.manager.auth.application.UnauthorizedException;
+import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -18,6 +20,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUnauthorized(UnauthorizedException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("code", "UNAUTHORIZED", "message", e.getMessage()));
+    }
+
+    @ExceptionHandler(OnboardingRequiredException.class)
+    public ResponseEntity<Map<String, String>> handleOnboardingRequired(OnboardingRequiredException e) {
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                .location(URI.create("/members/me"))
+                .body(Map.of("code", "ONBOARDING_REQUIRED", "message", e.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)

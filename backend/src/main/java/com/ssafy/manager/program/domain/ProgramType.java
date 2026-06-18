@@ -1,5 +1,6 @@
 package com.ssafy.manager.program.domain;
 
+import com.ssafy.manager.member.domain.HealthGoal;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +13,15 @@ public enum ProgramType {
     DISEASE(0);
 
     private final int adjustment;
+
+    public static ProgramType from(HealthGoal healthGoal) {
+        return switch (healthGoal) {
+            case DIET -> DIET;
+            case MUSCLE -> MUSCLE;
+            case HEALTH -> HEALTH;
+            case DISEASE -> DISEASE;
+        };
+    }
 
     public int adjust(int tdee) {
         return tdee + adjustment;

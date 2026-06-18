@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -23,10 +22,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(OnboardingRequiredException.class)
-    public ResponseEntity<Map<String, String>> handleOnboardingRequired(OnboardingRequiredException e) {
-        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("/members/me"))
-                .body(Map.of("code", "ONBOARDING_REQUIRED", "message", e.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleOnboardingRequired(OnboardingRequiredException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "code", "ONBOARDING_REQUIRED",
+                        "message", e.getMessage(),
+                        "resolution", Map.of("method", "PATCH", "href", "/members/me")
+                ));
     }
 
     @ExceptionHandler(IllegalStateException.class)

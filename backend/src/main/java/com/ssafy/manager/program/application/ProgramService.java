@@ -31,7 +31,8 @@ public class ProgramService {
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
         if (!member.isOnboardingCompleted()) {
-            throw new OnboardingRequiredException("온보딩을 먼저 완료해야 합니다.");
+            throw new OnboardingRequiredException(
+                    "프로필 정보가 없어 프로그램을 생성할 수 없습니다. 온보딩을 먼저 완료해 주세요.");
         }
 
         programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)

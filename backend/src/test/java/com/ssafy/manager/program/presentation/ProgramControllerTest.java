@@ -84,9 +84,10 @@ class ProgramControllerTest {
     }
 
     @Test
-    void 온보딩_미완료시_301과_온보딩_Location_반환() throws Exception {
+    void 온보딩_미완료시_409와_해소경로_반환() throws Exception {
         given(programService.create(any(), any(), anyInt()))
-                .willThrow(new OnboardingRequiredException("온보딩을 먼저 완료해야 합니다."));
+                .willThrow(new OnboardingRequiredException(
+                        "프로필 정보가 없어 프로그램을 생성할 수 없습니다. 온보딩을 먼저 완료해 주세요."));
 
         CreateProgramRequest request = new CreateProgramRequest(
                 1L, LocalDate.of(2026, 6, 1), 4
@@ -95,9 +96,10 @@ class ProgramControllerTest {
         mockMvc.perform(post("/programs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isMovedPermanently())
-                .andExpect(header().string("Location", "/members/me"))
-                .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"))
+                .andExpect(jsonPath("$.resolution.method").value("PATCH"))
+                .andExpect(jsonPath("$.resolution.href").value("/members/me"));
     }
 
     @Test

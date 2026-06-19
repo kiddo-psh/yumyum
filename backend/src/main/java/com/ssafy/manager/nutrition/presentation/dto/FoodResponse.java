@@ -3,7 +3,7 @@ package com.ssafy.manager.nutrition.presentation.dto;
 import com.ssafy.manager.nutrition.domain.Food;
 
 public record FoodResponse(
-        Long id,
+        String foodCode,
         String name,
         double caloriesPer100g,
         double carbsPer100g,
@@ -13,7 +13,7 @@ public record FoodResponse(
 ) {
     public static FoodResponse from(Food food) {
         return new FoodResponse(
-                food.getId(),
+                food.getFoodCode(),
                 food.getName(),
                 food.getCaloriesPer100g(),
                 food.getCarbsPer100g(),

@@ -53,7 +53,7 @@ class MealControllerTest {
         MealRequest request = new MealRequest(
                 MealType.LUNCH,
                 LocalDate.of(2026, 6, 1),
-                List.of(new MealRequest.Item(1L, 100.0))
+                List.of(new MealRequest.Item("D000001", 100.0))
         );
 
         mockMvc.perform(post("/meals")
@@ -70,7 +70,7 @@ class MealControllerTest {
         MealRequest request = new MealRequest(
                 MealType.LUNCH,
                 LocalDate.of(2026, 6, 1),
-                List.of(new MealRequest.Item(1L, 100.0))
+                List.of(new MealRequest.Item("D000001", 100.0))
         );
 
         mockMvc.perform(post("/meals")

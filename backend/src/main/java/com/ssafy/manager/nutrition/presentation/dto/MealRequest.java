@@ -9,14 +9,14 @@ import java.util.List;
 
 public record MealRequest(MealType type, LocalDate date, List<Item> items) {
 
-    public record Item(Long foodId, double amountGrams) {}
+    public record Item(String foodCode, double amountGrams) {}
 
     public MealCommand toCommand(Long memberId) {
         return new MealCommand(
                 memberId,
                 type,
                 date,
-                items.stream().map(i -> new MealItemCommand(i.foodId(), i.amountGrams())).toList()
+                items.stream().map(i -> new MealItemCommand(i.foodCode(), i.amountGrams())).toList()
         );
     }
 }

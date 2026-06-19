@@ -6,6 +6,7 @@ import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
 import com.ssafy.manager.member.application.MemberService;
+import com.ssafy.manager.member.application.dto.OnboardingResult;
 import com.ssafy.manager.member.domain.HealthGoal;
 import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.domain.Sex;
@@ -50,9 +51,16 @@ class MemberControllerTest {
 
     @Test
     void 온보딩_성공시_200과_프로필_반환() throws Exception {
-        Member member = new Member("kakao", "12345", "test@kakao.com");
-        member.completeOnboarding(Sex.MALE, 1990, 175.0, 80.0, ActivityLevel.MODERATELY_ACTIVE, HealthGoal.DIET);
-        given(memberService.completeOnboarding(eq(MEMBER_ID), any())).willReturn(member);
+        OnboardingResult result = new OnboardingResult(
+                MEMBER_ID,
+                true,
+                Sex.MALE,
+                1990,
+                175.0,
+                80.0,
+                ActivityLevel.MODERATELY_ACTIVE, HealthGoal.DIET
+        );
+        given(memberService.completeOnboarding(eq(MEMBER_ID), any())).willReturn(result);
 
         mockMvc.perform(patch("/members/me")
                         .with(authentication(AUTH))

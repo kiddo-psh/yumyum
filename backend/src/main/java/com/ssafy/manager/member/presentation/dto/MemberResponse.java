@@ -1,8 +1,8 @@
 package com.ssafy.manager.member.presentation.dto;
 
+import com.ssafy.manager.member.application.dto.OnboardingResult;
 import com.ssafy.manager.member.domain.ActivityLevel;
 import com.ssafy.manager.member.domain.HealthGoal;
-import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.domain.Sex;
 
 public record MemberResponse(
@@ -15,16 +15,16 @@ public record MemberResponse(
         ActivityLevel activityLevel,
         HealthGoal healthGoal
 ) {
-    public static MemberResponse from(Member member) {
+    public static MemberResponse from(OnboardingResult member) {
         return new MemberResponse(
-                member.getId(),
-                member.isOnboardingCompleted(),
-                member.getSex(),
-                member.getBirthYear(),
-                member.getHeightCm(),
-                member.getWeightKg(),
-                member.getActivityLevel(),
-                member.getHealthGoal()
+                member.memberId(),
+                member.onboardingCompleted(),
+                member.sex(),
+                member.birthYear(),
+                member.heightCm(),
+                member.weightKg(),
+                member.activityLevel(),
+                member.healthGoal()
         );
     }
 }

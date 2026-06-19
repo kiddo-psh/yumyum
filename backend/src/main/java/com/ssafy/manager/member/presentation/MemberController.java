@@ -1,7 +1,7 @@
 package com.ssafy.manager.member.presentation;
 
 import com.ssafy.manager.member.application.MemberService;
-import com.ssafy.manager.member.domain.Member;
+import com.ssafy.manager.member.application.dto.OnboardingResult;
 import com.ssafy.manager.member.presentation.dto.MemberResponse;
 import com.ssafy.manager.member.presentation.dto.OnboardingRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class MemberController {
             @AuthenticationPrincipal Long memberId,
             @RequestBody OnboardingRequest request
     ) {
-        Member member = memberService.completeOnboarding(memberId, request.toCommand());
+        OnboardingResult member = memberService.completeOnboarding(memberId, request.toCommand());
         return ResponseEntity.ok(MemberResponse.from(member));
     }
 }

@@ -1,5 +1,6 @@
 package com.ssafy.manager.member.application;
 
+import com.ssafy.manager.member.application.dto.OnboardingResult;
 import com.ssafy.manager.member.domain.ActivityLevel;
 import com.ssafy.manager.member.domain.HealthGoal;
 import com.ssafy.manager.member.domain.Member;
@@ -35,15 +36,15 @@ class MemberServiceTest {
         Member member = new Member("kakao", "12345", "test@kakao.com");
         given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
 
-        Member result = memberService.completeOnboarding(MEMBER_ID, COMMAND);
+        OnboardingResult result = memberService.completeOnboarding(MEMBER_ID, COMMAND);
 
-        assertThat(result.isOnboardingCompleted()).isTrue();
-        assertThat(result.getSex()).isEqualTo(Sex.MALE);
-        assertThat(result.getBirthYear()).isEqualTo(1990);
-        assertThat(result.getHeightCm()).isEqualTo(175.0);
-        assertThat(result.getWeightKg()).isEqualTo(80.0);
-        assertThat(result.getActivityLevel()).isEqualTo(ActivityLevel.MODERATELY_ACTIVE);
-        assertThat(result.getHealthGoal()).isEqualTo(HealthGoal.DIET);
+        assertThat(result.onboardingCompleted()).isTrue();
+        assertThat(result.sex()).isEqualTo(Sex.MALE);
+        assertThat(result.birthYear()).isEqualTo(1990);
+        assertThat(result.heightCm()).isEqualTo(175.0);
+        assertThat(result.weightKg()).isEqualTo(80.0);
+        assertThat(result.activityLevel()).isEqualTo(ActivityLevel.MODERATELY_ACTIVE);
+        assertThat(result.healthGoal()).isEqualTo(HealthGoal.DIET);
     }
 
     @Test

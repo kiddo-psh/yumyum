@@ -1,9 +1,9 @@
 package com.ssafy.manager.program.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import com.ssafy.manager.program.application.ProgramResult;
 import com.ssafy.manager.program.application.ProgramService;
-import com.ssafy.manager.program.domain.ProgramType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,10 +47,10 @@ class ProgramControllerTest {
 
     @Test
     void 프로그램_생성_성공시_201과_응답_본문_반환() throws Exception {
-        given(programService.create(any(), any(), any(), anyInt())).willReturn(RESULT);
+        given(programService.create(any(), any(), anyInt())).willReturn(RESULT);
 
         CreateProgramRequest request = new CreateProgramRequest(
-                1L, ProgramType.HEALTH, LocalDate.of(2026, 6, 1), 4
+                1L, LocalDate.of(2026, 6, 1), 4
         );
 
         mockMvc.perform(post("/programs")
@@ -69,11 +69,11 @@ class ProgramControllerTest {
 
     @Test
     void 활성_프로그램_중복시_409_반환() throws Exception {
-        given(programService.create(any(), any(), any(), anyInt()))
+        given(programService.create(any(), any(), anyInt()))
                 .willThrow(new IllegalStateException("이미 활성화된 Program이 있습니다."));
 
         CreateProgramRequest request = new CreateProgramRequest(
-                1L, ProgramType.DIET, LocalDate.of(2026, 6, 1), 4
+                1L, LocalDate.of(2026, 6, 1), 4
         );
 
         mockMvc.perform(post("/programs")
@@ -81,6 +81,25 @@ class ProgramControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409));
+    }
+
+    @Test
+    void 온보딩_미완료시_409와_해소경로_반환() throws Exception {
+        given(programService.create(any(), any(), anyInt()))
+                .willThrow(new OnboardingRequiredException(
+                        "프로필 정보가 없어 프로그램을 생성할 수 없습니다. 온보딩을 먼저 완료해 주세요."));
+
+        CreateProgramRequest request = new CreateProgramRequest(
+                1L, LocalDate.of(2026, 6, 1), 4
+        );
+
+        mockMvc.perform(post("/programs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"))
+                .andExpect(jsonPath("$.resolution.method").value("PATCH"))
+                .andExpect(jsonPath("$.resolution.href").value("/members/me"));
     }
 
     @Test

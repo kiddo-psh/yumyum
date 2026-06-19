@@ -1,6 +1,7 @@
 package com.ssafy.manager.program.application;
 
 import com.ssafy.manager.member.domain.Member;
+import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
 import com.ssafy.manager.program.domain.Program;
 import com.ssafy.manager.program.domain.ProgramStatus;
@@ -25,13 +26,19 @@ public class ProgramService {
     private final AiPlanClient aiPlanClient;
 
     @Transactional
-    public ProgramResult create(Long memberId, ProgramType type, LocalDate startDate, int durationWeeks) {
-        programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
-                .ifPresent(p -> { throw new IllegalStateException("이미 활성화된 Program이 있습니다."); });
-
+    public ProgramResult create(Long memberId, LocalDate startDate, int durationWeeks) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
+        if (!member.isOnboardingCompleted()) {
+            throw new OnboardingRequiredException(
+                    "프로필 정보가 없어 프로그램을 생성할 수 없습니다. 온보딩을 먼저 완료해 주세요.");
+        }
+
+        programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
+                .ifPresent(p -> { throw new IllegalStateException("이미 활성화된 Program이 있습니다."); });
+
+        ProgramType type = ProgramType.from(member.getHealthGoal());
         AiPlanClientResponse aiPlan = aiPlanClient.generate(member, type);
 
         LocalDate endDate = startDate.plusWeeks(durationWeeks);

@@ -152,3 +152,56 @@ def test_HEALTH_체중_안정시_칼로리_유지():
     data = response.json()
     assert data["new_target_kcal"] == WEEKLY_ADJUST_REQUEST["current_target_kcal"]
     assert data["adjustment"] == 0.0
+
+
+# ── /ai/checkin/biweekly ─────────────────────────────────────────────
+
+BIWEEKLY_CHECKIN_REQUEST = {
+    "program_id": 1,
+    "week_number": 2,
+    "health_goal": "DIET",
+    "sex": "FEMALE",
+    "achievement_rate": 35.7,   # 30~50% → LOW
+    "current_target_kcal": 1800.0,
+}
+
+
+def test_2주_체크인_성공시_200과_구조_반환():
+    response = client.post("/ai/checkin/biweekly", json=BIWEEKLY_CHECKIN_REQUEST)
+    assert response.status_code == 200
+    data = response.json()
+    assert "checkin_type" in data
+    assert "adjustment_options" in data
+    assert "ai_comment" in data
+    assert isinstance(data["adjustment_options"], list)
+    assert len(data["ai_comment"]) > 0
+
+
+def test_달성률_30미만이면_VERY_LOW_타입():
+    req = {**BIWEEKLY_CHECKIN_REQUEST, "achievement_rate": 20.0}
+    response = client.post("/ai/checkin/biweekly", json=req)
+    assert response.json()["checkin_type"] == "VERY_LOW"
+
+
+def test_달성률_30이상이면_LOW_타입():
+    req = {**BIWEEKLY_CHECKIN_REQUEST, "achievement_rate": 42.8}
+    response = client.post("/ai/checkin/biweekly", json=req)
+    assert response.json()["checkin_type"] == "LOW"
+
+
+def test_DIET_목표시_옵션_3개_포함():
+    response = client.post("/ai/checkin/biweekly", json=BIWEEKLY_CHECKIN_REQUEST)
+    assert len(response.json()["adjustment_options"]) == 3
+
+
+def test_HEALTH_목표시_옵션_2개_포함():
+    req = {**BIWEEKLY_CHECKIN_REQUEST, "health_goal": "HEALTH"}
+    response = client.post("/ai/checkin/biweekly", json=req)
+    assert len(response.json()["adjustment_options"]) == 2
+
+
+def test_KEEP_옵션이_항상_첫번째_포함():
+    response = client.post("/ai/checkin/biweekly", json=BIWEEKLY_CHECKIN_REQUEST)
+    options = response.json()["adjustment_options"]
+    assert options[0]["option_id"] == "KEEP"
+    assert options[0]["new_target_kcal"] == BIWEEKLY_CHECKIN_REQUEST["current_target_kcal"]

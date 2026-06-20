@@ -2,9 +2,11 @@ from fastapi import APIRouter
 from app.schemas.report import (
     WeeklyReportRequest, WeeklyReportResponse,
     WeeklyAdjustRequest, WeeklyAdjustResponse,
+    BiweeklyCheckinRequest, BiweeklyCheckinResponse,
 )
 from app.services.claude_service import call_claude
 from app.services.trend_service import calc_weight_trend, calc_calorie_adjustment
+from app.services.checkin_service import classify_checkin, calc_adjustment_options
 
 # 두 엔드포인트가 서로 다른 URL prefix(/ai/report, /ai/plan)를 사용하므로 prefix 생략
 router = APIRouter(tags=["AI Report"])
@@ -90,5 +92,32 @@ async def weekly_adjust(req: WeeklyAdjustRequest):
         new_target_kcal=new_kcal,
         adjustment=adjustment,
         reason=reason,
+        ai_comment=ai_comment,
+    )
+
+
+@router.post("/ai/checkin/biweekly", response_model=BiweeklyCheckinResponse)
+async def biweekly_checkin(req: BiweeklyCheckinRequest):
+    """
+    연동 #7 - 2주 달성률 저조 체크인
+    Spring이 2주 DailyGoal 달성률 < 50% 일 때 호출.
+    달성률을 LOW/VERY_LOW로 분류하고 목표 조정 옵션 + AI 격려 코멘트를 반환한다.
+    """
+    checkin_type = classify_checkin(req.achievement_rate)
+    options = calc_adjustment_options(req.health_goal, req.current_target_kcal, req.sex)
+
+    low_label = "매우 저조" if checkin_type == "VERY_LOW" else "저조"
+    prompt = (
+        f"[{req.week_number}주차 2주 체크인] 건강 목표: {req.health_goal}\n"
+        f"2주 달성률: {req.achievement_rate:.1f}% ({low_label})\n"
+        f"현재 목표 칼로리: {req.current_target_kcal:.0f}kcal\n"
+        "달성률이 낮은 사용자를 격려하고 실천 가능한 조언을 2~3문장으로 한국어로 제안하세요."
+    )
+
+    ai_comment = await call_claude(prompt, max_tokens=300)
+
+    return BiweeklyCheckinResponse(
+        checkin_type=checkin_type,
+        adjustment_options=options,
         ai_comment=ai_comment,
     )

@@ -44,6 +44,9 @@ async def _call_gms(prompt: str, model: str, max_tokens: int) -> str:
 
 def _mock_response(prompt: str) -> str:
     """개발용 mock 응답 (크레딧 절약). JSON 요청 여부에 따라 형식 분리."""
+    if "체크인" in prompt:
+        return "2주 동안 꾸준히 노력하셨어요! 달성률이 낮더라도 포기하지 마세요. 목표를 조금 조정하면 더 오래 지속 가능한 건강 습관을 만들 수 있습니다."
+
     if "칼로리 조정" in prompt:
         return "체중 변화 추세를 분석해 목표 칼로리를 조정했습니다. 새로운 목표에 맞춰 식단을 구성해보세요!"
 

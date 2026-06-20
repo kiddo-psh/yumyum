@@ -89,3 +89,16 @@ def test_추세_None이면_현재_칼로리_유지():
 def test_칼로리_하한선_1200_미만으로_내려가지_않음():
     new_kcal, _ = calc_calorie_adjustment(1250.0, "DIET", 0.5)
     assert new_kcal >= 1200.0
+
+
+def test_HEALTH_체중_음수_변동_과다시_칼로리_증량():
+    # 체중이 빠르게 감소하는 경우 칼로리 증량
+    new_kcal, reason = calc_calorie_adjustment(2000.0, "HEALTH", -0.8)
+    assert new_kcal == 2100.0
+
+
+def test_DISEASE_목표도_HEALTH와_동일_규칙_적용():
+    # DISEASE는 HEALTH와 동일한 else 분기 처리
+    new_kcal, reason = calc_calorie_adjustment(2000.0, "DISEASE", 0.2)
+    assert new_kcal == 2000.0
+    assert "유지" in reason

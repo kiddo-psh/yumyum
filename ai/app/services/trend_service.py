@@ -19,13 +19,16 @@ def calc_weight_trend(weights: List[float]) -> Optional[float]:
 
 
 _ADJUSTMENT_STEP = 100.0
-_MIN_KCAL = 1200.0
+_MIN_KCAL_FEMALE = 1200.0
+_MIN_KCAL_MALE   = 1500.0
+_VALID_GOALS = {"DIET", "MUSCLE", "HEALTH", "DISEASE"}
 
 
 def calc_calorie_adjustment(
     current_kcal: float,
     health_goal: str,
     weight_trend: Optional[float],
+    sex: str = "FEMALE",
 ) -> tuple[float, str]:
     """
     체중 추세와 건강 목표를 기반으로 목표 칼로리 조정량 계산.
@@ -34,9 +37,13 @@ def calc_calorie_adjustment(
         current_kcal: 현재 목표 칼로리
         health_goal: "DIET" | "MUSCLE" | "HEALTH" | "DISEASE"
         weight_trend: kg/week 변화량. None이면 데이터 부족으로 유지
+        sex: "MALE" | "FEMALE". 칼로리 하한선 기준 (남성 1500, 여성 1200). 기본값 FEMALE (안전한 하한)
     Returns:
         (new_kcal, reason)
     """
+    if health_goal not in _VALID_GOALS:
+        raise ValueError(f"지원하지 않는 health_goal: {health_goal!r}")
+
     if weight_trend is None:
         return current_kcal, "체중 데이터 부족으로 유지"
 
@@ -68,5 +75,6 @@ def calc_calorie_adjustment(
         else:
             reason = f"체중 안정({weight_trend:+.2f}kg/주) → 유지"
 
-    new_kcal = max(_MIN_KCAL, current_kcal + adjustment)
+    min_kcal = _MIN_KCAL_MALE if sex == "MALE" else _MIN_KCAL_FEMALE
+    new_kcal = max(min_kcal, current_kcal + adjustment)
     return round(new_kcal, 1), reason

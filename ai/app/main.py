@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import ai_meal, ai_plan, ai_routine, food, ai_report
+from app.routers import ai_meal, ai_plan, ai_routine, food, ai_report, ai_coach
 
 app = FastAPI(
     title="냠냠코치 AI Server",
@@ -12,6 +12,7 @@ app.include_router(ai_plan.router)
 app.include_router(ai_routine.router)
 app.include_router(food.router)
 app.include_router(ai_report.router)
+app.include_router(ai_coach.router)
 
 
 @app.get("/health", tags=["Health"])

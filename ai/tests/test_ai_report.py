@@ -52,8 +52,11 @@ def test_주간_리포트_성공시_200과_구조_반환():
 def test_달성률_평균이_올바르게_계산된다():
     response = client.post("/ai/report/weekly", json=WEEKLY_REPORT_REQUEST)
     data = response.json()
-    # 첫날: (1800+200)/2000=100%, 마지막날: (1920+200)/2000=106%
-    assert 95.0 <= data["avg_calorie_rate"] <= 115.0
+    expected = round(sum(
+        (d["kcal"] + d["calories_burned"]) / WEEKLY_REPORT_REQUEST["target_kcal"] * 100
+        for d in WEEKLY_REPORT_REQUEST["daily_nutrition"]
+    ) / len(WEEKLY_REPORT_REQUEST["daily_nutrition"]), 1)
+    assert data["avg_calorie_rate"] == expected
 
 
 def test_체중_기록_있으면_weight_trend_반환():
@@ -70,10 +73,18 @@ def test_체중_기록_없으면_weight_trend_None():
     assert response.json()["weight_trend"] is None
 
 
-def test_달성일수는_0이상_7이하():
+def test_달성일수_모든날_달성시_7():
+    # 테스트 데이터: 모든 날이 칼로리 달성률 80~120% 범위
+    # 최소: (1800+200)/2000=100%, 최대: (1920+200)/2000=106%
     response = client.post("/ai/report/weekly", json=WEEKLY_REPORT_REQUEST)
-    data = response.json()
-    assert 0 <= data["achievement_days"] <= 7
+    assert response.json()["achievement_days"] == 7
+
+
+def test_달성일수_목표치_과도시_0():
+    # target_kcal을 극단적으로 높게 설정해 모든 날 80% 미만으로 만듦
+    req = {**WEEKLY_REPORT_REQUEST, "target_kcal": 5000.0}
+    response = client.post("/ai/report/weekly", json=req)
+    assert response.json()["achievement_days"] == 0
 
 
 # ── /ai/plan/weekly-adjust ───────────────────────────────────────────
@@ -121,6 +132,22 @@ def test_남성_칼로리_하한선_1500_보장():
 
 def test_weight_trend_None이면_칼로리_유지():
     req = {**WEEKLY_ADJUST_REQUEST, "weight_trend": None}
+    response = client.post("/ai/plan/weekly-adjust", json=req)
+    data = response.json()
+    assert data["new_target_kcal"] == WEEKLY_ADJUST_REQUEST["current_target_kcal"]
+    assert data["adjustment"] == 0.0
+
+
+def test_MUSCLE_증가_속도_부족시_칼로리_증량():
+    req = {**WEEKLY_ADJUST_REQUEST, "health_goal": "MUSCLE", "weight_trend": 0.05}
+    response = client.post("/ai/plan/weekly-adjust", json=req)
+    data = response.json()
+    assert data["new_target_kcal"] == 1900.0
+    assert data["adjustment"] == 100.0
+
+
+def test_HEALTH_체중_안정시_칼로리_유지():
+    req = {**WEEKLY_ADJUST_REQUEST, "health_goal": "HEALTH", "weight_trend": 0.3}
     response = client.post("/ai/plan/weekly-adjust", json=req)
     data = response.json()
     assert data["new_target_kcal"] == WEEKLY_ADJUST_REQUEST["current_target_kcal"]

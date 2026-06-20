@@ -8,7 +8,7 @@ class ExerciseCoachItem(BaseModel):
     current_weight_kg: float
     current_sets: int
     current_reps: int
-    last_action: str        # UP | HOLD | DOWN | VOLUME_UP | DELOAD
+    last_action: Literal["UP", "HOLD", "DOWN", "VOLUME_UP", "DELOAD"]
     success_rate: float = Field(ge=0.0, le=1.0)     # 0.0~1.0 (마지막 세션 세트 성공률)
 
 

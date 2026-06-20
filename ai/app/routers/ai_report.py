@@ -6,6 +6,7 @@ from app.schemas.report import (
 from app.services.claude_service import call_claude
 from app.services.trend_service import calc_weight_trend, calc_calorie_adjustment
 
+# 두 엔드포인트가 서로 다른 URL prefix(/ai/report, /ai/plan)를 사용하므로 prefix 생략
 router = APIRouter(tags=["AI Report"])
 
 

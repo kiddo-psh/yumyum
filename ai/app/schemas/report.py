@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 
 class DailyNutrition(BaseModel):
@@ -19,7 +19,7 @@ class WeightRecord(BaseModel):
 class WeeklyReportRequest(BaseModel):
     program_id: int
     week_number: int
-    health_goal: str              # DIET | MUSCLE | HEALTH | DISEASE
+    health_goal: Literal["DIET", "MUSCLE", "HEALTH", "DISEASE"]
     target_kcal: float
     target_protein_g: float
     target_carb_g: float
@@ -41,8 +41,8 @@ class WeeklyReportResponse(BaseModel):
 class WeeklyAdjustRequest(BaseModel):
     program_id: int
     week_number: int
-    health_goal: str              # DIET | MUSCLE | HEALTH | DISEASE
-    sex: str                      # MALE | FEMALE
+    health_goal: Literal["DIET", "MUSCLE", "HEALTH", "DISEASE"]
+    sex: Literal["MALE", "FEMALE"]
     current_target_kcal: float
     weight_trend: Optional[float]
 

@@ -38,7 +38,7 @@ public class CalorieBalanceService {
 
         boolean trigger = false;
         if (currentTime.getHour() >= 17 && mealCount >= 1) {
-            double oneMealTarget = (double) targetCalories / mealCount;
+            double oneMealTarget = (double) targetCalories / (mealCount + 1);
             trigger = remainingCalories >= oneMealTarget * 0.8
                    && remainingCalories <= oneMealTarget * 1.2;
         }

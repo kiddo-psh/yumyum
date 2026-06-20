@@ -34,7 +34,7 @@ class DailyBatchJobTest {
         InOrder order = inOrder(programCompletionService, streakResetService,
                 dailyGoalCreationService, weeklyReportService);
         order.verify(programCompletionService).completeExpired(TODAY);
-        order.verify(streakResetService).resetUnachievedFor(TODAY.minusDays(1));
+        order.verify(streakResetService).resetUnachievedFor(TODAY);
         order.verify(dailyGoalCreationService).createForActivePrograms(TODAY);
         order.verify(weeklyReportService).createStubs(TODAY);
     }

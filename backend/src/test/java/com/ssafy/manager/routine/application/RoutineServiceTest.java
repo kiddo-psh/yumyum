@@ -108,12 +108,13 @@ class RoutineServiceTest {
 
     @Test
     void 운동_수정시_필드가_변경된다() {
+        Routine routine = Routine.create(MEMBER_ID, "내 루틴", 4, false);
         RoutineExercise exercise = RoutineExercise.create(1L, "상체", "벤치프레스", 4, 8, 60.0, 0);
-        given(routineRepository.existsById(1L)).willReturn(true);
+        given(routineRepository.findById(1L)).willReturn(Optional.of(routine));
         given(routineExerciseRepository.findById(1L)).willReturn(Optional.of(exercise));
 
         RoutineResult.ExerciseResult result =
-                routineService.updateExercise(1L, 1L, "인클라인 벤치프레스", 3, 10, 55.0);
+                routineService.updateExercise(MEMBER_ID, 1L, 1L, "인클라인 벤치프레스", 3, 10, 55.0);
 
         assertThat(result.exerciseName()).isEqualTo("인클라인 벤치프레스");
         assertThat(result.targetSets()).isEqualTo(3);
@@ -122,9 +123,9 @@ class RoutineServiceTest {
 
     @Test
     void 없는_루틴_수정시_예외가_발생한다() {
-        given(routineRepository.existsById(99L)).willReturn(false);
+        given(routineRepository.findById(99L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> routineService.updateExercise(99L, 1L, "벤치프레스", 4, 8, 60.0))
+        assertThatThrownBy(() -> routineService.updateExercise(MEMBER_ID, 99L, 1L, "벤치프레스", 4, 8, 60.0))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("루틴을 찾을 수 없습니다");
     }

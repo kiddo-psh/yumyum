@@ -59,12 +59,12 @@ class CalorieBalanceServiceTest {
 
     @Test
     void 트리거_조건_충족시_lastMealRecommendTrigger_true() {
-        // target=2000, intake=1333, burned=0, mealCount=3
-        // oneMealTarget = 2000/3 ≈ 667
-        // remaining = 2000 - 1333 = 667 → within 667 * [0.8, 1.2] = [533, 800] → true
+        // target=2000, intake=1500, burned=0, mealCount=3
+        // oneMealTarget = 2000/(3+1) = 500
+        // remaining = 2000 - 1500 = 500 → within 500 * [0.8, 1.2] = [400, 600] → true
         DailyGoal goal = makeDailyGoal(2000.0);
         given(dailyGoalRepository.findByMemberIdAndDate(MEMBER_ID, DATE)).willReturn(Optional.of(goal));
-        given(mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(MEMBER_ID, DATE)).willReturn(1333.0);
+        given(mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(MEMBER_ID, DATE)).willReturn(1500.0);
         given(routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(MEMBER_ID, DATE)).willReturn(0L);
         given(mealRepository.countByMemberIdAndEffectiveDate(MEMBER_ID, DATE)).willReturn(3);
 

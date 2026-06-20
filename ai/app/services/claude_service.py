@@ -47,26 +47,26 @@ def _mock_response(prompt: str) -> str:
     if "체크인" in prompt:
         return "2주 동안 꾸준히 노력하셨어요! 달성률이 낮더라도 포기하지 마세요. 목표를 조금 조정하면 더 오래 지속 가능한 건강 습관을 만들 수 있습니다."
 
-    if "운동 코칭" in prompt:
+    elif "운동 코칭" in prompt:
         return (
             "스쿼트 동작 시 무릎이 발끝을 넘지 않도록 주의하고, 코어를 단단히 잡아주세요. "
             "현재 성공률을 보면 하체 운동 집중이 필요합니다. "
             "다음 주는 무게를 유지하며 자세 완성도를 높이는 데 집중해보세요!"
         )
 
-    if "칼로리 조정" in prompt:
+    elif "칼로리 조정" in prompt:
         return "체중 변화 추세를 분석해 목표 칼로리를 조정했습니다. 새로운 목표에 맞춰 식단을 구성해보세요!"
 
-    if "리포트" in prompt or "주차" in prompt:
+    elif "리포트" in prompt or "주차" in prompt:
         return "이번 주도 꾸준히 노력하셨네요! 칼로리 달성률이 안정적으로 유지되고 있어요. 다음 주에는 단백질 섭취를 조금 더 신경 써보세요."
 
-    if "영양 균형" in prompt or "diet" in prompt.lower():
+    elif "영양 균형" in prompt or "diet" in prompt.lower():
         return "오늘 식단을 분석한 결과, 전반적으로 균형 잡힌 하루를 보내셨네요! 단백질 섭취를 조금 더 늘리면 목표 달성에 가까워질 거예요."
 
-    if "조정" in prompt or "adjust" in prompt.lower():
+    elif "조정" in prompt or "adjust" in prompt.lower():
         return "분석 결과를 반영했습니다. 꾸준한 노력이 빛을 발하고 있어요! 다음 주도 현재 강도를 유지하며 도전해보세요."
 
-    if "루틴" in prompt or "routine" in prompt.lower():
+    elif "루틴" in prompt or "routine" in prompt.lower():
         return json.dumps({
             "routine_name": "4일 상체/하체 분할 루틴",
             "days": [
@@ -106,7 +106,7 @@ def _mock_response(prompt: str) -> str:
             "ai_comment": "근육량 증가를 위해 복합운동 위주로 구성했습니다. 점진적으로 무게를 늘려보세요!"
         }, ensure_ascii=False)
 
-    if "JSON" in prompt or "json" in prompt:
+    elif "JSON" in prompt or "json" in prompt:
         return (
             '[{"name":"닭가슴살 샐러드","kcal":380,"protein_g":42,"carb_g":18,"fat_g":12,'
             '"reason":"단백질 보충에 최적"},'
@@ -115,4 +115,5 @@ def _mock_response(prompt: str) -> str:
             '{"name":"연어구이+고구마","kcal":390,"protein_g":35,"carb_g":32,"fat_g":14,'
             '"reason":"오메가3 + 복합 탄수화물"}]'
         )
-    return "오늘 하루도 균형 잡힌 식단으로 건강 목표에 가까워지고 있어요! 단백질 섭취에 특히 신경 써보세요."
+    else:
+        return "오늘 하루도 균형 잡힌 식단으로 건강 목표에 가까워지고 있어요! 단백질 섭취에 특히 신경 써보세요."

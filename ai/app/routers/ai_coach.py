@@ -15,6 +15,8 @@ async def exercise_coach(req: ExerciseCoachRequest):
     try:
         focus = pick_focus_exercise(req.exercises)
     except ValueError as e:
+        # Pydantic Field(min_length=1) catches the empty-list case first;
+        # this guard handles direct service calls bypassing HTTP validation.
         raise HTTPException(status_code=422, detail=str(e))
 
     exercise_summary = "\n".join(

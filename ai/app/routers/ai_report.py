@@ -34,8 +34,10 @@ async def weekly_report(req: WeeklyReportRequest):
 
     achievement_days = sum(1 for r in calorie_rates if 80 <= r <= 120)
 
-    weights = [w.weight_kg for w in req.weight_records]
-    weight_trend = calc_weight_trend(weights)
+    sorted_records = sorted(req.weight_records, key=lambda w: w.date)
+    weights = [w.weight_kg for w in sorted_records]
+    dates   = [w.date     for w in sorted_records]
+    weight_trend = calc_weight_trend(weights, dates)
 
     trend_text = (
         f"체중 추세: {weight_trend:+.2f}kg/주"

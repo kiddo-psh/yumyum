@@ -4,31 +4,53 @@ from app.services.trend_service import calc_weight_trend, calc_calorie_adjustmen
 
 # ── calc_weight_trend ────────────────────────────────────────────────
 
+_DATES_7 = [
+    "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04",
+    "2026-06-05", "2026-06-06", "2026-06-07",
+]
+
+
 def test_체중이_일정하면_추세_0():
-    result = calc_weight_trend([70.0, 70.0, 70.0, 70.0])
+    result = calc_weight_trend([70.0, 70.0, 70.0, 70.0], _DATES_7[:4])
     assert result == pytest.approx(0.0, abs=0.01)
 
 
 def test_체중이_꾸준히_감소하면_음수_반환():
     # 하루 -1/7 kg씩 7일간 선형 감소 → 선형 회귀 기울기 = -1.0 kg/week
     weights = [71.0, 70.857, 70.714, 70.571, 70.429, 70.286, 70.143]
-    result = calc_weight_trend(weights)
+    result = calc_weight_trend(weights, _DATES_7)
     assert result == pytest.approx(-1.0, abs=0.05)
 
 
 def test_체중이_꾸준히_증가하면_양수_반환():
     weights = [70.0, 70.1, 70.2, 70.3, 70.4, 70.5, 70.6]
-    result = calc_weight_trend(weights)
+    result = calc_weight_trend(weights, _DATES_7)
     assert result is not None
     assert result > 0
 
 
 def test_데이터_1개면_None_반환():
-    assert calc_weight_trend([70.0]) is None
+    assert calc_weight_trend([70.0], ["2026-06-01"]) is None
 
 
 def test_빈_리스트면_None_반환():
-    assert calc_weight_trend([]) is None
+    assert calc_weight_trend([], []) is None
+
+
+def test_날짜_간격이_불균일해도_올바른_추세_계산():
+    # 1일차, 4일차, 7일차 (간격 불균일): 6일에 -6/7 kg 감소 → kg/week ≈ -1.0
+    weights = [71.0, 70.571, 70.143]
+    dates   = ["2026-06-01", "2026-06-04", "2026-06-07"]
+    result = calc_weight_trend(weights, dates)
+    assert result == pytest.approx(-1.0, abs=0.05)
+
+
+def test_날짜_간격_넓은_경우_주간_변화량_정규화():
+    # 14일에 -2.0 kg 감소 → 주간 변화량 -1.0 kg/week
+    weights = [72.0, 70.0]
+    dates   = ["2026-06-01", "2026-06-15"]
+    result = calc_weight_trend(weights, dates)
+    assert result == pytest.approx(-1.0, abs=0.05)
 
 
 # ── calc_calorie_adjustment ──────────────────────────────────────────

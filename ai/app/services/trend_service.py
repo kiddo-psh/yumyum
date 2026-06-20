@@ -1,19 +1,22 @@
 import numpy as np
+from datetime import date as _date
 from typing import List, Optional
 
 
-def calc_weight_trend(weights: List[float]) -> Optional[float]:
+def calc_weight_trend(weights: List[float], dates: List[str]) -> Optional[float]:
     """
     선형 회귀로 주간 체중 변화량(kg/week) 계산.
 
     Args:
         weights: 날짜 오름차순으로 정렬된 체중 목록 (최소 2개 필요)
+        dates: weights와 1:1 대응하는 ISO 날짜 문자열 목록 ("YYYY-MM-DD")
     Returns:
         kg/week 변화량 (양수=증가, 음수=감소), 데이터 2개 미만이면 None
     """
     if len(weights) < 2:
         return None
-    x = np.arange(len(weights), dtype=float)
+    d0 = _date.fromisoformat(dates[0])
+    x = np.array([(_date.fromisoformat(d) - d0).days for d in dates], dtype=float)
     slope, _ = np.polyfit(x, weights, 1)
     return round(float(slope) * 7, 3)
 

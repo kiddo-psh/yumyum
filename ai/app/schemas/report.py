@@ -52,3 +52,27 @@ class WeeklyAdjustResponse(BaseModel):
     adjustment: float
     reason: str
     ai_comment: str
+
+
+# ── F804 2주 체크인 ──────────────────────────────────────────────────
+
+class AdjustmentOption(BaseModel):
+    option_id: Literal["KEEP", "RELAX", "CHANGE_GOAL"]
+    label: str
+    description: str
+    new_target_kcal: Optional[float] = None
+
+
+class BiweeklyCheckinRequest(BaseModel):
+    program_id: int
+    week_number: int
+    health_goal: Literal["DIET", "MUSCLE", "HEALTH", "DISEASE"]
+    sex: Literal["MALE", "FEMALE"]
+    achievement_rate: float        # 0.0~100.0 (2주 DailyGoal 달성 일수 / 14 × 100)
+    current_target_kcal: float
+
+
+class BiweeklyCheckinResponse(BaseModel):
+    checkin_type: Literal["LOW", "VERY_LOW"]
+    adjustment_options: List[AdjustmentOption]
+    ai_comment: str

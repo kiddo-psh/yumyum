@@ -49,7 +49,7 @@ def test_DOWN_여럿이면_성공률_낮은쪽_선택():
     assert pick_focus_exercise(exercises) == "벤치프레스"
 
 
-def test_DELOAD가_DOWN보다_우선():
+def test_DOWN과_DELOAD_동시_존재시_성공률_낮은쪽_선택():
     exercises = [
         _item("스쿼트",     "DOWN",   0.4),
         _item("벤치프레스", "DELOAD", 0.6),

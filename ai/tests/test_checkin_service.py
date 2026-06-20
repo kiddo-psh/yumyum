@@ -33,11 +33,23 @@ def test_DISEASE_옵션_2개_반환():
     assert len(options) == 2
 
 
-def test_KEEP_옵션이_항상_첫번째이고_칼로리_유지():
+def test_KEEP_옵션이_항상_첫번째():
     for goal in ["DIET", "MUSCLE", "HEALTH", "DISEASE"]:
         options = calc_adjustment_options(goal, 2000.0, "FEMALE")
         assert options[0].option_id == "KEEP"
+
+
+def test_KEEP_옵션_new_target_kcal_현재_칼로리_유지():
+    for goal in ["DIET", "MUSCLE", "HEALTH", "DISEASE"]:
+        options = calc_adjustment_options(goal, 2000.0, "FEMALE")
         assert options[0].new_target_kcal == 2000.0
+
+
+def test_달성률_50이상이면_ValueError():
+    with pytest.raises(ValueError):
+        classify_checkin(50.0)
+    with pytest.raises(ValueError):
+        classify_checkin(100.0)
 
 
 def test_DIET_RELAX_옵션은_칼로리_100_증량():

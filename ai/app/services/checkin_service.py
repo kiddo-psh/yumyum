@@ -9,7 +9,10 @@ def classify_checkin(achievement_rate: float) -> str:
     """
     2주 달성률 → 체크인 타입.
     < 30% → VERY_LOW, 30~50% → LOW
+    Spring이 50% 미만일 때만 호출하지만 방어적으로 검증한다.
     """
+    if achievement_rate >= 50.0:
+        raise ValueError(f"체크인은 달성률 50% 미만일 때만 호출됩니다: {achievement_rate}")
     if achievement_rate < 30.0:
         return "VERY_LOW"
     return "LOW"

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardView from '@/views/DashboardView.vue';
+import HomeView from '@/views/HomeView.vue';
 import MealActionView from '@/views/MealActionView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
@@ -14,10 +15,19 @@ const routes = [
       {
         path: '',
         name: 'home',
+        component: HomeView,
+        meta: {
+          title: '홈',
+          navLabel: 'Home',
+        },
+      },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
         component: DashboardView,
         meta: {
           title: '대시보드',
-          navLabel: 'Home',
+          navLabel: 'Dashboard',
         },
       },
       {

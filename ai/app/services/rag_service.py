@@ -6,6 +6,7 @@ from chromadb.utils import embedding_functions
 
 _collection = None
 
+# 현재 25개 수록 (데모 수준). 운영 전 식품안전처 DB에서 300개 이상으로 확장 필요.
 _KB_PATH = Path(__file__).parent.parent / "data" / "nutrition_kb.json"
 _CHROMA_PATH = str(Path(__file__).parent.parent.parent / "chroma_db")
 _MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"

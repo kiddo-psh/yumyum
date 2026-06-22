@@ -67,5 +67,5 @@ def test_search_n_results_capped_by_collection_count():
     assert len(result) == 1
     # n_results=min(10, 1)=1 로 query가 호출됐는지 확인
     call_kwargs = mock_col.query.call_args
-    passed_n = call_kwargs.kwargs.get("n_results") or call_kwargs.args[1]
+    passed_n = call_kwargs.kwargs["n_results"]
     assert passed_n == 1

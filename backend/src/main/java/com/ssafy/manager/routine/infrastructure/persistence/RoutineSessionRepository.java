@@ -13,4 +13,9 @@ public interface RoutineSessionRepository extends JpaRepository<RoutineSession, 
 
     @Query("SELECT COALESCE(SUM(rs.caloriesBurned), 0) FROM RoutineSession rs WHERE rs.memberId = :memberId AND rs.sessionDate = :date")
     long sumCaloriesBurnedByMemberIdAndDate(@Param("memberId") Long memberId, @Param("date") LocalDate date);
+
+    @Query("SELECT COUNT(DISTINCT rs.sessionDate) FROM RoutineSession rs WHERE rs.memberId = :memberId AND rs.sessionDate BETWEEN :from AND :to")
+    int countDistinctSessionDatesByMemberIdAndDateBetween(@Param("memberId") Long memberId,
+                                                          @Param("from") LocalDate from,
+                                                          @Param("to") LocalDate to);
 }

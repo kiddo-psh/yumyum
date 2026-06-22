@@ -16,10 +16,12 @@ function resolveUrl(path) {
     return path;
   }
 
-  const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+  const base = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
 
-  return new URL(normalizedPath, baseUrl).toString();
+  // URL constructor requires an absolute base; resolve relative base against current location
+  const absoluteBase = new URL(base, window.location.href).href;
+  return new URL(normalizedPath, absoluteBase).href;
 }
 
 function appendQueryParams(url, params) {

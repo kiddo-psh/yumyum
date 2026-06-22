@@ -75,7 +75,7 @@
     </div>
 
     <!-- Today's Calories Card -->
-    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
+    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl px-8 pt-14 pb-8 neo-brutal-card-hover">
       <div class="flex justify-between items-start mb-8">
         <div>
           <p class="text-label-lg text-on-surface-variant uppercase tracking-widest">오늘의 칼로리</p>

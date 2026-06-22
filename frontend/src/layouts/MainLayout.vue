@@ -64,7 +64,7 @@ const navItems = [
   { to: '/',        label: '홈',        icon: 'home' },
   { to: '/log',     label: '식단 기록',  icon: 'restaurant_menu' },
   { to: '/routine', label: '운동 루틴',  icon: 'fitness_center' },
-  { to: '/report',  label: '대시보드',   icon: 'dashboard' },
+  { to: '/dashboard', label: '대시보드',  icon: 'dashboard' },
   { to: '/my',      label: '마이페이지', icon: 'person' },
 ]
 </script>

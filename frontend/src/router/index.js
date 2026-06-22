@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import HomeView from '@/views/HomeView.vue';
+import LogView from '@/views/LogView.vue';
 import MealActionView from '@/views/MealActionView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
@@ -33,12 +34,10 @@ const routes = [
       {
         path: 'log',
         name: 'log',
-        component: PlaceholderView,
+        component: LogView,
         meta: {
           title: '식단 기록',
           navLabel: 'Log',
-          heading: '식단 기록',
-          description: '오늘 등록한 Meal 목록과 추가 액션을 확인합니다.',
         },
       },
       {

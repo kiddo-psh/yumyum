@@ -2,14 +2,14 @@
   <section class="meal-action">
     <header class="meal-action__header">
       <RouterLink
-        to="/"
+        :to="mealId ? '/log' : '/'"
         class="back-link"
       >
-        대시보드로
+        {{ mealId ? '식단 기록으로' : '대시보드로' }}
       </RouterLink>
-      <h1>{{ isManualMode ? '직접 입력' : '음식 검색' }}</h1>
+      <h1>{{ mealId ? '음식 추가' : isManualMode ? '직접 입력' : '음식 검색' }}</h1>
       <p>
-        {{ isManualMode ? 'Food를 검색해 MealRequest 형식으로 식단을 저장합니다.' : 'GET /foods?query=... 형식으로 음식 마스터 데이터를 조회합니다.' }}
+        {{ mealId ? '기존 끼니에 음식을 추가합니다.' : isManualMode ? 'Food를 검색해 MealRequest 형식으로 식단을 저장합니다.' : 'GET /foods?query=... 형식으로 음식 마스터 데이터를 조회합니다.' }}
       </p>
     </header>
 
@@ -103,11 +103,10 @@
             >
           </label>
           <label>
-            Food ID
+            Food Code
             <input
-              v-model="recordForm.foodId"
-              type="number"
-              min="1"
+              v-model="recordForm.foodCode"
+              type="text"
               required
             >
           </label>
@@ -151,13 +150,15 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
-import { recordMeal, searchFoods } from '@/api/dashboard';
+import { addMealItem, recordMeal, searchFoods } from '@/api/dashboard';
 
 const route = useRoute();
+const router = useRouter();
 const todayDate = formatDate(new Date());
 const isManualMode = computed(() => route.meta.mode === 'manual');
+const mealId = computed(() => route.query.mealId ? Number(route.query.mealId) : null);
 const query = ref(typeof route.query.q === 'string' ? route.query.q : '');
 const foods = ref([]);
 const selectedFood = ref(null);
@@ -175,7 +176,7 @@ const recordState = reactive({
 const recordForm = reactive({
   type: 'DINNER',
   date: todayDate,
-  foodId: '',
+  foodCode: '',
   amountGrams: 100,
 });
 
@@ -184,7 +185,7 @@ const requestPreview = computed(() => JSON.stringify({
   date: recordForm.date,
   items: [
     {
-      foodId: Number(recordForm.foodId || 0),
+      foodCode: recordForm.foodCode || '',
       amountGrams: Number(recordForm.amountGrams || 0),
     },
   ],
@@ -198,7 +199,7 @@ onMounted(() => {
 
 watch(selectedFood, (food) => {
   if (food) {
-    recordForm.foodId = String(food.id);
+    recordForm.foodCode = food.foodCode;
   }
 });
 
@@ -224,8 +225,13 @@ async function handleRecord() {
   recordState.success = false;
 
   try {
-    await recordMeal(recordForm);
-    recordState.success = true;
+    if (mealId.value) {
+      await addMealItem(mealId.value, { foodCode: recordForm.foodCode, amountGrams: recordForm.amountGrams });
+      router.push('/log');
+    } else {
+      await recordMeal(recordForm);
+      recordState.success = true;
+    }
   } catch (error) {
     recordState.error = formatApiError(error, 'Meal 저장 API 호출에 실패했습니다.');
   } finally {

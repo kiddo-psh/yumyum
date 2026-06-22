@@ -1,6 +1,9 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.nutrition.application.MealItemCommand;
 import com.ssafy.manager.nutrition.application.MealService;
+import com.ssafy.manager.nutrition.domain.Meal;
+import com.ssafy.manager.nutrition.presentation.dto.MealItemRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +24,37 @@ public class MealController {
     private final MealService mealService;
 
     @PostMapping
-    public ResponseEntity<Void> record(
+    public ResponseEntity<MealResponse> record(
             @AuthenticationPrincipal Long memberId,
             @RequestBody MealRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        Long mealId = mealService.record(request.toCommand(memberId), LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        Meal meal = mealService.record(request.toCommand(memberId, request.type()), now);
         return ResponseEntity.created(
-                uriBuilder.path("/meals/{id}").buildAndExpand(mealId).toUri()
-        ).build();
+                uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
+        ).body(MealResponse.from(meal));
+    }
+
+    @PostMapping("/{id}/items")
+    public ResponseEntity<MealResponse> addItem(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long id,
+            @RequestBody MealItemRequest request
+    ) {
+        return ResponseEntity.ok(
+                MealResponse.from(mealService.addItem(id, memberId,
+                        new MealItemCommand(request.foodCode(), request.amountGrams())))
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long id
+    ) {
+        mealService.delete(id, memberId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

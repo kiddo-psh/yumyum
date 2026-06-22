@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,8 +48,13 @@ class MealControllerTest {
             new UsernamePasswordAuthenticationToken(MEMBER_ID, null, List.of());
 
     @Test
-    void 식사를_기록하면_201과_Location_헤더를_반환한다() throws Exception {
-        given(mealService.record(any(), any())).willReturn(1L);
+    void 식사를_기록하면_201과_Location_헤더와_응답_바디를_반환한다() throws Exception {
+        Meal meal = mock(Meal.class);
+        given(meal.getId()).willReturn(1L);
+        given(meal.getType()).willReturn(MealType.LUNCH);
+        given(meal.getDate()).willReturn(LocalDate.of(2026, 6, 1));
+        given(meal.getItems()).willReturn(List.of());
+        given(mealService.record(any(), any())).willReturn(meal);
 
         MealRequest request = new MealRequest(
                 MealType.LUNCH,
@@ -62,7 +68,9 @@ class MealControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "http://localhost/meals/1"));
+                .andExpect(header().string("Location", "http://localhost/meals/1"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.type").value("LUNCH"));
     }
 
     @Test

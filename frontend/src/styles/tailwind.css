@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+  }
+}
+
+@layer utilities {
+  .neo-brutal-border {
+    border: 3px solid #2D2D2D;
+  }
+  .neo-brutal-shadow {
+    box-shadow: 6px 6px 0px 0px #2D2D2D;
+  }
+  .neo-brutal-card-hover {
+    transition: transform 300ms, box-shadow 300ms;
+  }
+  .neo-brutal-card-hover:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 10px 10px 0px 0px #2D2D2D;
+  }
+  .progress-circle-svg {
+    transform: rotate(-90deg);
+  }
+}

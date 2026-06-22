@@ -1,0 +1,56 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#FF8C42',
+        'on-primary': '#ffffff',
+        protein: '#6B9BD1',
+        carbs: '#F4C95D',
+        fat: '#E8806B',
+        success: '#4CAF50',
+        warning: '#FFA726',
+        danger: '#EF5350',
+        background: '#FFFFFF',
+        'sub-background': '#FAFAFA',
+        surface: '#F5F5F5',
+        'on-background': '#2D2D2D',
+        'on-surface-variant': '#8A8A8A',
+        outline: '#E0E0E0',
+        'nyam-mint': '#A8E6CF',
+        'surface-container': '#F5F5F5',
+        'surface-container-high': '#F0F0F0',
+        'surface-container-low': '#FAFAFA',
+      },
+      borderRadius: {
+        DEFAULT: '1rem',
+        lg: '2rem',
+        xl: '3rem',
+        full: '9999px',
+      },
+      spacing: {
+        base: '8px',
+        'sidebar-width': '280px',
+        'max-width': '1440px',
+        margin: '40px',
+        gutter: '24px',
+      },
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+      },
+      fontSize: {
+        'headline-md': ['22px', { lineHeight: '1.4', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '500' }],
+        'label-lg': ['14px', { lineHeight: '1.2', letterSpacing: '0.05em', fontWeight: '700' }],
+        'headline-lg': ['28px', { lineHeight: '1.3', fontWeight: '700' }],
+        'body-md': ['16px', { lineHeight: '1.6', fontWeight: '500' }],
+        'numeral-xl': ['64px', { lineHeight: '1', fontWeight: '800' }],
+        'display-md': ['36px', { lineHeight: '1.2', fontWeight: '800' }],
+        'display-lg': ['48px', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '800' }],
+      },
+    },
+  },
+  plugins: [],
+}

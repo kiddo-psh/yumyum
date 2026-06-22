@@ -12,8 +12,8 @@ export function listMeals(date) {
   return apiClient.get('/meals', { params: { date } });
 }
 
-export function getWeeklyCalendar() {
-  return apiClient.get('/growth/weekly-calendar');
+export function getWeeklyCalendar(weekOffset = 0) {
+  return apiClient.get('/growth/weekly-calendar', { params: { weekOffset } });
 }
 
 export function getDailyProgress() {
@@ -22,6 +22,14 @@ export function getDailyProgress() {
 
 export function getLastMealRecommendation() {
   return apiClient.post('/meals/last-recommend');
+}
+
+export function getWeightHistory() {
+  return apiClient.get('/weights');
+}
+
+export function sendChatMessage(message) {
+  return apiClient.post('/ai/chat', { message });
 }
 
 export function searchFoods(query) {

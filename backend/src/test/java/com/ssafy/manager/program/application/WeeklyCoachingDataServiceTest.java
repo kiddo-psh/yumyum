@@ -46,7 +46,8 @@ class WeeklyCoachingDataServiceTest {
         given(programRepository.findById(PROGRAM_ID)).willReturn(Optional.of(program));
         given(mealItemRepository.findDailyNutritionByMemberIdAndDateBetween(
                 eq(1L), eq(START), eq(START.plusDays(6)))).willReturn(List.of());
-        given(routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(eq(1L), any())).willReturn(0L);
+        given(routineSessionRepository.findDailyCaloriesBurnedByMemberIdAndDateBetween(
+                eq(1L), eq(START), eq(START.plusDays(6)))).willReturn(List.of());
         given(routineSessionRepository.findByMemberIdAndSessionDateBetween(
                 eq(1L), eq(START), eq(START.plusDays(6)))).willReturn(List.of());
         given(weightRepository.findByMemberIdAndRecordedDateBetween(
@@ -69,7 +70,7 @@ class WeeklyCoachingDataServiceTest {
         given(programRepository.findById(PROGRAM_ID)).willReturn(Optional.of(program));
         given(mealItemRepository.findDailyNutritionByMemberIdAndDateBetween(any(), any(), any()))
                 .willReturn(List.of());
-        given(routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(any(), any())).willReturn(0L);
+        given(routineSessionRepository.findDailyCaloriesBurnedByMemberIdAndDateBetween(any(), any(), any())).willReturn(List.of());
         given(routineSessionRepository.findByMemberIdAndSessionDateBetween(any(), any(), any()))
                 .willReturn(List.of());
         given(weightRepository.findByMemberIdAndRecordedDateBetween(any(), any(), any()))
@@ -89,7 +90,7 @@ class WeeklyCoachingDataServiceTest {
         given(programRepository.findById(PROGRAM_ID)).willReturn(Optional.of(program));
         given(mealItemRepository.findDailyNutritionByMemberIdAndDateBetween(any(), any(), any()))
                 .willReturn(List.of());
-        given(routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(any(), any())).willReturn(0L);
+        given(routineSessionRepository.findDailyCaloriesBurnedByMemberIdAndDateBetween(any(), any(), any())).willReturn(List.of());
         given(routineSessionRepository.findByMemberIdAndSessionDateBetween(any(), any(), any()))
                 .willReturn(List.of());
         given(weightRepository.findByMemberIdAndRecordedDateBetween(any(), any(), any()))
@@ -109,7 +110,7 @@ class WeeklyCoachingDataServiceTest {
         given(programRepository.findById(PROGRAM_ID)).willReturn(Optional.of(program));
         given(mealItemRepository.findDailyNutritionByMemberIdAndDateBetween(any(), any(), any()))
                 .willReturn(List.of());
-        given(routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(any(), any())).willReturn(0L);
+        given(routineSessionRepository.findDailyCaloriesBurnedByMemberIdAndDateBetween(any(), any(), any())).willReturn(List.of());
         given(routineSessionRepository.findByMemberIdAndSessionDateBetween(any(), any(), any()))
                 .willReturn(List.of());
         given(weightRepository.findByMemberIdAndRecordedDateBetween(any(), any(), any()))

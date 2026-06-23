@@ -74,18 +74,24 @@ public class WeeklyCoachingDataService {
                         .collect(Collectors.toMap(MealItemRepository.DailyNutritionSummary::getDate,
                                 s -> s));
 
+        Map<LocalDate, Long> burnByDate =
+                routineSessionRepository.findDailyCaloriesBurnedByMemberIdAndDateBetween(memberId, weekStart, weekEnd)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                RoutineSessionRepository.DailyCaloriesSummary::getSessionDate,
+                                RoutineSessionRepository.DailyCaloriesSummary::getTotalCalories));
+
         return weekStart.datesUntil(weekEnd.plusDays(1))
                 .map(date -> {
                     var n = nutritionByDate.get(date);
-                    double burned = routineSessionRepository
-                            .sumCaloriesBurnedByMemberIdAndDate(memberId, date);
+                    long burned = burnByDate.getOrDefault(date, 0L);
                     return new AiCoachingClientRequest.DailyNutritionRecord(
                             date.toString(),
                             n != null ? n.getCalories() : 0.0,
                             n != null ? n.getProtein()  : 0.0,
                             n != null ? n.getCarbs()    : 0.0,
                             n != null ? n.getFat()      : 0.0,
-                            burned
+                            (double) burned
                     );
                 })
                 .toList();

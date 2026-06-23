@@ -39,6 +39,7 @@ class WeeklyReportControllerTest {
     @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 
     private static final Long MEMBER_ID = 1L;
+    private static final Long PROGRAM_ID = 10L;
     private static final UsernamePasswordAuthenticationToken AUTH =
             new UsernamePasswordAuthenticationToken(MEMBER_ID, null, List.of());
 
@@ -87,6 +88,15 @@ class WeeklyReportControllerTest {
                 .willReturn(Optional.empty());
 
         mockMvc.perform(get("/programs/{programId}/weekly-reports/1", programId)
+                        .with(authentication(AUTH)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로그램이_존재하지_않으면_404를_반환한다() throws Exception {
+        given(programRepository.findById(PROGRAM_ID)).willReturn(Optional.empty());
+
+        mockMvc.perform(get("/programs/{programId}/weekly-reports/{weekNumber}", PROGRAM_ID, 1)
                         .with(authentication(AUTH)))
                 .andExpect(status().isNotFound());
     }

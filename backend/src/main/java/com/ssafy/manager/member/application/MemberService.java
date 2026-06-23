@@ -4,6 +4,7 @@ import com.ssafy.manager.member.application.dto.OnboardingResult;
 import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.NoSuchElementException;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public OnboardingResult getMember(Long memberId) {
@@ -35,6 +37,7 @@ public class MemberService {
                 command.activityLevel(),
                 command.healthGoal()
         );
+        eventPublisher.publishEvent(new MemberOnboardedEvent(member.getId()));
         return OnboardingResult.from(member);
     }
 }

@@ -11,18 +11,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
     @Mock MemberRepository memberRepository;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks MemberService memberService;
 
@@ -48,10 +54,23 @@ class MemberServiceTest {
     }
 
     @Test
+    void 온보딩_완료시_MemberOnboardedEvent가_발행된다() {
+        Member member = new Member("kakao", "12345", "test@kakao.com");
+        ReflectionTestUtils.setField(member, "id", MEMBER_ID);
+        given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
+
+        memberService.completeOnboarding(MEMBER_ID, COMMAND);
+
+        verify(eventPublisher).publishEvent(new MemberOnboardedEvent(MEMBER_ID));
+    }
+
+    @Test
     void 존재하지_않는_회원이면_예외가_발생한다() {
         given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> memberService.completeOnboarding(MEMBER_ID, COMMAND))
                 .isInstanceOf(NoSuchElementException.class);
+
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }

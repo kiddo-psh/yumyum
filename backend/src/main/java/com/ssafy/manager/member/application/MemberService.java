@@ -15,6 +15,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional(readOnly = true)
+    public OnboardingResult getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
+        return OnboardingResult.from(member);
+    }
+
     @Transactional
     public OnboardingResult completeOnboarding(Long memberId, OnboardingCommand command) {
         Member member = memberRepository.findById(memberId)

@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +79,28 @@ class MemberControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(BODY))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 내_프로필을_조회하면_200과_프로필_반환() throws Exception {
+        OnboardingResult result = new OnboardingResult(
+                MEMBER_ID, true, Sex.MALE, 1990, 175.0, 80.0,
+                ActivityLevel.MODERATELY_ACTIVE, HealthGoal.DIET
+        );
+        given(memberService.getMember(MEMBER_ID)).willReturn(result);
+
+        mockMvc.perform(get("/members/me")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.memberId").value(MEMBER_ID))
+                .andExpect(jsonPath("$.sex").value("MALE"))
+                .andExpect(jsonPath("$.healthGoal").value("DIET"));
+    }
+
+    @Test
+    void 인증_없이_프로필_조회하면_401_반환() throws Exception {
+        mockMvc.perform(get("/members/me"))
                 .andExpect(status().isUnauthorized());
     }
 }

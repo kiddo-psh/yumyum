@@ -56,6 +56,7 @@ class RoutineSessionServiceTest {
     @Test
     void 세션_기록시_RoutineSession과_SessionSet이_저장된다() {
         given(routineRepository.existsById(1L)).willReturn(true);
+        given(memberStatsRepository.findByMemberId(2L)).willReturn(Optional.of(MemberStats.newFor(2L)));
         List<SessionSetInput> inputs = List.of(
                 new SessionSetInput(10L, "벤치프레스", 1, 8, 60.0, true)
         );

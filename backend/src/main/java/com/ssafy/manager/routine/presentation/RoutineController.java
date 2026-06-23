@@ -26,6 +26,15 @@ public class RoutineController {
 
     private final RoutineService routineService;
 
+    @GetMapping
+    public ResponseEntity<List<RoutineSummaryResponse>> getMyRoutines(
+            @AuthenticationPrincipal Long memberId) {
+        List<RoutineSummaryResponse> body = routineService.getMyRoutines(memberId).stream()
+                .map(RoutineSummaryResponse::from)
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
     @GetMapping("/split-options")
     public ResponseEntity<List<SplitOptionResponse>> getSplitOptions(@RequestParam int daysPerWeek) {
         List<SplitOptionResponse> body = SplitType.findByDaysPerWeek(daysPerWeek).stream()
@@ -38,7 +47,8 @@ public class RoutineController {
     public ResponseEntity<RoutineResponse> createAi(
             @AuthenticationPrincipal Long memberId,
             @RequestBody CreateAiRoutineRequest request) {
-        RoutineResult result = routineService.createAi(memberId, request.daysPerWeek(), request.splitType());
+        RoutineResult result = routineService.createAi(
+                memberId, request.hasExistingRoutine(), request.daysPerWeek(), request.splitType());
         return ResponseEntity.status(HttpStatus.CREATED).body(RoutineResponse.from(result));
     }
 

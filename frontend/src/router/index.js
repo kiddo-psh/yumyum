@@ -7,6 +7,8 @@ import LogView from '@/views/LogView.vue';
 import MealActionView from '@/views/MealActionView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
+import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
+import RoutineView from '@/views/RoutineView.vue';
 
 const routes = [
   {
@@ -66,6 +68,23 @@ const routes = [
         meta: {
           title: '직접 입력',
           mode: 'manual',
+        },
+      },
+      {
+        path: 'routine',
+        name: 'routine',
+        component: RoutineView,
+        meta: {
+          title: '운동 루틴',
+          navLabel: 'Routine',
+        },
+      },
+      {
+        path: 'routine/onboarding',
+        name: 'routine-onboarding',
+        component: RoutineOnboardingView,
+        meta: {
+          title: '운동 루틴 만들기',
         },
       },
       {

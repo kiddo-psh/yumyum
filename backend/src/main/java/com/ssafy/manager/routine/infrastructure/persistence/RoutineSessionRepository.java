@@ -18,4 +18,6 @@ public interface RoutineSessionRepository extends JpaRepository<RoutineSession, 
     int countDistinctSessionDatesByMemberIdAndDateBetween(@Param("memberId") Long memberId,
                                                           @Param("from") LocalDate from,
                                                           @Param("to") LocalDate to);
+
+    List<RoutineSession> findByMemberIdAndSessionDateBetween(Long memberId, LocalDate from, LocalDate to);
 }

@@ -88,6 +88,26 @@ public class MealService {
         mealRepository.delete(meal);
     }
 
+    @Transactional
+    public Meal recordFromPhoto(PhotoMealCommand command, LocalDateTime recordedAt) {
+        LocalDate effectiveDate = effectiveDateOf(recordedAt);
+        MealType resolvedType = command.mealType() != null ? command.mealType() : inferMealType(recordedAt);
+
+        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate);
+        for (PhotoMealItemCommand item : command.items()) {
+            meal.addAiItem(item.name(), item.estimatedGrams(),
+                    item.kcal(), item.proteinG(), item.carbG(), item.fatG());
+        }
+        mealRepository.save(meal);
+
+        double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(
+                command.memberId(), effectiveDate);
+        dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
+                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+
+        return meal;
+    }
+
     @Transactional(readOnly = true)
     public List<Meal> listByDate(Long memberId, LocalDate date) {
         return mealRepository.findAllByMemberIdAndDate(memberId, date);

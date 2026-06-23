@@ -6,6 +6,7 @@ import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.presentation.dto.MealItemRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
+import com.ssafy.manager.nutrition.presentation.dto.PhotoMealRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,19 @@ import java.util.List;
 public class MealController {
 
     private final MealService mealService;
+
+    @PostMapping("/photo")
+    public ResponseEntity<MealResponse> recordFromPhoto(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotoMealRequest request,
+            UriComponentsBuilder uriBuilder
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+        Meal meal = mealService.recordFromPhoto(request.toCommand(memberId), now);
+        return ResponseEntity.created(
+                uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
+        ).body(MealResponse.from(meal));
+    }
 
     @PostMapping
     public ResponseEntity<MealResponse> record(

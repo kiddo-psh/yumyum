@@ -1,11 +1,15 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.nutrition.application.AiMealPhotoAnalyzeResult;
 import com.ssafy.manager.nutrition.application.AiMealService;
 import com.ssafy.manager.nutrition.presentation.dto.LastMealRecommendResponse;
+import com.ssafy.manager.nutrition.presentation.dto.PhotoAnalysisRequest;
+import com.ssafy.manager.nutrition.presentation.dto.PhotoAnalysisResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +27,15 @@ public class AiMealController {
             @AuthenticationPrincipal Long memberId
     ) {
         return ResponseEntity.ok(LastMealRecommendResponse.from(aiMealService.lastRecommend(memberId, LocalDate.now())));
+    }
+
+    @PostMapping("/photo/analyze")
+    public ResponseEntity<PhotoAnalysisResponse> analyzePhoto(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotoAnalysisRequest request
+    ) {
+        AiMealPhotoAnalyzeResult result = aiMealService.analyzePhoto(
+                request.imageBase64(), request.mediaType(), request.mealType());
+        return ResponseEntity.ok(PhotoAnalysisResponse.from(result));
     }
 }

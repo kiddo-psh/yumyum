@@ -1,6 +1,5 @@
 package com.ssafy.manager.nutrition.presentation;
 
-import com.ssafy.manager.nutrition.application.AiMealPhotoAnalyzeResult;
 import com.ssafy.manager.nutrition.application.AiMealService;
 import com.ssafy.manager.nutrition.presentation.dto.LastMealRecommendResponse;
 import com.ssafy.manager.nutrition.presentation.dto.PhotoAnalysisRequest;
@@ -34,8 +33,7 @@ public class AiMealController {
             @AuthenticationPrincipal Long memberId,
             @RequestBody PhotoAnalysisRequest request
     ) {
-        AiMealPhotoAnalyzeResult result = aiMealService.analyzePhoto(
-                request.imageBase64(), request.mediaType(), request.mealType());
-        return ResponseEntity.ok(PhotoAnalysisResponse.from(result));
+        return ResponseEntity.ok(PhotoAnalysisResponse.from(
+                aiMealService.analyzePhoto(request.imageBase64(), request.mediaType(), request.mealType())));
     }
 }

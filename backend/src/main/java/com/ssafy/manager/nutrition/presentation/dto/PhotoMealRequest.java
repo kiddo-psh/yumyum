@@ -20,7 +20,7 @@ public record PhotoMealRequest(
     ) {}
 
     public PhotoMealCommand toCommand(Long memberId) {
-        List<PhotoMealItemCommand> cmds = items.stream()
+        List<PhotoMealItemCommand> cmds = items == null ? List.of() : items.stream()
                 .map(i -> new PhotoMealItemCommand(
                         i.name(), i.estimatedGrams(), i.kcal(),
                         i.proteinG(), i.carbG(), i.fatG()))

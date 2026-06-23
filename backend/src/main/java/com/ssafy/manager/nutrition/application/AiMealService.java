@@ -3,6 +3,8 @@ package com.ssafy.manager.nutrition.application;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealClient;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientRequest;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientResponse;
+import com.ssafy.manager.nutrition.infrastructure.client.AiMealPhotoClientRequest;
+import com.ssafy.manager.nutrition.infrastructure.client.AiMealPhotoClientResponse;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.program.domain.Program;
@@ -56,5 +58,17 @@ public class AiMealService {
                         r.name(), r.kcal(), r.proteinG(), r.carbG(), r.fatG(), r.reason()))
                 .toList();
         return new AiMealLastRecommendResult(recs, resp.priorityNutrient(), resp.aiComment());
+    }
+
+    public AiMealPhotoAnalyzeResult analyzePhoto(String imageBase64, String mediaType, String mealType) {
+        AiMealPhotoClientRequest request = new AiMealPhotoClientRequest(imageBase64, mediaType, mealType);
+        AiMealPhotoClientResponse response = aiMealClient.analyzePhoto(request);
+
+        List<AiMealPhotoAnalyzeResult.DetectedItemResult> items = response.detectedItems().stream()
+                .map(d -> new AiMealPhotoAnalyzeResult.DetectedItemResult(
+                        d.name(), d.estimatedGrams(), d.kcal(), d.proteinG(), d.carbG(), d.fatG()))
+                .toList();
+
+        return new AiMealPhotoAnalyzeResult(items, response.totalKcal(), response.aiComment());
     }
 }

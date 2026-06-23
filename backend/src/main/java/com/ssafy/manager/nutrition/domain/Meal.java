@@ -46,4 +46,13 @@ public class Meal {
         items.add(item);
         return item;
     }
+
+    public MealItem addAiItem(String name, double amountGrams,
+                               double kcal, double protein,
+                               double carb, double fat) {
+        MealItem item = MealItem.fromAiEstimate(name, amountGrams, kcal, protein, carb, fat);
+        item.bindTo(this);
+        items.add(item);
+        return item;
+    }
 }

@@ -117,3 +117,86 @@ def _mock_response(prompt: str) -> str:
         )
     else:
         return "오늘 하루도 균형 잡힌 식단으로 건강 목표에 가까워지고 있어요! 단백질 섭취에 특히 신경 써보세요."
+
+
+async def call_claude_vision(
+    image_base64: str,
+    media_type: str,
+    prompt: str,
+    model: str | None = None,
+    max_tokens: int = 800,
+) -> str:
+    """
+    Claude Vision API 호출. 이미지 + 텍스트 프롬프트를 받아 분석 결과를 문자열로 반환.
+    dev 환경에서는 mock JSON 응답 반환.
+    """
+    if settings.env == "dev":
+        return _mock_vision_response()
+
+    return await _call_gms_vision(
+        image_base64=image_base64,
+        media_type=media_type,
+        prompt=prompt,
+        model=model or "claude-opus-4-5-20251101",
+        max_tokens=max_tokens,
+    )
+
+
+async def _call_gms_vision(
+    image_base64: str, media_type: str, prompt: str, model: str, max_tokens: int
+) -> str:
+    url = f"{settings.gms_base_url}/v1/messages"
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": settings.gms_api_key,
+        "anthropic-version": settings.anthropic_version,
+    }
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": media_type,
+                        "data": image_base64,
+                    },
+                },
+                {"type": "text", "text": prompt},
+            ],
+        }],
+    }
+
+    async with httpx.AsyncClient(timeout=25) as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+
+    data = response.json()
+    return data["content"][0]["text"]
+
+
+def _mock_vision_response() -> str:
+    return json.dumps({
+        "detected_items": [
+            {
+                "name": "닭가슴살",
+                "estimated_grams": 150.0,
+                "kcal": 165.0,
+                "protein_g": 31.0,
+                "carb_g": 0.0,
+                "fat_g": 3.6,
+            },
+            {
+                "name": "현미밥",
+                "estimated_grams": 200.0,
+                "kcal": 278.0,
+                "protein_g": 5.6,
+                "carb_g": 58.0,
+                "fat_g": 1.6,
+            },
+        ],
+        "ai_comment": "[MOCK] 고단백 균형 식단이네요! 단백질 섭취가 훌륭합니다.",
+    }, ensure_ascii=False)

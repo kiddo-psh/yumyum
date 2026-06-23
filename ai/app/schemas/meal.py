@@ -58,3 +58,24 @@ class DietAnalyzeResponse(BaseModel):
     weak_nutrients: List[str]    # 달성률 80% 미만 영양소 목록
     excess_nutrients: List[str]  # 달성률 120% 초과 영양소 목록
     ai_comment: str
+
+
+class PhotoAnalyzeRequest(BaseModel):
+    image_base64: str
+    media_type: str   # "image/jpeg" | "image/png" | "image/webp"
+    meal_type: str    # "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK"
+
+
+class DetectedItem(BaseModel):
+    name: str
+    estimated_grams: float
+    kcal: float
+    protein_g: float
+    carb_g: float
+    fat_g: float
+
+
+class PhotoAnalyzeResponse(BaseModel):
+    detected_items: List[DetectedItem]
+    total_kcal: float
+    ai_comment: str

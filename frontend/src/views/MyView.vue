@@ -9,7 +9,6 @@
     <NyamSection :nyam="nyam" :error="nyamError" />
     <ProfileSection :profile="profile" :error="profileError" @updated="onProfileUpdated" />
     <ProgramSection :program="program" :error="programError" />
-    <WeightSection :initial-weights="weights" :error="weightsError" />
 
     <!-- 로그아웃 -->
     <div class="flex justify-end">
@@ -26,27 +25,23 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiClient } from '@/services/apiClient';
 import { getMyProfile, getNyamStatus, getCurrentProgram } from '@/api/my';
-import { getWeightHistory } from '@/api/dashboard';
 import NyamSection from '@/components/my/NyamSection.vue';
 import ProfileSection from '@/components/my/ProfileSection.vue';
 import ProgramSection from '@/components/my/ProgramSection.vue';
-import WeightSection from '@/components/my/WeightSection.vue';
 
 const router = useRouter();
 
 const nyam = ref(null);
 const profile = ref(null);
 const program = ref(null);
-const weights = ref([]);
 
 const nyamError = ref(null);
 const profileError = ref(null);
 const programError = ref(null);
-const weightsError = ref(null);
 
 onMounted(async () => {
   // 프로필 먼저 로딩 (memberId가 Program 조회에 필요)
-  const profileResult = await Promise.allSettled([getMyProfile(), getNyamStatus(), getWeightHistory()]);
+  const profileResult = await Promise.allSettled([getMyProfile(), getNyamStatus()]);
 
   if (profileResult[0].status === 'fulfilled') {
     profile.value = profileResult[0].value;
@@ -58,12 +53,6 @@ onMounted(async () => {
     nyam.value = profileResult[1].value;
   } else {
     nyamError.value = profileResult[1].reason;
-  }
-
-  if (profileResult[2].status === 'fulfilled') {
-    weights.value = profileResult[2].value ?? [];
-  } else {
-    weightsError.value = profileResult[2].reason;
   }
 
   // Program은 memberId 필요

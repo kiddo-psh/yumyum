@@ -1,5 +1,5 @@
 <template>
-  <section class="neo-brutal-border rounded-xl bg-surface p-8">
+  <section class="neo-brutal-border rounded-xl bg-surface p-8 neo-brutal-card-hover">
     <h2 class="text-headline-lg text-on-background mb-6">현재 Program</h2>
 
     <p v-if="error && error.status !== 404" class="text-on-surface-variant">

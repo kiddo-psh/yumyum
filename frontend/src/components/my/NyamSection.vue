@@ -1,5 +1,5 @@
 <template>
-  <section class="neo-brutal-border rounded-xl p-8 flex items-center gap-8"
+  <section class="neo-brutal-border rounded-xl p-8 flex items-center gap-8 neo-brutal-card-hover"
            :class="bgClass">
     <!-- 에러 -->
     <template v-if="error">

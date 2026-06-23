@@ -1,5 +1,5 @@
 <template>
-  <section class="neo-brutal-border rounded-xl bg-surface p-8">
+  <section class="neo-brutal-border rounded-xl bg-surface p-8 neo-brutal-card-hover">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-headline-lg text-on-background">내 프로필</h2>
       <button v-if="!editing && profile"

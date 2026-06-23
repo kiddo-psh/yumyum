@@ -185,21 +185,34 @@
         <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
         <span class="font-bold">사진 분석</span>
       </RouterLink>
-      <RouterLink
-        to="/log"
-        class="col-span-2 bg-white neo-brutal-border rounded-xl p-6 flex items-center justify-between neo-brutal-card-hover"
-      >
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-surface rounded-full flex items-center justify-center neo-brutal-border">
-            <span class="material-symbols-outlined text-warning">bolt</span>
-          </div>
-          <div>
-            <p class="font-bold">오늘의 식단 현황</p>
-            <p class="text-xs text-on-surface-variant">{{ mealCount }}끼 기록됨</p>
-          </div>
+      <!-- 체중 입력 -->
+      <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5 neo-brutal-card-hover">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
+          <span class="font-bold text-sm">오늘 체중</span>
+          <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
+          </span>
         </div>
-        <span class="material-symbols-outlined">chevron_right</span>
-      </RouterLink>
+        <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
+        <form class="flex gap-2" @submit.prevent="submitWeight">
+          <input
+            v-model.number="newWeight"
+            type="number"
+            step="0.1"
+            placeholder="kg 입력"
+            class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
+            :disabled="weightSubmitting"
+          >
+            {{ weightSubmitting ? '...' : '기록' }}
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -211,8 +224,8 @@ import {
   getCalorieBalance,
   getDailySummary,
   getLastMealRecommendation,
-  listMeals,
 } from '@/api/dashboard'
+import { apiClient } from '@/services/apiClient'
 
 const RADIUS = 42
 const circumference = 2 * Math.PI * RADIUS
@@ -221,7 +234,6 @@ const state = reactive({
   loading: true,
   summary: null,
   balance: null,
-  meals: [],
   recommendLoading: false,
   recommendData: null,
 })
@@ -229,13 +241,17 @@ const state = reactive({
 const progressCircle = ref(null)
 const strokeDashoffset = ref(circumference)
 
+const newWeight = ref(null)
+const weightSubmitting = ref(false)
+const weightError = ref('')
+const weightSuccess = ref(false)
+
 const today = formatDate(new Date())
 
 const targetCalories = computed(() => state.balance?.targetCalories ?? state.summary?.targetCalories ?? 1800)
 const intakeCalories = computed(() => state.balance?.intakeCalories ?? state.summary?.achievedCalories ?? 0)
 const remainingCalories = computed(() => Math.max(targetCalories.value - intakeCalories.value, 0))
 const currentStreak = computed(() => state.summary?.currentStreak ?? 0)
-const mealCount = computed(() => state.meals?.length ?? 0)
 
 const calorieProgress = computed(() =>
   clamp(targetCalories.value ? Math.round((intakeCalories.value / targetCalories.value) * 100) : 0)
@@ -293,15 +309,13 @@ const recommendation = computed(() => {
 })
 
 onMounted(async () => {
-  const [summary, balance, meals] = await Promise.allSettled([
+  const [summary, balance] = await Promise.allSettled([
     getDailySummary(today),
     getCalorieBalance(today),
-    listMeals(today),
   ])
 
   state.summary = summary.status === 'fulfilled' ? summary.value : null
   state.balance = balance.status === 'fulfilled' ? balance.value : null
-  state.meals = meals.status === 'fulfilled' ? meals.value : []
   state.loading = false
 
   // animate progress circle
@@ -322,6 +336,22 @@ async function loadRecommendation() {
     // recommendation not available yet
   } finally {
     state.recommendLoading = false
+  }
+}
+
+async function submitWeight() {
+  weightSubmitting.value = true
+  weightError.value = ''
+  weightSuccess.value = false
+  try {
+    await apiClient.post('/weights', { weightKg: newWeight.value, recordedDate: today })
+    newWeight.value = null
+    weightSuccess.value = true
+    setTimeout(() => { weightSuccess.value = false }, 3000)
+  } catch {
+    weightError.value = '체중 기록에 실패했어요.'
+  } finally {
+    weightSubmitting.value = false
   }
 }
 

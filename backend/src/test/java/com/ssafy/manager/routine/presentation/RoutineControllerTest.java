@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -57,14 +58,14 @@ class RoutineControllerTest {
 
     @Test
     void AI_루틴_생성_성공시_201_반환() throws Exception {
-        given(routineService.createAi(anyLong(), anyInt(), any())).willReturn(RESULT);
+        given(routineService.createAi(anyLong(), anyBoolean(), anyInt(), any())).willReturn(RESULT);
 
         mockMvc.perform(post("/routines/ai")
                         .with(authentication(AUTH))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateAiRoutineRequest(4, SplitType.UPPER_LOWER_4))))
+                                new CreateAiRoutineRequest(false, 4, SplitType.UPPER_LOWER_4))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.routineId").value(1))
                 .andExpect(jsonPath("$.aiGenerated").value(true))
@@ -100,6 +101,21 @@ class RoutineControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.routineId").value(2))
                 .andExpect(jsonPath("$.aiGenerated").value(false));
+    }
+
+    @Test
+    void 내_루틴_목록_조회_성공() throws Exception {
+        given(routineService.getMyRoutines(anyLong())).willReturn(List.of(
+                new com.ssafy.manager.routine.application.RoutineSummaryResult(1L, "4일 상하체 분할", 4, true)
+        ));
+
+        mockMvc.perform(get("/routines")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].routineId").value(1))
+                .andExpect(jsonPath("$[0].name").value("4일 상하체 분할"))
+                .andExpect(jsonPath("$[0].aiGenerated").value(true));
     }
 
     @Test

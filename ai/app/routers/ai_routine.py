@@ -24,8 +24,16 @@ async def generate_routine(req: RoutineGenerateRequest):
     F901 - AI 루틴 생성
     사용자 정보 & 분할 유형을 기반으로 맞춤 운동 루틴 생성
     """
+    experience = (
+        "기존에 수행하던 운동 루틴이 있는 경험자입니다. 점진적 과부하 원리를 적용해 "
+        "강도 높은 무게·세트로 구성하세요."
+        if req.has_existing_routine
+        else "운동 루틴이 없는 초보자입니다. 부상 없이 따라할 수 있도록 가벼운 무게와 "
+        "기본 운동 위주로 구성하세요."
+    )
     prompt = f"""
 사용자 정보: 성별={req.gender}, 나이={req.age}세, 키={req.height_cm}cm, 몸무게={req.weight_kg}kg, 목표={req.health_goal}
+운동 경험: {experience}
 운동 분할: 주 {req.days_per_week}회 [{', '.join(req.split_labels)}]
 
 각 분할에 맞는 운동 루틴을 반드시 아래 JSON 형식으로만 응답하세요. 추가 설명 없이 JSON만 반환하세요:

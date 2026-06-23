@@ -186,7 +186,7 @@
         <span class="font-bold">사진 분석</span>
       </RouterLink>
       <!-- 체중 입력 -->
-      <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5">
+      <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5 neo-brutal-card-hover">
         <div class="flex items-center gap-2 mb-3">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
           <span class="font-bold text-sm">오늘 체중</span>

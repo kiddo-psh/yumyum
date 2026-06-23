@@ -7,6 +7,7 @@ import LogView from '@/views/LogView.vue';
 import MealActionView from '@/views/MealActionView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import MyView from '@/views/MyView.vue';
+import MealPhotoView from '@/views/MealPhotoView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
 
 const routes = [
@@ -53,11 +54,9 @@ const routes = [
       {
         path: 'meals/photo',
         name: 'meal-photo',
-        component: PlaceholderView,
+        component: MealPhotoView,
         meta: {
           title: '사진으로 기록',
-          heading: '사진으로 기록',
-          description: '사진 분석 API가 연결되면 이 화면에서 업로드 후 Meal을 생성합니다.',
         },
       },
       {

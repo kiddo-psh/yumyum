@@ -117,11 +117,14 @@ async def _synthesis_agent(
 async def run_coaching_chain(req: WeeklyCoachingRequest) -> WeeklyCoachingResponse:
     avg_calorie_rate, achievement_days = _calc_stats(req)
 
-    sorted_records = sorted(req.weight_records, key=lambda w: w.date)
-    weight_trend = calc_weight_trend(
-        [w.weight_kg for w in sorted_records],
-        [w.date for w in sorted_records],
-    )
+    try:
+        sorted_records = sorted(req.weight_records, key=lambda w: w.date)
+        weight_trend = calc_weight_trend(
+            [w.weight_kg for w in sorted_records],
+            [w.date for w in sorted_records],
+        )
+    except Exception:
+        weight_trend = None
 
     nutrition_analysis = await _nutrition_agent(req, avg_calorie_rate)
     exercise_analysis = await _exercise_agent(req, nutrition_analysis)

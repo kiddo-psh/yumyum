@@ -55,6 +55,15 @@ public class MealItem {
         return item;
     }
 
+    public static MealItem fromAiEstimate(String itemName, double amountGrams,
+                                           double kcal, double protein,
+                                           double carb, double fat) {
+        MealItem item = new MealItem(amountGrams, kcal, carb, protein, fat, 0.0);
+        item.foodCode = null;
+        item.foodName = itemName;
+        return item;
+    }
+
     void bindTo(Meal meal) {
         this.meal = meal;
     }

@@ -62,4 +62,17 @@ public class RestClientConfig {
                 .requestFactory(factory)
                 .build();
     }
+
+    @Bean
+    RestClient aiCoachingRestClient(
+            @Value("${ai.fastapi.url}") String baseUrl) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3_000);
+        factory.setReadTimeout(60_000);  // Multi-Agent 체인 대기
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(factory)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 }

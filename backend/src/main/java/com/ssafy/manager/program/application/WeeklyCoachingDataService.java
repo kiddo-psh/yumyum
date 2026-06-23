@@ -3,12 +3,15 @@ package com.ssafy.manager.program.application;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.program.domain.Program;
 import com.ssafy.manager.program.infrastructure.client.AiCoachingClientRequest;
+import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
 import com.ssafy.manager.routine.domain.RoutineSession;
 import com.ssafy.manager.routine.domain.SessionSet;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.SessionSetRepository;
 import com.ssafy.manager.weight.infrastructure.persistence.WeightRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WeeklyCoachingDataService {
@@ -25,9 +29,12 @@ public class WeeklyCoachingDataService {
     private final RoutineSessionRepository routineSessionRepository;
     private final SessionSetRepository sessionSetRepository;
     private final WeightRepository weightRepository;
+    private final ProgramRepository programRepository;
 
     @Transactional(readOnly = true)
-    public AiCoachingClientRequest buildRequest(Program program, int weekNumber) {
+    public AiCoachingClientRequest buildRequest(Long programId, int weekNumber) {
+        Program program = programRepository.findById(programId)
+                .orElseThrow(() -> new EntityNotFoundException("Program not found: " + programId));
         Long memberId = program.getMemberId();
         LocalDate weekStart = program.getStartDate().plusDays((long) (weekNumber - 1) * 7);
         LocalDate weekEnd = weekStart.plusDays(6);

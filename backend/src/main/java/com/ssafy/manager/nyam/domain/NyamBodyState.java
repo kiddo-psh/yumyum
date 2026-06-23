@@ -33,6 +33,7 @@ public class NyamBodyState {
     @Column(nullable = false, unique = true)
     private Long memberId;
 
+    /** 온보딩 전까지 0.0. 온보딩 체중으로 최초 확정된다(확정 여부는 {@link #anchorDate}로 판단). */
     private double anchorWeightKg;
     private LocalDate anchorDate;
     private double cumulativeBalanceKcal;
@@ -44,8 +45,17 @@ public class NyamBodyState {
         this.cumulativeBalanceKcal = 0;
     }
 
+    /** 가입 시점: anchor 미확정 상태로 생성한다. 온보딩 때 {@link #resetAnchor}로 확정된다. */
+    public static NyamBodyState newFor(Long memberId) {
+        return new NyamBodyState(memberId, 0.0, null);
+    }
+
     public static NyamBodyState newFor(Long memberId, double anchorWeightKg, LocalDate anchorDate) {
         return new NyamBodyState(memberId, anchorWeightKg, anchorDate);
+    }
+
+    public boolean isAnchored() {
+        return anchorDate != null;
     }
 
     /** 하루치 칼로리 밸런스(잉여 +, 결손 −)를 누적한다. */

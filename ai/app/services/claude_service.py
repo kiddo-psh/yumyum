@@ -170,7 +170,7 @@ async def _call_gms_vision(
         }],
     }
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=25) as client:
         response = await client.post(url, headers=headers, json=payload)
         response.raise_for_status()
 
@@ -198,6 +198,5 @@ def _mock_vision_response() -> str:
                 "fat_g": 1.6,
             },
         ],
-        "total_kcal": 443.0,
         "ai_comment": "[MOCK] 고단백 균형 식단이네요! 단백질 섭취가 훌륭합니다.",
     }, ensure_ascii=False)

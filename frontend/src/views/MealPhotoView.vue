@@ -59,8 +59,8 @@
 
         <div class="space-y-3 mb-8">
           <div
-            v-for="item in analysisResult.detectedItems"
-            :key="item.name"
+            v-for="(item, idx) in analysisResult.detectedItems"
+            :key="item.name + '_' + idx"
             class="bg-white neo-brutal-border rounded-xl p-4 flex items-center justify-between"
           >
             <div>

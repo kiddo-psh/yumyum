@@ -185,22 +185,6 @@
         <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
         <span class="font-bold">사진 분석</span>
       </RouterLink>
-      <RouterLink
-        to="/log"
-        class="col-span-2 bg-white neo-brutal-border rounded-xl p-6 flex items-center justify-between neo-brutal-card-hover"
-      >
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-surface rounded-full flex items-center justify-center neo-brutal-border">
-            <span class="material-symbols-outlined text-warning">bolt</span>
-          </div>
-          <div>
-            <p class="font-bold">오늘의 식단 현황</p>
-            <p class="text-xs text-on-surface-variant">{{ mealCount }}끼 기록됨</p>
-          </div>
-        </div>
-        <span class="material-symbols-outlined">chevron_right</span>
-      </RouterLink>
-
       <!-- 체중 입력 -->
       <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5">
         <div class="flex items-center gap-2 mb-3">
@@ -240,7 +224,6 @@ import {
   getCalorieBalance,
   getDailySummary,
   getLastMealRecommendation,
-  listMeals,
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
 
@@ -251,7 +234,6 @@ const state = reactive({
   loading: true,
   summary: null,
   balance: null,
-  meals: [],
   recommendLoading: false,
   recommendData: null,
 })
@@ -270,7 +252,6 @@ const targetCalories = computed(() => state.balance?.targetCalories ?? state.sum
 const intakeCalories = computed(() => state.balance?.intakeCalories ?? state.summary?.achievedCalories ?? 0)
 const remainingCalories = computed(() => Math.max(targetCalories.value - intakeCalories.value, 0))
 const currentStreak = computed(() => state.summary?.currentStreak ?? 0)
-const mealCount = computed(() => state.meals?.length ?? 0)
 
 const calorieProgress = computed(() =>
   clamp(targetCalories.value ? Math.round((intakeCalories.value / targetCalories.value) * 100) : 0)
@@ -328,15 +309,13 @@ const recommendation = computed(() => {
 })
 
 onMounted(async () => {
-  const [summary, balance, meals] = await Promise.allSettled([
+  const [summary, balance] = await Promise.allSettled([
     getDailySummary(today),
     getCalorieBalance(today),
-    listMeals(today),
   ])
 
   state.summary = summary.status === 'fulfilled' ? summary.value : null
   state.balance = balance.status === 'fulfilled' ? balance.value : null
-  state.meals = meals.status === 'fulfilled' ? meals.value : []
   state.loading = false
 
   // animate progress circle

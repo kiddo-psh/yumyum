@@ -159,7 +159,7 @@ async function saveMeal() {
     await recordPhotoMeal(inferMealType(), analysisResult.value.detectedItems)
     router.push('/log')
   } catch {
-    phase.value = 'result'
+    phase.value = 'error'
     errorMessage.value = '저장에 실패했어요. 다시 시도해주세요.'
   }
 }

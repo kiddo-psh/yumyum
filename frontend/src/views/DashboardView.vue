@@ -193,12 +193,6 @@
             class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-body-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
-          <input
-            v-model="newDate"
-            type="date"
-            class="neo-brutal-border rounded-lg px-3 py-2 text-body-sm bg-white"
-            required
-          />
           <button
             type="submit"
             class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-label-lg disabled:opacity-50"
@@ -318,7 +312,6 @@ const today = formatDate(new Date())
 const todayFormatted = formatDisplayDate(new Date())
 
 const newWeight = ref(null)
-const newDate = ref(today)
 const submitting = ref(false)
 const weightSubmitError = ref('')
 
@@ -525,7 +518,7 @@ async function submitWeight() {
   try {
     const created = await apiClient.post('/weights', {
       weightKg: newWeight.value,
-      recordedDate: newDate.value,
+      recordedDate: today,
     })
     state.weights = [...state.weights, { id: created.id, date: created.recordedDate, weight: created.weightKg }]
       .sort((a, b) => a.date.localeCompare(b.date))

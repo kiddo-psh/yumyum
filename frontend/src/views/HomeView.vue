@@ -200,6 +200,35 @@
         </div>
         <span class="material-symbols-outlined">chevron_right</span>
       </RouterLink>
+
+      <!-- 체중 입력 -->
+      <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
+          <span class="font-bold text-sm">오늘 체중</span>
+          <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
+          </span>
+        </div>
+        <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
+        <form class="flex gap-2" @submit.prevent="submitWeight">
+          <input
+            v-model.number="newWeight"
+            type="number"
+            step="0.1"
+            placeholder="kg 입력"
+            class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
+            :disabled="weightSubmitting"
+          >
+            {{ weightSubmitting ? '...' : '기록' }}
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -213,6 +242,7 @@ import {
   getLastMealRecommendation,
   listMeals,
 } from '@/api/dashboard'
+import { apiClient } from '@/services/apiClient'
 
 const RADIUS = 42
 const circumference = 2 * Math.PI * RADIUS
@@ -228,6 +258,11 @@ const state = reactive({
 
 const progressCircle = ref(null)
 const strokeDashoffset = ref(circumference)
+
+const newWeight = ref(null)
+const weightSubmitting = ref(false)
+const weightError = ref('')
+const weightSuccess = ref(false)
 
 const today = formatDate(new Date())
 
@@ -322,6 +357,22 @@ async function loadRecommendation() {
     // recommendation not available yet
   } finally {
     state.recommendLoading = false
+  }
+}
+
+async function submitWeight() {
+  weightSubmitting.value = true
+  weightError.value = ''
+  weightSuccess.value = false
+  try {
+    await apiClient.post('/weights', { weightKg: newWeight.value, recordedDate: today })
+    newWeight.value = null
+    weightSuccess.value = true
+    setTimeout(() => { weightSuccess.value = false }, 3000)
+  } catch {
+    weightError.value = '체중 기록에 실패했어요.'
+  } finally {
+    weightSubmitting.value = false
   }
 }
 

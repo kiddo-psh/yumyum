@@ -1,17 +1,38 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { isAuthenticated } from '@/services/auth';
 import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import HomeView from '@/views/HomeView.vue';
+import LoginView from '@/views/LoginView.vue';
 import LogView from '@/views/LogView.vue';
 import MealActionView from '@/views/MealActionView.vue';
-import NotFoundView from '@/views/NotFoundView.vue';
 import MyView from '@/views/MyView.vue';
+import NotFoundView from '@/views/NotFoundView.vue';
+import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
 import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
 import RoutineView from '@/views/RoutineView.vue';
 
 const routes = [
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: {
+      title: '로그인',
+      public: true,
+    },
+  },
+  {
+    path: '/oauth/callback',
+    name: 'oauth-callback',
+    component: OAuthCallbackView,
+    meta: {
+      title: '로그인 처리 중',
+      public: true,
+    },
+  },
   {
     path: '/',
     component: MainLayout,
@@ -127,6 +148,7 @@ const routes = [
     component: NotFoundView,
     meta: {
       title: 'Page not found',
+      public: true,
     },
   },
 ];
@@ -139,32 +161,22 @@ const router = createRouter({
   },
 });
 
+// 모든 기능은 로그인 후 사용 가능하다. meta.public 라우트만 비로그인 접근을 허용하고,
+// 그 외 라우트는 토큰이 없으면 로그인 화면으로 보낸다.
 router.beforeEach((to) => {
-  const accessToken = to.query.accessToken;
-  const refreshToken = to.query.refreshToken;
-
-  if (typeof accessToken === 'string') {
-    localStorage.setItem('accessToken', accessToken);
+  if (to.meta.public) {
+    // 이미 로그인된 상태에서 로그인 화면으로 가면 홈으로 되돌린다.
+    if (to.name === 'login' && isAuthenticated()) {
+      return { name: 'home' };
+    }
+    return true;
   }
 
-  if (typeof refreshToken === 'string') {
-    localStorage.setItem('refreshToken', refreshToken);
+  if (isAuthenticated()) {
+    return true;
   }
 
-  if (accessToken || refreshToken) {
-    const query = { ...to.query };
-    delete query.accessToken;
-    delete query.refreshToken;
-
-    return {
-      path: to.path,
-      query,
-      hash: to.hash,
-      replace: true,
-    };
-  }
-
-  return true;
+  return { name: 'login' };
 });
 
 router.afterEach((to) => {

@@ -1,6 +1,9 @@
 import { API_BASE_URL } from '@/config/env';
+import { clearTokens, getAccessToken, getRefreshToken, storeTokens } from '@/services/auth';
 
 const JSON_CONTENT_TYPE = 'application/json';
+const LOGIN_PATH = '/login';
+const REISSUE_PATH = '/auth/reissue';
 
 export class ApiError extends Error {
   constructor(message, { status, data } = {}) {
@@ -42,8 +45,50 @@ function appendQueryParams(url, params) {
   return nextUrl.toString();
 }
 
-function getStoredAccessToken() {
-  return localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
+function redirectToLogin() {
+  clearTokens();
+  if (window.location.pathname !== LOGIN_PATH) {
+    window.location.assign(LOGIN_PATH);
+  }
+}
+
+// 동시에 여러 요청이 401을 받아도 재발급은 한 번만 수행한다.
+// (백엔드가 Refresh Token을 회전시키므로, 중복 호출 시 두 번째부터는 이미 삭제된 토큰으로 실패한다.)
+let reissueInFlight = null;
+
+function reissueAccessToken() {
+  if (reissueInFlight) {
+    return reissueInFlight;
+  }
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return Promise.resolve(null);
+  }
+
+  reissueInFlight = (async () => {
+    try {
+      const response = await fetch(resolveUrl(REISSUE_PATH), {
+        method: 'POST',
+        headers: { 'content-type': JSON_CONTENT_TYPE },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      storeTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
+      return data.accessToken ?? null;
+    } catch {
+      return null;
+    } finally {
+      reissueInFlight = null;
+    }
+  })();
+
+  return reissueInFlight;
 }
 
 async function parseResponse(response) {
@@ -61,14 +106,18 @@ async function parseResponse(response) {
 }
 
 export async function request(path, options = {}) {
+  return performRequest(path, options, true);
+}
+
+async function performRequest(path, options, allowReissue) {
   const headers = new Headers(options.headers);
-  const token = getStoredAccessToken();
+  const token = getAccessToken();
 
   if (options.body && !headers.has('content-type')) {
     headers.set('content-type', JSON_CONTENT_TYPE);
   }
 
-  if (token && !headers.has('authorization')) {
+  if (token) {
     headers.set('authorization', `Bearer ${token}`);
   }
 
@@ -82,6 +131,20 @@ export async function request(path, options = {}) {
   const data = await parseResponse(response);
 
   if (!response.ok) {
+    if (response.status === 401 && allowReissue && path !== REISSUE_PATH) {
+      // Access Token이 거부되면 Refresh Token으로 재발급 후 1회 재시도한다.
+      const newToken = await reissueAccessToken();
+      if (newToken) {
+        return performRequest(path, options, false);
+      }
+    }
+
+    // 재발급까지 실패한 401이면 세션을 정리하고 로그인 화면으로 보낸다.
+    if (response.status === 401) {
+      console.warn(`[auth] 401 (재발급 실패) — ${fetchOptions.method ?? 'GET'} ${path}`, data);
+      redirectToLogin();
+    }
+
     throw new ApiError('API request failed', {
       status: response.status,
       data,

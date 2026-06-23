@@ -147,7 +147,7 @@ async def analyze_photo(req: PhotoAnalyzeRequest):
         "아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):\n"
         '{"detected_items": [{"name": "음식명(한국어)", "estimated_grams": 숫자, '
         '"kcal": 숫자, "protein_g": 숫자, "carb_g": 숫자, "fat_g": 숫자}], '
-        '"total_kcal": 합계숫자, "ai_comment": "한 문장 한국어 코멘트"}\n\n'
+        '"ai_comment": "한 문장 한국어 코멘트"}\n\n'
         "음식이 감지되지 않으면 detected_items를 빈 배열로 반환하세요."
     )
 
@@ -162,22 +162,20 @@ async def analyze_photo(req: PhotoAnalyzeRequest):
         if "```" in cleaned:
             parts = cleaned.split("```")
             cleaned = parts[1] if len(parts) > 1 else cleaned
-            if cleaned.startswith("json"):
+            if cleaned.lower().startswith("json"):
                 cleaned = cleaned[4:]
         data = json.loads(cleaned)
+        items = [DetectedItem(**item) for item in data.get("detected_items", [])]
+        total_kcal = sum(i.kcal for i in items)
+        ai_comment = data.get("ai_comment", "")
     except Exception as e:
         print(f"[analyze_photo] vision 분석 실패 — {type(e).__name__}: {e}")
-        data = {
-            "detected_items": [],
-            "total_kcal": 0.0,
-            "ai_comment": "음식을 인식하지 못했어요. 다시 촬영해보세요.",
-        }
-
-    items = [DetectedItem(**item) for item in data.get("detected_items", [])]
-    total_kcal = sum(i.kcal for i in items)
+        items = []
+        total_kcal = 0.0
+        ai_comment = "음식을 인식하지 못했어요. 다시 촬영해보세요."
 
     return PhotoAnalyzeResponse(
         detected_items=items,
         total_kcal=total_kcal,
-        ai_comment=data.get("ai_comment", ""),
+        ai_comment=ai_comment,
     )

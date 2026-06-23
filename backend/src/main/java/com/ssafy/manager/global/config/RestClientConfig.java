@@ -41,9 +41,12 @@ public class RestClientConfig {
     @Bean
     RestClient aiMealRestClient(
             @Value("${ai.fastapi.url}") String baseUrl) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3000);
+        factory.setReadTimeout(30000);  // 15000 → 30000 (Vision AI 응답 대기)
         return RestClient.builder()
                 .baseUrl(baseUrl)
-                .requestFactory(fastapiRequestFactory())
+                .requestFactory(factory)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

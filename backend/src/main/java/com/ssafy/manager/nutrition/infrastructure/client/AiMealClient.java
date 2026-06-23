@@ -17,4 +17,12 @@ public class AiMealClient {
                 .retrieve()
                 .body(AiMealLastRecommendClientResponse.class);
     }
+
+    public AiMealPhotoClientResponse analyzePhoto(AiMealPhotoClientRequest request) {
+        return aiMealRestClient.post()
+                .uri("/ai/meal/analyze-photo")
+                .body(request)
+                .retrieve()
+                .body(AiMealPhotoClientResponse.class);
+    }
 }

@@ -7,6 +7,7 @@ import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import LogView from '@/views/LogView.vue';
 import MealActionView from '@/views/MealActionView.vue';
+import MyView from '@/views/MyView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
@@ -133,12 +134,10 @@ const routes = [
       {
         path: 'my',
         name: 'my',
-        component: PlaceholderView,
+        component: MyView,
         meta: {
           title: '마이',
           navLabel: 'My',
-          heading: '마이',
-          description: 'Member, Program, Nyam 상태를 관리하는 개인 화면입니다.',
         },
       },
     ],

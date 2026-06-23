@@ -8,6 +8,11 @@ import com.ssafy.manager.global.exception.GlobalExceptionHandler;
 import com.ssafy.manager.growth.application.DailyGoalSummaryService;
 import com.ssafy.manager.growth.domain.DailyProgress;
 import com.ssafy.manager.growth.domain.WeeklyAchievementSummary;
+import com.ssafy.manager.member.application.MemberService;
+import com.ssafy.manager.member.application.dto.OnboardingResult;
+import com.ssafy.manager.member.domain.ActivityLevel;
+import com.ssafy.manager.member.domain.HealthGoal;
+import com.ssafy.manager.member.domain.Sex;
 import com.ssafy.manager.program.domain.DailyGoal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,7 @@ class GrowthControllerTest {
 
     @Autowired MockMvc mockMvc;
     @MockitoBean DailyGoalSummaryService dailyGoalSummaryService;
+    @MockitoBean MemberService memberService;
     @MockitoBean KakaoOAuth2UserService kakaoOAuth2UserService;
     @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 
@@ -83,5 +89,29 @@ class GrowthControllerTest {
                 .andExpect(jsonPath("$.achievedKcal").value(1350.0))
                 .andExpect(jsonPath("$.achievementRate").value(0.675))
                 .andExpect(jsonPath("$.achieved").value(false));
+    }
+
+    @Test
+    void Nyam_상태를_조회하면_200과_상태_반환() throws Exception {
+        given(dailyGoalSummaryService.todayProgress(any(), any()))
+                .willReturn(new DailyProgress(2000.0, 1700.0, 0.85, true));
+        OnboardingResult memberResult = new OnboardingResult(
+                MEMBER_ID, true, Sex.MALE, 1990, 175.0, 80.0,
+                ActivityLevel.MODERATELY_ACTIVE, HealthGoal.DIET
+        );
+        given(memberService.getMember(MEMBER_ID)).willReturn(memberResult);
+
+        mockMvc.perform(get("/nyam/status")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mood").value("HAPPY"))
+                .andExpect(jsonPath("$.achievementRate").value(0.85))
+                .andExpect(jsonPath("$.healthGoal").value("DIET"));
+    }
+
+    @Test
+    void 인증_없이_Nyam_상태를_조회하면_401_반환() throws Exception {
+        mockMvc.perform(get("/nyam/status"))
+                .andExpect(status().isUnauthorized());
     }
 }

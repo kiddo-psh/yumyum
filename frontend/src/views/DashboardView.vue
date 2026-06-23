@@ -10,7 +10,7 @@
   <!-- Row 1: 주간 달성 현황 + 목표 달성률 -->
   <div class="grid grid-cols-12 gap-8 mb-8">
     <!-- 주간 달성 현황 -->
-    <div class="col-span-8 bg-surface neo-brutal-border rounded-xl p-6">
+    <div class="col-span-8 bg-surface neo-brutal-border rounded-xl p-6 neo-brutal-card-hover">
       <div class="flex items-center justify-between mb-10">
         <h2 class="text-headline-lg text-on-background">주간 달성 현황</h2>
         <!-- 주차 네비게이션 -->
@@ -101,7 +101,7 @@
   <!-- Row 2: 체중 추세 + AI 채팅 -->
   <div class="grid grid-cols-12 gap-8">
     <!-- 체중 추세 그래프 -->
-    <div class="col-span-7 bg-surface neo-brutal-border rounded-xl p-8">
+    <div class="col-span-7 bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
       <!-- 헤더 -->
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-headline-lg text-on-background">체중 추세</h2>
@@ -144,11 +144,7 @@
               <stop offset="100%" stop-color="#FF8C42" stop-opacity="0"/>
             </linearGradient>
           </defs>
-
-          <!-- 그라데이션 채우기 -->
           <path :d="fillPath(weightPoints)" fill="url(#weight-fill)" />
-
-          <!-- 부드러운 곡선 -->
           <path
             :d="smoothPath(weightPoints)"
             fill="none"
@@ -157,8 +153,6 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           />
-
-          <!-- 데이터 포인트 -->
           <circle
             v-for="(p, i) in weightPoints"
             :key="i"
@@ -169,8 +163,6 @@
             stroke="white"
             stroke-width="2.5"
           />
-
-          <!-- X 레이블 -->
           <text
             v-for="(p, i) in xLabels"
             :key="`xl-${i}`"
@@ -182,17 +174,38 @@
             fill="#AAAAAA"
           >{{ p.label }}</text>
         </svg>
-
         <div class="flex justify-between text-xs font-bold mt-3 px-1">
           <span class="text-on-surface-variant">최저 <span class="text-on-background">{{ weightMin }}kg</span></span>
           <span class="text-on-surface-variant">최고 <span class="text-on-background">{{ weightMax }}kg</span></span>
           <span class="text-on-surface-variant">평균 <span class="text-on-background">{{ weightAvg }}kg</span></span>
         </div>
       </template>
+
+      <!-- 체중 입력 폼 -->
+      <div class="border-t-[3px] border-on-background mt-6 pt-5">
+        <p v-if="weightSubmitError" class="text-danger text-xs font-bold mb-2">{{ weightSubmitError }}</p>
+        <form class="flex gap-3" @submit.prevent="submitWeight">
+          <input
+            v-model.number="newWeight"
+            type="number"
+            step="0.1"
+            placeholder="오늘 체중 (kg)"
+            class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-body-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+            required
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-label-lg disabled:opacity-50"
+            :disabled="submitting"
+          >
+            {{ submitting ? '저장 중' : '기록' }}
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- AI 채팅 -->
-    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl flex flex-col overflow-hidden" style="min-height: 380px;">
+    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl flex flex-col overflow-hidden neo-brutal-card-hover" style="min-height: 380px;">
       <div class="flex items-center gap-3 p-6 border-b-[3px] border-on-background">
         <div class="w-10 h-10 bg-nyam-mint neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
@@ -265,6 +278,7 @@ import {
   getWeightHistory,
   sendChatMessage,
 } from '@/api/dashboard'
+import { apiClient } from '@/services/apiClient'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 const CHART_W = 500
@@ -296,6 +310,10 @@ const chatContainer = ref(null)
 
 const today = formatDate(new Date())
 const todayFormatted = formatDisplayDate(new Date())
+
+const newWeight = ref(null)
+const submitting = ref(false)
+const weightSubmitError = ref('')
 
 // ─── 주간 달성 현황 ───────────────────────────────────────────────
 
@@ -485,11 +503,30 @@ async function loadCalendar() {
 async function loadWeights() {
   state.weightsLoading = true
   try {
-    state.weights = await getWeightHistory() ?? []
+    const raw = await getWeightHistory() ?? []
+    state.weights = raw.map(w => ({ id: w.id, date: w.recordedDate, weight: w.weightKg }))
   } catch {
     state.weights = []
   } finally {
     state.weightsLoading = false
+  }
+}
+
+async function submitWeight() {
+  submitting.value = true
+  weightSubmitError.value = ''
+  try {
+    const created = await apiClient.post('/weights', {
+      weightKg: newWeight.value,
+      recordedDate: today,
+    })
+    state.weights = [...state.weights, { id: created.id, date: created.recordedDate, weight: created.weightKg }]
+      .sort((a, b) => a.date.localeCompare(b.date))
+    newWeight.value = null
+  } catch {
+    weightSubmitError.value = '체중 기록에 실패했어요.'
+  } finally {
+    submitting.value = false
   }
 }
 

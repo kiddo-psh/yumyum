@@ -32,7 +32,7 @@ public class NyamBodyQueryService {
 
     @Transactional
     public NyamBodyResult getBody(Long memberId, LocalDate today) {
-        NyamBodyState state = stateManager.loadOrCreate(memberId, today);
+        NyamBodyState state = stateManager.load(memberId);
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 

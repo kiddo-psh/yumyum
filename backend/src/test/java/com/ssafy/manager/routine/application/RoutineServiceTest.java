@@ -11,6 +11,7 @@ import com.ssafy.manager.routine.domain.Routine;
 import com.ssafy.manager.routine.domain.RoutineExercise;
 import com.ssafy.manager.routine.domain.SplitType;
 import com.ssafy.manager.routine.infrastructure.client.AiRoutineClient;
+import com.ssafy.manager.routine.infrastructure.client.AiRoutineClientRequest;
 import com.ssafy.manager.routine.infrastructure.client.AiRoutineClientResponse;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineExerciseRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineRepository;
@@ -72,7 +73,7 @@ class RoutineServiceTest {
                 .willReturn(Optional.empty());
         given(aiRoutineClient.generate(any())).willReturn(AI_RESPONSE);
 
-        RoutineResult result = routineService.createAi(MEMBER_ID, 4, SplitType.UPPER_LOWER_4);
+        RoutineResult result = routineService.createAi(MEMBER_ID, false, 4, SplitType.UPPER_LOWER_4);
 
         ArgumentCaptor<Routine> routineCaptor = ArgumentCaptor.forClass(Routine.class);
         verify(routineRepository).save(routineCaptor.capture());
@@ -82,6 +83,23 @@ class RoutineServiceTest {
         verify(routineExerciseRepository).saveAll(any());
         assertThat(result.aiComment()).isEqualTo("열심히 해봐요!");
         assertThat(result.exercises()).isNotEmpty();
+    }
+
+    @Test
+    void AI_루틴_생성시_기존루틴_보유여부가_FastAPI_요청에_전달된다() {
+        given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
+        given(programRepository.findByMemberIdAndStatus(MEMBER_ID, ProgramStatus.ACTIVE))
+                .willReturn(Optional.empty());
+        given(aiRoutineClient.generate(any())).willReturn(AI_RESPONSE);
+
+        routineService.createAi(MEMBER_ID, true, 4, SplitType.UPPER_LOWER_4);
+
+        ArgumentCaptor<AiRoutineClientRequest> requestCaptor =
+                ArgumentCaptor.forClass(AiRoutineClientRequest.class);
+        verify(aiRoutineClient).generate(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().hasExistingRoutine()).isTrue();
+        assertThat(requestCaptor.getValue().daysPerWeek()).isEqualTo(4);
+        assertThat(requestCaptor.getValue().splitType()).isEqualTo(SplitType.UPPER_LOWER_4.name());
     }
 
     @Test
@@ -101,9 +119,25 @@ class RoutineServiceTest {
     void 없는_회원으로_AI_루틴_생성시_예외가_발생한다() {
         given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> routineService.createAi(MEMBER_ID, 4, SplitType.UPPER_LOWER_4))
+        assertThatThrownBy(() -> routineService.createAi(MEMBER_ID, false, 4, SplitType.UPPER_LOWER_4))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("회원을 찾을 수 없습니다");
+    }
+
+    @Test
+    void 내_루틴_목록을_요약_형태로_반환한다() {
+        given(routineRepository.findByMemberId(MEMBER_ID)).willReturn(List.of(
+                Routine.create(MEMBER_ID, "4일 상하체 분할", 4, true),
+                Routine.create(MEMBER_ID, "내 수동 루틴", 3, false)
+        ));
+
+        List<RoutineSummaryResult> results = routineService.getMyRoutines(MEMBER_ID);
+
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).name()).isEqualTo("4일 상하체 분할");
+        assertThat(results.get(0).aiGenerated()).isTrue();
+        assertThat(results.get(1).daysPerWeek()).isEqualTo(3);
+        assertThat(results.get(1).aiGenerated()).isFalse();
     }
 
     @Test

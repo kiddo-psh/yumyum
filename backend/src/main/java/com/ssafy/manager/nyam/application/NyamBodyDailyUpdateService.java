@@ -44,7 +44,7 @@ public class NyamBodyDailyUpdateService {
 
     private void applyDailyBalance(DailyGoal goal, LocalDate targetDate, LocalDate today) {
         Long memberId = goal.getMemberId();
-        NyamBodyState state = stateManager.loadOrCreate(memberId, targetDate);
+        NyamBodyState state = stateManager.load(memberId);
         stateManager.reAnchorToLatestWeight(state);
 
         if (!targetDate.isAfter(state.getAnchorDate())) {

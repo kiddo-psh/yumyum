@@ -22,6 +22,7 @@ class RoutineGenerateRequest(BaseModel):
     weight_kg: float
     height_cm: float
     health_goal: str
+    has_existing_routine: bool = False
     days_per_week: int
     split_type: str
     split_labels: List[str]

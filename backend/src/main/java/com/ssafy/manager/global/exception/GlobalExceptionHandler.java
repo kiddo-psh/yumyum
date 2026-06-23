@@ -71,4 +71,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of(400, "Bad Request", "올바른 값을 입력해주세요.", fieldErrors));
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleUnexpected(Exception e) {
+        return ErrorResponse.of(500, "Internal Server Error", "예기치 못한 오류가 발생했습니다.");
+    }
 }

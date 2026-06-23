@@ -34,8 +34,15 @@ public class RoutineService {
     private final RoutineExerciseRepository routineExerciseRepository;
     private final AiRoutineClient aiRoutineClient;
 
+    public List<RoutineSummaryResult> getMyRoutines(Long memberId) {
+        return routineRepository.findByMemberId(memberId).stream()
+                .map(RoutineSummaryResult::from)
+                .toList();
+    }
+
     @Transactional
-    public RoutineResult createAi(Long memberId, int daysPerWeek, SplitType splitType) {
+    public RoutineResult createAi(Long memberId, boolean hasExistingRoutine,
+                                  int daysPerWeek, SplitType splitType) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
@@ -50,6 +57,7 @@ public class RoutineService {
                 member.getWeightKg(),
                 member.getHeightCm(),
                 healthGoal,
+                hasExistingRoutine,
                 daysPerWeek,
                 splitType.name(),
                 splitType.getSplitLabels()

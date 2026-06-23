@@ -74,6 +74,8 @@ onMounted(async () => {
     } else {
       programError.value = programResult[0].reason;
     }
+  } else {
+    programError.value = new Error('프로필 로딩 실패로 Program을 조회할 수 없습니다.');
   }
 });
 

@@ -29,6 +29,13 @@
           class="w-full aspect-square transition-transform group-hover:-translate-y-1"
         />
 
+        <!-- 미획득 잠금 표시 -->
+        <span
+          v-if="!badge.earned"
+          class="material-symbols-outlined absolute inset-0 m-auto h-fit w-fit text-on-surface-variant"
+          style="font-variation-settings:'FILL' 1;"
+        >lock</span>
+
         <!-- hover 정보 -->
         <div
           class="pointer-events-none absolute bottom-full left-1/2 mb-2 w-44 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white neo-brutal-border rounded-lg p-3 text-center"

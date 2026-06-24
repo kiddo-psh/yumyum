@@ -45,7 +45,7 @@ export const useBadgeStore = defineStore('badge', () => {
   /**
    * 식사/운동 기록 응답을 받아 연출 큐를 채운다.
    * streak.increased → 스트릭 갱신, 이어서 newlyEarnedBadges 각각을 순차 노출.
-   * 새 뱃지를 받으면 컬렉션 캐시를 무효화해 다음 조회 시 갱신되게 한다.
+   * 새 뱃지를 받으면 컬렉션 캐시를 다시 불러와 도감·사이드바가 즉시 갱신되게 한다.
    */
   function celebrate(response) {
     if (!response) return;
@@ -60,7 +60,7 @@ export const useBadgeStore = defineStore('badge', () => {
     }
 
     if (newBadges.length > 0) {
-      loaded.value = false;
+      loadCollection(true);
     }
 
     advance();

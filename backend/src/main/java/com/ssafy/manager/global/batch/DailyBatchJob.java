@@ -2,7 +2,6 @@ package com.ssafy.manager.global.batch;
 
 import com.ssafy.manager.growth.application.StreakResetService;
 import com.ssafy.manager.nyam.application.NyamBodyDailyUpdateService;
-import com.ssafy.manager.program.application.DailyGoalCreationService;
 import com.ssafy.manager.program.application.ProgramCompletionService;
 import com.ssafy.manager.program.application.WeeklyReportService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ public class DailyBatchJob {
     private final ProgramCompletionService programCompletionService;
     private final StreakResetService streakResetService;
     private final NyamBodyDailyUpdateService nyamBodyDailyUpdateService;
-    private final DailyGoalCreationService dailyGoalCreationService;
     private final WeeklyReportService weeklyReportService;
 
     @Scheduled(cron = "0 0 4 * * *")
@@ -26,13 +24,12 @@ public class DailyBatchJob {
         run(LocalDate.now());
     }
 
-    // package-visible: @SpringBootTest 없이 단위 테스트 가능
-    // 순서 중요: 만료 완료 → 전날 Streak 리셋 → 전날 Nyam 체형 누적 → 오늘 DailyGoal 생성 → WeeklyReport stub 생성
+    // 순서 중요: 만료 완료 → 전날 Streak 리셋 → 전날 Nyam 체형 누적 → WeeklyReport stub 생성
+    // DailyGoal은 API 호출 시 lazy 생성 (ensureGoalExists) — 배치 선행 생성 불필요
     void run(LocalDate today) {
         programCompletionService.completeExpired(today);
         streakResetService.resetUnachievedFor(today);
         nyamBodyDailyUpdateService.updateFor(today);
-        dailyGoalCreationService.createForActivePrograms(today);
         weeklyReportService.createStubs(today);
     }
 }

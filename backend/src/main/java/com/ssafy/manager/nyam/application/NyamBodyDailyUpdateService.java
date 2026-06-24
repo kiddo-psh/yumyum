@@ -6,9 +6,11 @@ import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.nyam.domain.DailyBalanceCalculator;
 import com.ssafy.manager.nyam.domain.NyamBodyState;
 import com.ssafy.manager.nyam.infrastructure.persistence.NyamBodyStateRepository;
-import com.ssafy.manager.program.domain.DailyGoal;
+import com.ssafy.manager.program.domain.Program;
+import com.ssafy.manager.program.domain.ProgramStatus;
 import com.ssafy.manager.program.domain.TdeeCalculator;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
+import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,13 @@ import java.util.NoSuchElementException;
 
 /**
  * 매일 배치: 전날 마감분(섭취 vs TDEE+운동소모)을 각 회원의 NyamBodyState에 누적한다.
- * 상위 도메인의 push 없이, DailyGoal·Meal·RoutineSession·Member를 읽어 스스로 파생한다.
+ * 활성 Program 기준으로 대상 회원을 결정하므로 DailyGoal 선행 생성 불필요.
  */
 @Service
 @RequiredArgsConstructor
 public class NyamBodyDailyUpdateService {
 
+    private final ProgramRepository programRepository;
     private final DailyGoalRepository dailyGoalRepository;
     private final MealRepository mealRepository;
     private final RoutineSessionRepository routineSessionRepository;
@@ -36,14 +39,14 @@ public class NyamBodyDailyUpdateService {
     @Transactional
     public void updateFor(LocalDate today) {
         LocalDate targetDate = today.minusDays(1);
-        List<DailyGoal> goals = dailyGoalRepository.findAllByDate(targetDate);
-        for (DailyGoal goal : goals) {
-            applyDailyBalance(goal, targetDate, today);
+        List<Program> programs = programRepository.findAllByStatus(ProgramStatus.ACTIVE);
+        for (Program program : programs) {
+            applyDailyBalance(program, targetDate, today);
         }
     }
 
-    private void applyDailyBalance(DailyGoal goal, LocalDate targetDate, LocalDate today) {
-        Long memberId = goal.getMemberId();
+    private void applyDailyBalance(Program program, LocalDate targetDate, LocalDate today) {
+        Long memberId = program.getMemberId();
         NyamBodyState state = stateManager.load(memberId);
         stateManager.reAnchorToLatestWeight(state);
 
@@ -51,9 +54,13 @@ public class NyamBodyDailyUpdateService {
             return; // anchor 시점 이전/당일은 누적하지 않는다
         }
 
+        double achievedValue = dailyGoalRepository.findByMemberIdAndDate(memberId, targetDate)
+                .map(g -> g.getAchievedValue())
+                .orElse(0.0);
+
         double balance = DailyBalanceCalculator.calculate(
-                (int) goal.getTargetValue(),
-                goal.getAchievedValue(),
+                (int) program.getTargetCalories(),
+                achievedValue,
                 mealRepository.countByMemberIdAndEffectiveDate(memberId, targetDate),
                 routineSessionRepository.sumCaloriesBurnedByMemberIdAndDate(memberId, targetDate),
                 tdeeOf(memberId, today.getYear()),

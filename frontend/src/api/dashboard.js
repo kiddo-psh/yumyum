@@ -29,7 +29,7 @@ export function getWeightHistory() {
 }
 
 export function sendChatMessage(message) {
-  return apiClient.post('/ai/chat', { message });
+  return apiClient.post('/chat', { message });
 }
 
 export function searchFoods(query) {

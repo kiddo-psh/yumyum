@@ -540,10 +540,10 @@ async function sendMessage() {
   await scrollChat()
   try {
     const res = await sendChatMessage(msg)
-    chat.messages.push({ role: 'ai', content: res.reply ?? res.message ?? '응답을 받았습니다.' })
+    chat.messages.push({ role: 'ai', content: res.answer ?? '응답을 받았습니다.' })
   } catch (err) {
-    chat.error = err?.data?.message ?? 'AI 채팅 서비스 준비 중입니다.'
-    chat.messages.push({ role: 'ai', content: 'AI 채팅은 곧 지원될 예정입니다.' })
+    chat.error = err?.data?.message ?? '잠시 후 다시 시도해주세요.'
+    chat.messages.push({ role: 'ai', content: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.' })
   } finally {
     chat.loading = false
     await scrollChat()

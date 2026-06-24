@@ -1,5 +1,7 @@
 package com.ssafy.manager.nutrition.application;
 
+import com.ssafy.manager.nutrition.infrastructure.client.AiChatClientRequest;
+import com.ssafy.manager.nutrition.infrastructure.client.AiChatClientResponse;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealClient;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientRequest;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientResponse;
@@ -58,6 +60,14 @@ public class AiMealService {
                         r.name(), r.kcal(), r.proteinG(), r.carbG(), r.fatG(), r.reason()))
                 .toList();
         return new AiMealLastRecommendResult(recs, resp.priorityNutrient(), resp.aiComment());
+    }
+
+    public AiChatResult chat(String message) {
+        AiChatClientResponse resp = aiMealClient.chat(new AiChatClientRequest(message, null));
+        List<AiChatResult.Source> sources = resp.sources().stream()
+                .map(s -> new AiChatResult.Source(s.name(), s.info()))
+                .toList();
+        return new AiChatResult(resp.answer(), sources);
     }
 
     public AiMealPhotoAnalyzeResult analyzePhoto(String imageBase64, String mediaType, String mealType) {

@@ -1,5 +1,9 @@
 package com.ssafy.manager.nutrition.application;
 
+import com.ssafy.manager.member.domain.Member;
+import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
+import com.ssafy.manager.nutrition.infrastructure.client.AiChatClientRequest;
+import com.ssafy.manager.nutrition.infrastructure.client.AiChatClientResponse;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealClient;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientRequest;
 import com.ssafy.manager.nutrition.infrastructure.client.AiMealLastRecommendClientResponse;
@@ -25,6 +29,7 @@ public class AiMealService {
     private final MealItemRepository mealItemRepository;
     private final MealRepository mealRepository;
     private final ProgramRepository programRepository;
+    private final MemberRepository memberRepository;
     private final AiMealClient aiMealClient;
 
     @Transactional(readOnly = true)
@@ -60,6 +65,16 @@ public class AiMealService {
         return new AiMealLastRecommendResult(recs, resp.priorityNutrient(), resp.aiComment());
     }
 
+    @Transactional(readOnly = true)
+    public AiChatResult chat(Long memberId, String message) {
+        AiChatClientRequest.MealContext context = buildMealContext(memberId, LocalDate.now());
+        AiChatClientResponse resp = aiMealClient.chat(new AiChatClientRequest(message, context));
+        List<AiChatResult.Source> sources = resp.sources().stream()
+                .map(s -> new AiChatResult.Source(s.name(), s.info()))
+                .toList();
+        return new AiChatResult(resp.answer(), sources);
+    }
+
     public AiMealPhotoAnalyzeResult analyzePhoto(String imageBase64, String mediaType, String mealType) {
         AiMealPhotoClientRequest request = new AiMealPhotoClientRequest(imageBase64, mediaType, mealType);
         AiMealPhotoClientResponse response = aiMealClient.analyzePhoto(request);
@@ -70,5 +85,32 @@ public class AiMealService {
                 .toList();
 
         return new AiMealPhotoAnalyzeResult(items, response.totalKcal(), response.aiComment());
+    }
+
+    private AiChatClientRequest.MealContext buildMealContext(Long memberId, LocalDate date) {
+        try {
+            Program program = programRepository.findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
+                    .orElse(null);
+            if (program == null) return null;
+
+            Member member = memberRepository.findById(memberId).orElse(null);
+            String healthGoal = (member != null && member.getHealthGoal() != null)
+                    ? member.getHealthGoal().name() : "HEALTH";
+
+            double totalKcal    = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(memberId, date);
+            double totalProtein = mealItemRepository.sumProteinByMemberIdAndEffectiveDate(memberId, date);
+            double totalCarb    = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, date);
+            double totalFat     = mealItemRepository.sumFatByMemberIdAndEffectiveDate(memberId, date);
+
+            return new AiChatClientRequest.MealContext(
+                    totalProtein, program.getTargetProteinG(),
+                    totalCarb,    program.getTargetCarbG(),
+                    totalFat,     program.getTargetFatG(),
+                    totalKcal,    program.getTargetCalories(),
+                    healthGoal
+            );
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

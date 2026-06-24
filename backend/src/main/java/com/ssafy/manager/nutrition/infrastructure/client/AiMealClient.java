@@ -25,4 +25,12 @@ public class AiMealClient {
                 .retrieve()
                 .body(AiMealPhotoClientResponse.class);
     }
+
+    public AiChatClientResponse chat(AiChatClientRequest request) {
+        return aiMealRestClient.post()
+                .uri("/ai/chat")
+                .body(request)
+                .retrieve()
+                .body(AiChatClientResponse.class);
+    }
 }

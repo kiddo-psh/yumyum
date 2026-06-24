@@ -41,6 +41,10 @@ public record SessionResponse(
         }
     }
 
+    public static SessionResponse from(RoutineSessionResult result) {
+        return from(result, List.of(), null);
+    }
+
     public static SessionResponse from(RoutineSessionResult result, List<Badge> earnedBadges,
                                        StreakChangeResponse streak) {
         return new SessionResponse(

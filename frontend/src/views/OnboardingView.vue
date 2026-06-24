@@ -264,6 +264,7 @@ async function submit() {
       weightKg: form.weightKg,
       activityLevel: form.activityLevel,
       healthGoal: form.healthGoal,
+      targetDate: form.targetDate || undefined,
     })
     markOnboardingComplete()
     router.replace({ name: 'home' })

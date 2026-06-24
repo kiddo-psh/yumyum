@@ -403,6 +403,7 @@ async function confirmAdd(mealId) {
 
     if (meal?._isTemp) {
       updated = await recordMeal({
+        type: inferMealType(),
         date: formatDate(currentDate.value),
         foodCode: search.selected.foodCode,
         amountGrams: search.amount,
@@ -416,6 +417,7 @@ async function confirmAdd(mealId) {
         foodCode: search.selected.foodCode,
         amountGrams: search.amount,
       })
+      badgeStore.celebrate(updated)
       const idx = state.meals.findIndex((m) => m.id === mealId)
       if (idx !== -1) state.meals[idx] = updated
     }
@@ -471,7 +473,10 @@ async function loadRecommendation() {
   }
 }
 
+let loadEpoch = 0
+
 async function loadData() {
+  const epoch = ++loadEpoch
   state.loading = true
   const date = formatDate(currentDate.value)
   const [summary, balance, meals] = await Promise.allSettled([
@@ -479,12 +484,13 @@ async function loadData() {
     getCalorieBalance(date),
     listMeals(date),
   ])
+  if (epoch !== loadEpoch) return
   state.summary = summary.status === 'fulfilled' ? summary.value : null
   state.balance = balance.status === 'fulfilled' ? balance.value : null
   state.meals   = meals.status === 'fulfilled' ? meals.value : []
   state.loading = false
 
-  if (canRecommend.value) loadRecommendation()
+  if (canRecommend.value) await loadRecommendation()
 }
 
 function prevDay() {
@@ -503,6 +509,14 @@ function nextDay() {
 function goToday() { currentDate.value = new Date() }
 
 function clamp(v) { return Math.max(0, Math.min(100, v)) }
+
+function inferMealType() {
+  const h = new Date().getHours()
+  if (h >= 4 && h < 10) return 'BREAKFAST'
+  if (h < 15) return 'LUNCH'
+  if (h < 20) return 'DINNER'
+  return 'SNACK'
+}
 
 function formatDate(date) {
   const y = date.getFullYear()

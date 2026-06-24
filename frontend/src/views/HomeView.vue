@@ -28,8 +28,22 @@
     </div>
   </header>
 
+  <!-- 프로그램 생성 대기 중 로딩 카드 -->
+  <div v-if="!state.loading && !isProgramReady" class="mb-8">
+    <div class="bg-surface neo-brutal-border rounded-xl p-12 flex flex-col items-center justify-center gap-6 text-center" style="min-height: 320px;">
+      <div class="plan-spinner" />
+      <div>
+        <p class="text-headline-lg text-on-background mb-2">맞춤 플랜을 생성하고 있어요</p>
+        <p class="text-body-md text-on-surface-variant">BMR·TDEE를 계산해 목표 칼로리와 영양소를 설정 중이에요.<br/>잠시만 기다려 주세요!</p>
+      </div>
+      <div class="flex gap-3">
+        <span v-for="i in 3" :key="i" class="plan-dot" :style="{ animationDelay: (i - 1) * 0.25 + 's' }" />
+      </div>
+    </div>
+  </div>
+
   <!-- Row 1: Achievement & Calories -->
-  <div class="grid grid-cols-12 gap-8 mb-8">
+  <div v-if="isProgramReady" class="grid grid-cols-12 gap-8 mb-8">
     <!-- Achievement Card -->
     <div class="col-span-7 bg-surface neo-brutal-border rounded-xl p-8 relative overflow-hidden neo-brutal-card-hover">
       <div class="flex items-center justify-between gap-8 h-full">
@@ -130,7 +144,7 @@
   </div>
 
   <!-- Row 2: Recommendation & Quick Actions -->
-  <div class="grid grid-cols-12 gap-8">
+  <div v-if="isProgramReady" class="grid grid-cols-12 gap-8">
     <!-- Meal Recommendation Card -->
     <div class="col-span-8 bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
       <div v-if="state.loading" class="flex items-center gap-4 text-on-surface-variant">
@@ -268,7 +282,10 @@ const achievementMessage = computed(() => {
   return '오늘도 화이팅!'
 })
 
+const isProgramReady = computed(() => (state.balance?.targetCalories ?? 0) > 0)
+
 const coachMessage = computed(() => {
+  if (!isProgramReady.value) return 'AI가 맞춤 플랜을 생성하고 있어요...'
   if (aiComment.value) return aiComment.value
   if (state.balance?.lastMealRecommendTrigger) return '마지막 끼니 추천이 준비됐어요!'
   return `${formatNumber(remainingCalories.value)} kcal 남았어요. 기록해볼까요?`
@@ -331,6 +348,11 @@ onMounted(async () => {
     loadRecommendation()
   }
 
+  // 온보딩 직후: 목표칼로리가 0이면 Program 비동기 생성 완료를 기다려 자동 갱신
+  if (!state.balance?.targetCalories) {
+    pollForProgram()
+  }
+
   // AI 코멘트 비동기 로드 (실패 시 정적 fallback 유지)
   try {
     const res = await getHomeComment()
@@ -339,6 +361,22 @@ onMounted(async () => {
     // aiComment null 유지 → coachMessage computed가 정적 fallback 반환
   }
 })
+
+async function pollForProgram(attempts = 0) {
+  if (attempts >= 6) return   // 최대 12초(2s×6) 시도 후 포기
+  await new Promise(r => setTimeout(r, 2000))
+  try {
+    const balance = await getCalorieBalance(today)
+    if (balance?.targetCalories > 0) {
+      state.balance = balance
+      setTimeout(() => {
+        strokeDashoffset.value = circumference - (calorieProgress.value / 100) * circumference
+      }, 100)
+      return
+    }
+  } catch { /* 무시 */ }
+  pollForProgram(attempts + 1)
+}
 
 async function loadRecommendation() {
   state.recommendLoading = true
@@ -382,3 +420,33 @@ function formatNumber(v) {
   return Math.round(Number(v) || 0).toLocaleString('ko-KR')
 }
 </script>
+
+<style scoped>
+.plan-spinner {
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e8e8e8;
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.plan-dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #a8e6cf;
+  border: 2px solid #1a1a1a;
+  animation: bounce 0.75s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); opacity: 0.4; }
+  to   { transform: translateY(-8px); opacity: 1; }
+}
+</style>

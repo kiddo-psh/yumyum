@@ -12,6 +12,6 @@ export function getNyamStatus() {
   return apiClient.get('/nyam/status');
 }
 
-export function getCurrentProgram(memberId) {
-  return apiClient.get('/programs/current', { params: { memberId } });
+export function getCurrentProgram() {
+  return apiClient.get('/programs/current');
 }

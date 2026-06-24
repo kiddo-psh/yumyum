@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { isAuthenticated } from '@/services/auth';
+import { isAuthenticated, isOnboardingCompleted, markOnboardingComplete, markOnboardingIncomplete } from '@/services/auth';
+import { getMyProfile } from '@/api/my';
 import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import HomeView from '@/views/HomeView.vue';
@@ -11,6 +12,7 @@ import MyView from '@/views/MyView.vue';
 import MealPhotoView from '@/views/MealPhotoView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
+import OnboardingView from '@/views/OnboardingView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
 import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
 import RoutineView from '@/views/RoutineView.vue';
@@ -32,6 +34,14 @@ const routes = [
     meta: {
       title: '로그인 처리 중',
       public: true,
+    },
+  },
+  {
+    path: '/onboarding',
+    name: 'onboarding',
+    component: OnboardingView,
+    meta: {
+      title: '시작하기',
     },
   },
   {
@@ -160,22 +170,44 @@ const router = createRouter({
   },
 });
 
-// 모든 기능은 로그인 후 사용 가능하다. meta.public 라우트만 비로그인 접근을 허용하고,
-// 그 외 라우트는 토큰이 없으면 로그인 화면으로 보낸다.
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.public) {
-    // 이미 로그인된 상태에서 로그인 화면으로 가면 홈으로 되돌린다.
     if (to.name === 'login' && isAuthenticated()) {
       return { name: 'home' };
     }
     return true;
   }
 
-  if (isAuthenticated()) {
+  if (!isAuthenticated()) {
+    return { name: 'login' };
+  }
+
+  // /onboarding 진입: 이미 완료한 회원이면 홈으로 돌린다.
+  if (to.name === 'onboarding') {
+    const status = isOnboardingCompleted();
+    if (status === 'true') return { name: 'home' };
     return true;
   }
 
-  return { name: 'login' };
+  // 일반 보호 라우트: localStorage 값 기준 → 없으면 API 확인
+  const status = isOnboardingCompleted();
+  if (status === 'true') return true;
+  if (status === 'false') return { name: 'onboarding' };
+
+  // localStorage에 값이 없는 경우(기존 로그인 유지 등) — API로 확인
+  try {
+    const profile = await getMyProfile();
+    if (profile.onboardingCompleted) {
+      markOnboardingComplete();
+      return true;
+    } else {
+      markOnboardingIncomplete();
+      return { name: 'onboarding' };
+    }
+  } catch {
+    // API 실패 시 통과시킨다 (로그인된 기존 회원 보호)
+    return true;
+  }
 });
 
 router.afterEach((to) => {

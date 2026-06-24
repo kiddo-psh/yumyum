@@ -84,9 +84,13 @@ public class HomeCommentService {
         double carbG = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, today);
         double fatG = mealItemRepository.sumFatByMemberIdAndEffectiveDate(memberId, today);
 
+        String healthGoal = member.getHealthGoal() != null
+                ? member.getHealthGoal().name()
+                : "HEALTH";
+
         return new AiHomeCommentClientRequest(
                 memberId,
-                member.getHealthGoal().name(),
+                healthGoal,
                 streak,
                 kcalRate,
                 remainingKcal,

@@ -14,7 +14,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { storeTokens } from '@/services/auth';
+import { storeTokens, markOnboardingComplete, markOnboardingIncomplete } from '@/services/auth';
 
 const route = useRoute();
 const router = useRouter();
@@ -33,8 +33,13 @@ onMounted(() => {
 
   storeTokens({ accessToken, refreshToken });
 
-  // 온보딩이 필요한 신규 회원은 루틴 온보딩으로, 기존 회원은 홈으로.
-  router.replace(needsOnboarding ? { name: 'routine-onboarding' } : { name: 'home' });
+  if (needsOnboarding) {
+    markOnboardingIncomplete();
+    router.replace({ name: 'onboarding' });
+  } else {
+    markOnboardingComplete();
+    router.replace({ name: 'home' });
+  }
 });
 </script>
 

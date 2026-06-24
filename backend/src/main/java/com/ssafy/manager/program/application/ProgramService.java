@@ -3,11 +3,13 @@ package com.ssafy.manager.program.application;
 import com.ssafy.manager.member.domain.Member;
 import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import com.ssafy.manager.member.infrastructure.persistence.MemberRepository;
+import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.domain.Program;
 import com.ssafy.manager.program.domain.ProgramStatus;
 import com.ssafy.manager.program.domain.ProgramType;
 import com.ssafy.manager.program.infrastructure.client.AiPlanClient;
 import com.ssafy.manager.program.infrastructure.client.AiPlanClientResponse;
+import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class ProgramService {
 
     private final MemberRepository memberRepository;
     private final ProgramRepository programRepository;
+    private final DailyGoalRepository dailyGoalRepository;
     private final AiPlanClient aiPlanClient;
 
     @Transactional
@@ -49,6 +52,15 @@ public class ProgramService {
                 aiPlan.targetProteinG(), aiPlan.targetCarbG(), aiPlan.targetFatG(), aiPlan.aiComment()
         );
         programRepository.save(program);
+
+        // 배치(새벽 4시)를 기다리지 않고 오늘 DailyGoal을 즉시 생성
+        if (!dailyGoalRepository.existsByMemberIdAndDate(memberId, startDate)) {
+            dailyGoalRepository.save(DailyGoal.of(
+                    memberId, startDate,
+                    targetCalories,
+                    aiPlan.targetProteinG(), aiPlan.targetCarbG(), aiPlan.targetFatG()
+            ));
+        }
 
         return ProgramResult.from(program, durationWeeks);
     }

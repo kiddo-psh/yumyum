@@ -38,6 +38,20 @@ export async function deleteExercise(routineId, exerciseId) {
   return apiClient.delete(`/routines/${routineId}/exercises/${exerciseId}`);
 }
 
+export async function recordSession(routineId, { sessionDate, caloriesBurned, sets }) {
+  return apiClient.post('/routines/sessions', {
+    routineId,
+    sessionDate,
+    caloriesBurned,
+    sets,
+  });
+}
+
+export async function getMonthSessions(year, month) {
+  const data = await apiClient.get('/routines/sessions', { params: { year, month } });
+  return Array.isArray(data) ? data : [];
+}
+
 export async function createAiRoutine({ hasExistingRoutine, daysPerWeek, splitType }) {
   const data = await apiClient.post('/routines/ai', {
     hasExistingRoutine,

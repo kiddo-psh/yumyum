@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,21 @@ public class RoutineSessionService {
         RoutineSessionResult result = saveSessionAndSets(memberId, routineId, sessionDate, caloriesBurned, setInputs);
         routineAiAdjustService.adjustAndSave(routineId);
         return result;
+    }
+
+    public List<RoutineSessionResult> getMonthSessions(Long memberId, int year, int month) {
+        LocalDate from = LocalDate.of(year, month, 1);
+        LocalDate to = from.withDayOfMonth(from.lengthOfMonth());
+        List<RoutineSession> sessions =
+                routineSessionRepository.findByMemberIdAndSessionDateBetween(memberId, from, to);
+        if (sessions.isEmpty()) return List.of();
+        List<Long> sessionIds = sessions.stream().map(RoutineSession::getId).toList();
+        List<SessionSet> allSets = sessionSetRepository.findBySessionIdIn(sessionIds);
+        Map<Long, List<SessionSet>> bySession =
+                allSets.stream().collect(Collectors.groupingBy(SessionSet::getSessionId));
+        return sessions.stream()
+                .map(s -> RoutineSessionResult.from(s, bySession.getOrDefault(s.getId(), List.of())))
+                .toList();
     }
 
     private RoutineSessionResult saveSessionAndSets(Long memberId, Long routineId,

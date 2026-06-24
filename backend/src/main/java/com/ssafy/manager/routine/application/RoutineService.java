@@ -46,8 +46,10 @@ public class RoutineService {
         if (!routine.getMemberId().equals(memberId)) {
             throw new ForbiddenException("본인의 루틴만 조회할 수 있습니다.");
         }
+        int maxWeek = routineExerciseRepository.findMaxWeekNumberByRoutineId(routineId);
         List<RoutineExercise> exercises =
-                routineExerciseRepository.findByRoutineIdOrderByDayLabelAscOrderIndexAsc(routineId);
+                routineExerciseRepository.findByRoutineIdAndWeekNumberOrderByDayLabelAscOrderIndexAsc(
+                        routineId, maxWeek);
         return RoutineResult.from(routine, exercises, null);
     }
 

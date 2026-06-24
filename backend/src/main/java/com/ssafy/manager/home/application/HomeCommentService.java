@@ -50,6 +50,9 @@ public class HomeCommentService {
                 log.warn("[HomeCommentService] Redis 저장 실패: {}", e.getMessage());
             }
             return comment;
+        } catch (java.util.NoSuchElementException e) {
+            log.error("[HomeCommentService] Member {} not found in DB after JWT auth", memberId);
+            return FALLBACK;
         } catch (Exception e) {
             log.warn("[HomeCommentService] AI 코멘트 생성 실패, fallback 반환: {}", e.getMessage());
             return FALLBACK;

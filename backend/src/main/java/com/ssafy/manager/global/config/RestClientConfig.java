@@ -79,9 +79,12 @@ public class RestClientConfig {
     @Bean
     RestClient aiHomeCommentRestClient(
             @Value("${ai.fastapi.url}") String baseUrl) {
+        SimpleClientHttpRequestFactory homeCommentFactory = new SimpleClientHttpRequestFactory();
+        homeCommentFactory.setConnectTimeout(3_000);
+        homeCommentFactory.setReadTimeout(15_000);
         return RestClient.builder()
                 .baseUrl(baseUrl)
-                .requestFactory(fastapiRequestFactory())
+                .requestFactory(homeCommentFactory)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

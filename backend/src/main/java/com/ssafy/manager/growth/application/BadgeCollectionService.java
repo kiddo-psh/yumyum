@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -27,17 +26,12 @@ public class BadgeCollectionService {
     @Transactional(readOnly = true)
     public BadgeCollectionResult collectionOf(Long memberId) {
         Map<Badge, LocalDateTime> earnedAtByBadge = new EnumMap<>(Badge.class);
-        for (MemberBadge memberBadge : memberBadgeRepository.findByMemberId(memberId)) {
-            earnedAtByBadge.put(memberBadge.getBadge(), memberBadge.getEarnedAt());
+        List<MemberBadge> badges = memberBadgeRepository.findByMemberId(memberId);
+
+        for (MemberBadge badge : badges) {
+            earnedAtByBadge.put(badge.getBadge(), badge.getEarnedAt());
         }
 
-        List<BadgeCollectionResult.Item> items = Arrays.stream(Badge.values())
-                .map(badge -> new BadgeCollectionResult.Item(
-                        badge,
-                        earnedAtByBadge.containsKey(badge),
-                        earnedAtByBadge.get(badge)))
-                .toList();
-
-        return new BadgeCollectionResult(items);
+        return BadgeCollectionResult.of(earnedAtByBadge);
     }
 }

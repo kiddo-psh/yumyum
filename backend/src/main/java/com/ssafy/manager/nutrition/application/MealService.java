@@ -1,16 +1,17 @@
 package com.ssafy.manager.nutrition.application;
 
 import com.ssafy.manager.global.exception.ForbiddenException;
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import com.ssafy.manager.nutrition.domain.MealType;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +27,15 @@ public class MealService {
     private final MealRepository mealRepository;
     private final MealItemRepository mealItemRepository;
     private final DailyGoalRepository dailyGoalRepository;
-    private final StreakService streakService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Meal record(MealCommand command, LocalDateTime recordedAt) {
         LocalDate effectiveDate = effectiveDateOf(recordedAt);
         MealType resolvedType = command.type() != null ? command.type() : inferMealType(recordedAt);
 
-        Meal meal = new Meal(command.memberId(), resolvedType, command.date(), effectiveDate);
+        Meal meal = new Meal(command.memberId(), resolvedType, command.date(), effectiveDate,
+                MealSource.MANUAL, recordedAt);
         for (MealItemCommand itemCmd : command.items()) {
             Food food = foodRepository.findByCode(itemCmd.foodCode()).orElseThrow();
             meal.addItem(food, itemCmd.amountGrams());
@@ -43,12 +45,13 @@ public class MealService {
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(command.memberId(), effectiveDate);
 
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, command.memberId(), effectiveDate));
 
+        eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;
     }
 
-    private void updateGoalAndStreak(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {
+    private void updateDailyGoalProgress(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {
         boolean wasAchieved = goal.isAchieved();
         double totalProtein = mealItemRepository.sumProteinByMemberIdAndEffectiveDate(memberId, effectiveDate);
         double totalCarbs   = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, effectiveDate);
@@ -56,7 +59,7 @@ public class MealService {
 
         goal.recalculate(totalCalories, totalProtein, totalCarbs, totalFat);
         if (!wasAchieved && goal.isAchieved()) {
-            streakService.increment(memberId, effectiveDate);
+            eventPublisher.publishEvent(new MealGoalAchievedEvent(memberId, effectiveDate));
         }
     }
 
@@ -73,7 +76,7 @@ public class MealService {
         LocalDate effectiveDate = meal.getEffectiveDate();
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(memberId, effectiveDate);
         dailyGoalRepository.findByMemberIdAndDate(memberId, effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, memberId, effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, memberId, effectiveDate));
 
         return meal;
     }
@@ -93,7 +96,8 @@ public class MealService {
         LocalDate effectiveDate = effectiveDateOf(recordedAt);
         MealType resolvedType = command.mealType() != null ? command.mealType() : inferMealType(recordedAt);
 
-        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate);
+        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate,
+                MealSource.PHOTO, recordedAt);
         for (PhotoMealItemCommand item : command.items()) {
             meal.addAiItem(item.name(), item.estimatedGrams(),
                     item.kcal(), item.proteinG(), item.carbG(), item.fatG());
@@ -103,8 +107,9 @@ public class MealService {
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(
                 command.memberId(), effectiveDate);
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, command.memberId(), effectiveDate));
 
+        eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;
     }
 

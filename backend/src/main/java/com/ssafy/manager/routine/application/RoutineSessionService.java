@@ -1,12 +1,12 @@
 package com.ssafy.manager.routine.application;
 
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.routine.domain.RoutineSession;
 import com.ssafy.manager.routine.domain.SessionSet;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.SessionSetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ public class RoutineSessionService {
     private final RoutineSessionRepository routineSessionRepository;
     private final SessionSetRepository sessionSetRepository;
     private final RoutineAiAdjustService routineAiAdjustService;
-    private final StreakService streakService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public RoutineSessionResult recordSession(Long memberId, Long routineId,
@@ -70,7 +70,7 @@ public class RoutineSessionService {
                         i.setNumber(), i.actualReps(), i.actualWeightKg(), i.completed()))
                 .toList();
         sessionSetRepository.saveAll(sets);
-        streakService.increment(memberId, sessionDate);
+        eventPublisher.publishEvent(new WorkoutLoggedEvent(memberId, sessionDate));
         return RoutineSessionResult.from(session, sets);
     }
 }

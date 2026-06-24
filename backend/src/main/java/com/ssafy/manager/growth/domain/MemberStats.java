@@ -47,15 +47,22 @@ public class MemberStats {
         this.lastAchievedDate = lastAchievedDate;
     }
 
-    public void incrementStreak(LocalDate achievedDate) {
+    /**
+     * 주어진 날짜로 스트릭을 증가시킨다.
+     *
+     * @return 실제로 증가했으면 {@code true}, 같은 날 재달성 등으로 변화가 없으면 {@code false}.
+     *         이 반환값으로 {@code StreakIncreasedEvent} 중복 발행을 막는다.
+     */
+    public boolean incrementStreak(LocalDate achievedDate) {
         if (lastAchievedDate != null && !achievedDate.isAfter(lastAchievedDate)) {
-            return;
+            return false;
         }
         currentStreak = isConsecutive(achievedDate) ? currentStreak.increment() : Streak.of(1);
         if (currentStreak.compareTo(maxStreak) > 0) {
             maxStreak = currentStreak;
         }
         lastAchievedDate = achievedDate;
+        return true;
     }
 
     public boolean isStreakExpired(LocalDate today) {

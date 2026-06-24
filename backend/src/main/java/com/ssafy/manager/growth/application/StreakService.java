@@ -15,11 +15,12 @@ public class StreakService {
     private final MemberStatsRepository memberStatsRepository;
 
     @Transactional
-    public void increment(Long memberId, LocalDate achievedDate) {
+    public StreakUpdate increment(Long memberId, LocalDate achievedDate) {
         MemberStats stats = memberStatsRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new IllegalArgumentException());
 
-        stats.incrementStreak(achievedDate);
+        boolean increased = stats.incrementStreak(achievedDate);
         memberStatsRepository.save(stats);
+        return new StreakUpdate(increased, stats.getCurrentStreak().count());
     }
 }

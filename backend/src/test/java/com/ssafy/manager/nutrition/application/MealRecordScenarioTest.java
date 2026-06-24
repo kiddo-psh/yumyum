@@ -1,6 +1,5 @@
 package com.ssafy.manager.nutrition.application;
 
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
 import com.ssafy.manager.nutrition.domain.MealType;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -35,7 +36,7 @@ class MealRecordScenarioTest {
     @Mock MealRepository mealRepository;
     @Mock MealItemRepository mealItemRepository;
     @Mock DailyGoalRepository dailyGoalRepository;
-    @Mock StreakService streakService;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks MealService mealService;
 
@@ -60,7 +61,7 @@ class MealRecordScenarioTest {
         );
 
         assertThat(goal.isAchieved()).isTrue();
-        verify(streakService).increment(MEMBER_ID, TODAY);
+        verify(eventPublisher).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 
     @Test
@@ -80,6 +81,6 @@ class MealRecordScenarioTest {
 
         assertThat(goal.isAchieved()).isFalse();
         assertThat(goal.getAchievedValue()).isEqualTo(500.0);
-        org.mockito.Mockito.verifyNoInteractions(streakService);
+        verify(eventPublisher, never()).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 }

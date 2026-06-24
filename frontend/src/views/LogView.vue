@@ -279,6 +279,9 @@ import {
   recordMeal,
   searchFoods,
 } from '@/api/dashboard'
+import { useBadgeStore } from '@/stores/badge'
+
+const badgeStore = useBadgeStore()
 
 const MACRO_TARGETS = { carbs: 250, protein: 120, fat: 60 }
 const ORDINALS = ['첫', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열']
@@ -404,6 +407,7 @@ async function confirmAdd(mealId) {
         foodCode: search.selected.foodCode,
         amountGrams: search.amount,
       })
+      badgeStore.celebrate(updated)
       const idx = state.meals.findIndex((m) => m.id === mealId)
       if (idx !== -1) state.meals[idx] = updated
       search.mealId = updated.id

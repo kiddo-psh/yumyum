@@ -9,6 +9,7 @@
     <NyamSection :nyam="nyam" :error="nyamError" />
     <ProfileSection :profile="profile" :error="profileError" @updated="onProfileUpdated" />
     <ProgramSection :program="program" :error="programError" />
+    <BadgeCollectionSection />
 
     <!-- 로그아웃 -->
     <div class="flex justify-end">
@@ -28,6 +29,7 @@ import { getMyProfile, getNyamStatus, getCurrentProgram } from '@/api/my';
 import NyamSection from '@/components/my/NyamSection.vue';
 import ProfileSection from '@/components/my/ProfileSection.vue';
 import ProgramSection from '@/components/my/ProgramSection.vue';
+import BadgeCollectionSection from '@/components/my/BadgeCollectionSection.vue';
 
 const router = useRouter();
 

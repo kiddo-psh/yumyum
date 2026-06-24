@@ -1,5 +1,7 @@
 import json
+import re
 from fastapi import APIRouter, HTTPException
+from pydantic import ValidationError
 from app.schemas.routine import (
     RoutineGenerateRequest, RoutineGenerateResponse,
     RoutineAdjustRequest, RoutineAdjustResponse, ExerciseAdjustment,
@@ -8,6 +10,19 @@ from app.services.claude_service import call_claude
 from app.services.routine_service import calculate_adjustment
 
 router = APIRouter(prefix="/ai/routine", tags=["AI Routine"])
+
+_JSON_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+
+
+def _extract_json(raw: str) -> str:
+    """Claude가 ```json ... ``` 코드블록으로 감싼 경우 내용만 추출."""
+    m = _JSON_FENCE_RE.search(raw)
+    if m:
+        return m.group(1).strip()
+    start = raw.find("{")
+    if start != -1:
+        return raw[start:]
+    return raw.strip()
 
 _REASON = {
     "UP":         "모든 세트·반복 성공 → 무게 증량",
@@ -36,7 +51,11 @@ async def generate_routine(req: RoutineGenerateRequest):
 운동 경험: {experience}
 운동 분할: 주 {req.days_per_week}회 [{', '.join(req.split_labels)}]
 
-각 분할에 맞는 운동 루틴을 반드시 아래 JSON 형식으로만 응답하세요. 추가 설명 없이 JSON만 반환하세요:
+규칙:
+- 각 분할마다 운동은 정확히 4개만 포함하세요.
+- day_label은 분할명만 간단히 (예: "상체", "하체", "전신").
+- 추가 설명 없이 아래 JSON만 반환하세요.
+
 {{
   "routine_name": "루틴 이름",
   "days": [
@@ -47,16 +66,18 @@ async def generate_routine(req: RoutineGenerateRequest):
       ]
     }}
   ],
-  "ai_comment": "2~3문장 동기부여 코멘트"
+  "ai_comment": "동기부여 코멘트 1~2문장"
 }}
 """
-    raw = await call_claude(prompt)
-
     try:
-        data = json.loads(raw)
+        raw = await call_claude(prompt, max_tokens=1500)
+        print(f"[routine/generate] Claude raw response: {raw[:500]}", flush=True)
+        cleaned = _extract_json(raw)
+        data = json.loads(cleaned)
         return RoutineGenerateResponse(**data)
-    except (json.JSONDecodeError, ValueError, TypeError) as e:
-        raise HTTPException(status_code=500, detail=f"AI 응답 파싱 실패: {e}")
+    except Exception as e:
+        print(f"[routine/generate] 오류 {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
 
 
 @router.post("/adjust", response_model=RoutineAdjustResponse)

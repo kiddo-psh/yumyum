@@ -191,24 +191,47 @@
       {{ result.aiComment }}
     </p>
 
+    <p class="text-label-sm text-on-surface-variant mt-5 mb-2">세트·횟수·무게를 조정하려면 바로 수정하세요.</p>
+
     <div
       v-for="day in groupedDays"
       :key="day.dayLabel"
-      class="mt-6"
+      class="mt-4"
     >
-      <h3 class="text-headline-md text-on-background mb-3">
-        {{ day.dayLabel }}
-      </h3>
-      <ul class="grid gap-2">
+      <h3 class="text-headline-md text-on-background mb-3">{{ day.dayLabel }}</h3>
+      <ul class="grid gap-3">
         <li
           v-for="exercise in day.exercises"
           :key="exercise.id"
-          class="flex items-center justify-between gap-4 neo-brutal-border rounded-lg bg-surface px-4 py-3"
+          class="neo-brutal-border rounded-xl bg-surface p-4"
         >
-          <span class="text-body-md text-on-background">{{ exercise.exerciseName }}</span>
-          <b class="text-body-md text-on-background whitespace-nowrap">
-            {{ exercise.targetSets }}세트 × {{ exercise.targetReps }}회 · {{ formatWeight(exercise.targetWeightKg) }}kg
-          </b>
+          <p class="text-body-md font-bold text-on-background mb-3">{{ exercise.exerciseName }}</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <p class="text-label-sm text-on-surface-variant mb-1">세트</p>
+              <input
+                v-model.number="resultEdits[exercise.id].targetSets"
+                type="number" min="1" step="1"
+                class="w-full neo-brutal-border rounded-lg px-2 py-1.5 text-body-md text-center bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <p class="text-label-sm text-on-surface-variant mb-1">횟수</p>
+              <input
+                v-model.number="resultEdits[exercise.id].targetReps"
+                type="number" min="1" step="1"
+                class="w-full neo-brutal-border rounded-lg px-2 py-1.5 text-body-md text-center bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <p class="text-label-sm text-on-surface-variant mb-1">무게 (kg)</p>
+              <input
+                v-model.number="resultEdits[exercise.id].targetWeightKg"
+                type="number" min="0" step="0.5"
+                class="w-full neo-brutal-border rounded-lg px-2 py-1.5 text-body-md text-center bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
         </li>
       </ul>
     </div>
@@ -221,20 +244,24 @@
       >
         다시 만들기
       </button>
-      <RouterLink
-        to="/routine"
-        class="flex items-center bg-primary text-on-primary neo-brutal-border rounded-xl px-6 py-3 text-label-lg hover:-translate-y-0.5 active:translate-y-1 transition-all"
+      <button
+        type="button"
+        class="flex items-center gap-2 bg-primary text-on-primary neo-brutal-border rounded-xl px-6 py-3 text-label-lg hover:-translate-y-0.5 active:translate-y-1 transition-all disabled:opacity-40"
+        :disabled="completing"
+        @click="completeOnboarding"
       >
+        <span v-if="completing" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
         완료
-      </RouterLink>
+      </button>
     </div>
   </section>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { createAiRoutine, getSplitOptions } from '@/api/routine';
+import { createAiRoutine, getSplitOptions, updateExercise } from '@/api/routine';
 
 const dayOptions = [2, 3, 4, 5];
 const stepLabels = ['루틴 보유', '운동 빈도', '분할 선택'];
@@ -251,6 +278,9 @@ const form = reactive({
 
 const splitState = reactive({ loading: false, error: '' });
 const submitState = reactive({ loading: false, error: '' });
+const resultEdits = reactive({});
+const completing = ref(false);
+const router = useRouter();
 
 const groupedDays = computed(() => {
   const order = [];
@@ -327,11 +357,46 @@ async function handleSubmit() {
       daysPerWeek: form.daysPerWeek,
       splitType: form.splitType,
     });
+    for (const ex of result.value.exercises) {
+      resultEdits[ex.id] = {
+        targetSets: ex.targetSets,
+        targetReps: ex.targetReps,
+        targetWeightKg: ex.targetWeightKg,
+      };
+    }
   } catch (error) {
     submitState.error = formatApiError(error, 'AI 루틴 생성에 실패했습니다.');
   } finally {
     submitState.loading = false;
   }
+}
+
+async function completeOnboarding() {
+  completing.value = true;
+  try {
+    const routineId = result.value.routineId;
+    const changed = result.value.exercises.filter(ex => {
+      const e = resultEdits[ex.id];
+      return e && (
+        e.targetSets !== ex.targetSets ||
+        e.targetReps !== ex.targetReps ||
+        e.targetWeightKg !== ex.targetWeightKg
+      );
+    });
+    await Promise.all(
+      changed.map(ex =>
+        updateExercise(routineId, ex.id, {
+          exerciseName: ex.exerciseName,
+          ...resultEdits[ex.id],
+        })
+      )
+    );
+  } catch {
+    // 수정 실패해도 루틴은 이미 생성됐으므로 이동
+  } finally {
+    completing.value = false;
+  }
+  router.push({ name: 'routine' });
 }
 
 function resetOnboarding() {

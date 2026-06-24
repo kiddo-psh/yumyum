@@ -67,25 +67,29 @@
     v-else
     class="grid grid-cols-1 md:grid-cols-2 gap-6"
   >
-    <li
-      v-for="routine in routines"
-      :key="routine.routineId"
-      class="bg-white neo-brutal-border rounded-xl p-6 flex items-center justify-between gap-4"
-    >
-      <div class="min-w-0">
-        <h2 class="text-headline-md text-on-background truncate">
-          {{ routine.name }}
-        </h2>
-        <p class="text-body-md text-on-surface-variant mt-1">
-          주 {{ routine.daysPerWeek }}회
-        </p>
-      </div>
-      <span
-        class="shrink-0 neo-brutal-border rounded-full px-3 py-1.5 text-label-lg"
-        :class="routine.aiGenerated ? 'bg-nyam-mint text-on-background' : 'bg-surface text-on-surface-variant'"
+    <li v-for="routine in routines" :key="routine.routineId">
+      <RouterLink
+        :to="{ name: 'routine-detail', params: { routineId: routine.routineId } }"
+        class="bg-white neo-brutal-border rounded-xl p-6 flex items-center justify-between gap-4 neo-brutal-card-hover block"
       >
-        {{ routine.aiGenerated ? 'AI 생성' : '직접 등록' }}
-      </span>
+        <div class="min-w-0">
+          <h2 class="text-headline-md text-on-background truncate">
+            {{ routine.name }}
+          </h2>
+          <p class="text-body-md text-on-surface-variant mt-1">
+            주 {{ routine.daysPerWeek }}회
+          </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <span
+            class="neo-brutal-border rounded-full px-3 py-1.5 text-label-lg"
+            :class="routine.aiGenerated ? 'bg-nyam-mint text-on-background' : 'bg-surface text-on-surface-variant'"
+          >
+            {{ routine.aiGenerated ? 'AI 생성' : '직접 등록' }}
+          </span>
+          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+        </div>
+      </RouterLink>
     </li>
   </ul>
 </template>

@@ -60,6 +60,10 @@ public class Member {
         this.onboardingCompleted = true;
     }
 
+    public void updateWeight(double weightKg) {
+        this.weightKg = weightKg;
+    }
+
     public int age(int currentYear) {
         return currentYear - birthYear;
     }

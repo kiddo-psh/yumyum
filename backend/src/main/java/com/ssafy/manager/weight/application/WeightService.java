@@ -1,12 +1,12 @@
 package com.ssafy.manager.weight.application;
 
+import com.ssafy.manager.global.exception.ForbiddenException;
+import com.ssafy.manager.member.application.MemberService;
 import com.ssafy.manager.weight.domain.Weight;
 import com.ssafy.manager.weight.infrastructure.persistence.WeightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.ssafy.manager.global.exception.ForbiddenException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,15 +17,18 @@ import java.util.NoSuchElementException;
 public class WeightService {
 
     private final WeightRepository weightRepository;
+    private final MemberService memberService;
 
     @Transactional
     public Weight record(Long memberId, double weightKg, LocalDate recordedDate) {
-        return weightRepository.findByMemberIdAndRecordedDate(memberId, recordedDate)
+        Weight weight = weightRepository.findByMemberIdAndRecordedDate(memberId, recordedDate)
                 .map(existing -> {
                     existing.update(weightKg);
                     return existing;
                 })
                 .orElseGet(() -> weightRepository.save(Weight.create(memberId, weightKg, recordedDate)));
+        memberService.updateWeight(memberId, weightKg);
+        return weight;
     }
 
     @Transactional(readOnly = true)

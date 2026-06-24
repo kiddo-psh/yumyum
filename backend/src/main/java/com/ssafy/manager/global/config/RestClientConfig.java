@@ -75,4 +75,14 @@ public class RestClientConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
+    @Bean
+    RestClient aiHomeCommentRestClient(
+            @Value("${ai.fastapi.url}") String baseUrl) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(fastapiRequestFactory())
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 }

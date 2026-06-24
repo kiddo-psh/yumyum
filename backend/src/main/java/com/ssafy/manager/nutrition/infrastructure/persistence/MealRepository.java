@@ -1,6 +1,7 @@
 package com.ssafy.manager.nutrition.infrastructure.persistence;
 
 import com.ssafy.manager.nutrition.domain.Meal;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +11,14 @@ import java.util.List;
 
 public interface MealRepository extends JpaRepository<Meal, Long> {
     List<Meal> findAllByMemberIdAndDate(Long memberId, LocalDate date);
+
+    /** 기록 경로(source)별 식사 수 (PHOTO_KING 평가용). */
+    long countByMemberIdAndSource(Long memberId, MealSource source);
+
+    /** 밤(22:00~04:00, hour ≥ 22 또는 < 4)에 기록된 식사 수 (NIGHT_EATER 평가용). */
+    @Query("SELECT COUNT(m) FROM Meal m WHERE m.memberId = :memberId AND m.recordedAt IS NOT NULL AND " +
+           "(FUNCTION('HOUR', m.recordedAt) >= 22 OR FUNCTION('HOUR', m.recordedAt) < 4)")
+    long countNightMealsByMemberId(@Param("memberId") Long memberId);
 
     int countByMemberIdAndEffectiveDate(Long memberId, LocalDate effectiveDate);
 

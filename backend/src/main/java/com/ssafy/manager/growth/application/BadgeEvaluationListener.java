@@ -2,6 +2,7 @@ package com.ssafy.manager.growth.application;
 
 import com.ssafy.manager.growth.domain.Badge;
 import com.ssafy.manager.nutrition.application.MealRecordedEvent;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.routine.application.WorkoutLoggedEvent;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
@@ -25,6 +26,8 @@ public class BadgeEvaluationListener {
     private static final double VEGGIE_MANIA_MIN_FIBER = 8.0;
     private static final long CHICKEN_BREAST_THRESHOLD = 30;
     private static final String CHICKEN_BREAST_KEYWORD = "닭가슴살";
+    private static final long PHOTO_KING_THRESHOLD = 20;
+    private static final long NIGHT_EATER_THRESHOLD = 10;
 
     private static final int NOVICE_TAMER_THRESHOLD = 3;
     private static final int LEGENDARY_TAMER_THRESHOLD = 30;
@@ -56,6 +59,12 @@ public class BadgeEvaluationListener {
         if (mealRepository.countMealsContainingFoodNameByMemberId(memberId, CHICKEN_BREAST_KEYWORD)
                 >= CHICKEN_BREAST_THRESHOLD) {
             badgeService.grant(memberId, Badge.CHICKEN_BREAST_EVANGELIST);
+        }
+        if (mealRepository.countByMemberIdAndSource(memberId, MealSource.PHOTO) >= PHOTO_KING_THRESHOLD) {
+            badgeService.grant(memberId, Badge.PHOTO_KING);
+        }
+        if (mealRepository.countNightMealsByMemberId(memberId) >= NIGHT_EATER_THRESHOLD) {
+            badgeService.grant(memberId, Badge.NIGHT_EATER);
         }
     }
 

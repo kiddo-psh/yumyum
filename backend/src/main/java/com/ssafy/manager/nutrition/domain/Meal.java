@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +30,21 @@ public class Meal {
     private MealType type;
     private LocalDate date;
     private LocalDate effectiveDate;
+    @Enumerated(EnumType.STRING)
+    private MealSource source;
+    private LocalDateTime recordedAt;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
     private List<MealItem> items = new ArrayList<>();
 
-    public Meal(Long memberId, MealType type, LocalDate date, LocalDate effectiveDate) {
+    public Meal(Long memberId, MealType type, LocalDate date, LocalDate effectiveDate,
+                MealSource source, LocalDateTime recordedAt) {
         this.memberId = memberId;
         this.type = type;
         this.date = date;
         this.effectiveDate = effectiveDate;
+        this.source = source;
+        this.recordedAt = recordedAt;
     }
 
     public MealItem addItem(Food food, double amountGrams) {

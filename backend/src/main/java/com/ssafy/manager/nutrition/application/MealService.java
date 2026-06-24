@@ -4,6 +4,7 @@ import com.ssafy.manager.global.exception.ForbiddenException;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import com.ssafy.manager.nutrition.domain.MealType;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
@@ -33,7 +34,8 @@ public class MealService {
         LocalDate effectiveDate = effectiveDateOf(recordedAt);
         MealType resolvedType = command.type() != null ? command.type() : inferMealType(recordedAt);
 
-        Meal meal = new Meal(command.memberId(), resolvedType, command.date(), effectiveDate);
+        Meal meal = new Meal(command.memberId(), resolvedType, command.date(), effectiveDate,
+                MealSource.MANUAL, recordedAt);
         for (MealItemCommand itemCmd : command.items()) {
             Food food = foodRepository.findByCode(itemCmd.foodCode()).orElseThrow();
             meal.addItem(food, itemCmd.amountGrams());
@@ -94,7 +96,8 @@ public class MealService {
         LocalDate effectiveDate = effectiveDateOf(recordedAt);
         MealType resolvedType = command.mealType() != null ? command.mealType() : inferMealType(recordedAt);
 
-        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate);
+        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate,
+                MealSource.PHOTO, recordedAt);
         for (PhotoMealItemCommand item : command.items()) {
             meal.addAiItem(item.name(), item.estimatedGrams(),
                     item.kcal(), item.proteinG(), item.carbG(), item.fatG());

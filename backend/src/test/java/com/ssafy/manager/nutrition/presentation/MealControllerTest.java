@@ -10,6 +10,7 @@ import com.ssafy.manager.growth.application.EarnedBadgeCollector;
 import com.ssafy.manager.growth.application.StreakChangeHolder;
 import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.domain.Meal;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import com.ssafy.manager.nutrition.domain.MealType;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -94,7 +96,8 @@ class MealControllerTest {
 
     @Test
     void 날짜로_식사_목록을_조회한다() throws Exception {
-        Meal meal = new Meal(MEMBER_ID, MealType.LUNCH, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 1));
+        Meal meal = new Meal(MEMBER_ID, MealType.LUNCH, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 1),
+                MealSource.MANUAL, LocalDateTime.of(2026, 6, 1, 12, 0));
         given(mealService.listByDate(MEMBER_ID, LocalDate.of(2026, 6, 1)))
                 .willReturn(List.of(meal));
 

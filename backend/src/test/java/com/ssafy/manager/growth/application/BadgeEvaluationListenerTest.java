@@ -3,6 +3,7 @@ package com.ssafy.manager.growth.application;
 import com.ssafy.manager.growth.domain.Badge;
 import com.ssafy.manager.growth.infrastructure.persistence.MemberBadgeRepository;
 import com.ssafy.manager.nutrition.application.MealRecordedEvent;
+import com.ssafy.manager.nutrition.domain.MealSource;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.routine.application.WorkoutLoggedEvent;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
@@ -119,6 +120,37 @@ class BadgeEvaluationListenerTest {
 
         verify(memberBadgeRepository, never()).save(org.mockito.ArgumentMatchers.any());
         verify(earnedBadgeCollector, never()).add(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void 사진_식사_20회_도달시_사진왕_발행() {
+        given(mealRepository.countByMemberIdAndSource(MEMBER_ID, MealSource.PHOTO)).willReturn(20L);
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.PHOTO_KING)).willReturn(false);
+
+        listener().on(MEAL_EVENT);
+
+        verify(earnedBadgeCollector).add(Badge.PHOTO_KING);
+    }
+
+    @Test
+    void 밤_식사_10회_도달시_밤냠족_발행() {
+        given(mealRepository.countNightMealsByMemberId(MEMBER_ID)).willReturn(10L);
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.NIGHT_EATER)).willReturn(false);
+
+        listener().on(MEAL_EVENT);
+
+        verify(earnedBadgeCollector).add(Badge.NIGHT_EATER);
+    }
+
+    @Test
+    void 사진_밤_식사_임계_미달시_발행하지_않는다() {
+        given(mealRepository.countByMemberIdAndSource(MEMBER_ID, MealSource.PHOTO)).willReturn(19L);
+        given(mealRepository.countNightMealsByMemberId(MEMBER_ID)).willReturn(9L);
+
+        listener().on(MEAL_EVENT);
+
+        verify(earnedBadgeCollector, never()).add(Badge.PHOTO_KING);
+        verify(earnedBadgeCollector, never()).add(Badge.NIGHT_EATER);
     }
 
     @Test

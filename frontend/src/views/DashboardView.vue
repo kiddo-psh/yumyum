@@ -520,7 +520,8 @@ async function submitWeight() {
       weightKg: newWeight.value,
       recordedDate: today,
     })
-    state.weights = [...state.weights, { id: created.id, date: created.recordedDate, weight: created.weightKg }]
+    state.weights = [...state.weights.filter(w => w.date !== created.recordedDate),
+                     { id: created.id, date: created.recordedDate, weight: created.weightKg }]
       .sort((a, b) => a.date.localeCompare(b.date))
     newWeight.value = null
   } catch {

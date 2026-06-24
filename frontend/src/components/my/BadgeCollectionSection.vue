@@ -1,7 +1,7 @@
 <template>
   <section class="neo-brutal-border rounded-xl bg-surface p-8 neo-brutal-card-hover">
     <div class="flex items-end justify-between mb-6">
-      <h2 class="text-headline-lg text-on-background">뱃지 도감</h2>
+      <h2 class="text-headline-lg text-on-background">업적</h2>
       <p v-if="store.loaded" class="text-label-lg text-on-surface-variant">
         {{ store.earnedBadges.length }} / {{ store.badges.length }} 획득
       </p>
@@ -27,6 +27,7 @@
           :alt="badge.name"
           :locked="!badge.earned"
           class="w-full aspect-square transition-transform group-hover:-translate-y-1"
+          :class="{ 'blur-sm': !badge.earned }"
         />
 
         <!-- 미획득 잠금 표시 -->

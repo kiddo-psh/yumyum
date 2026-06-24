@@ -426,6 +426,7 @@ async function confirmAdd(mealId) {
     search.query = ''
     search.results = []
     search.amount = 100
+    refreshSummary()
   } catch {
     if (state.meals.find((m) => m.id === mealId)?._isTemp) {
       state.meals = state.meals.filter((m) => m.id !== mealId)
@@ -456,6 +457,7 @@ async function handleDelete(mealId) {
   try {
     await deleteMeal(mealId)
     state.meals = state.meals.filter((m) => m.id !== mealId)
+    refreshSummary()
   } finally {
     state.deleting = null
   }
@@ -491,6 +493,16 @@ async function loadData() {
   state.loading = false
 
   if (canRecommend.value) await loadRecommendation()
+}
+
+async function refreshSummary() {
+  const date = formatDate(currentDate.value)
+  const [summary, balance] = await Promise.allSettled([
+    getDailySummary(date),
+    getCalorieBalance(date),
+  ])
+  if (summary.status === 'fulfilled') state.summary = summary.value
+  if (balance.status === 'fulfilled') state.balance = balance.value
 }
 
 function prevDay() {

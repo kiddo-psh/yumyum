@@ -18,6 +18,7 @@ public class FoodApiResponse {
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Body {
+        private int totalCount;
         private List<Item> items;
     }
 

@@ -31,4 +31,8 @@ public class Weight {
     public static Weight create(Long memberId, double weightKg, LocalDate recordedDate) {
         return new Weight(memberId, weightKg, recordedDate);
     }
+
+    public void update(double weightKg) {
+        this.weightKg = weightKg;
+    }
 }

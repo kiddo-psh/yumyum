@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,13 @@ public class RoutineController {
                 .map(RoutineSummaryResponse::from)
                 .toList();
         return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/{routineId}")
+    public ResponseEntity<RoutineResponse> getRoutine(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long routineId) {
+        return ResponseEntity.ok(RoutineResponse.from(routineService.getRoutine(memberId, routineId)));
     }
 
     @GetMapping("/split-options")
@@ -63,6 +71,27 @@ public class RoutineController {
         RoutineResult result = routineService.createManual(
                 memberId, request.name(), request.daysPerWeek(), inputs);
         return ResponseEntity.status(HttpStatus.CREATED).body(RoutineResponse.from(result));
+    }
+
+    @PostMapping("/{routineId}/exercises")
+    public ResponseEntity<RoutineResponse.ExerciseResponse> addExercise(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long routineId,
+            @RequestBody AddExerciseRequest request) {
+        RoutineResult.ExerciseResult result = routineService.addExercise(
+                memberId, routineId,
+                request.dayLabel(), request.exerciseName(),
+                request.targetSets(), request.targetReps(), request.targetWeightKg());
+        return ResponseEntity.status(HttpStatus.CREATED).body(RoutineResponse.ExerciseResponse.from(result));
+    }
+
+    @DeleteMapping("/{routineId}/exercises/{exerciseId}")
+    public ResponseEntity<Void> deleteExercise(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long routineId,
+            @PathVariable Long exerciseId) {
+        routineService.deleteExercise(memberId, routineId, exerciseId);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{routineId}/exercises/{exerciseId}")

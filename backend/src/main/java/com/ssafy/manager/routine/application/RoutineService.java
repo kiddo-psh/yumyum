@@ -40,6 +40,17 @@ public class RoutineService {
                 .toList();
     }
 
+    public RoutineResult getRoutine(Long memberId, Long routineId) {
+        Routine routine = routineRepository.findById(routineId)
+                .orElseThrow(() -> new NoSuchElementException("루틴을 찾을 수 없습니다."));
+        if (!routine.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("본인의 루틴만 조회할 수 있습니다.");
+        }
+        List<RoutineExercise> exercises =
+                routineExerciseRepository.findByRoutineIdOrderByDayLabelAscOrderIndexAsc(routineId);
+        return RoutineResult.from(routine, exercises, null);
+    }
+
     @Transactional
     public RoutineResult createAi(Long memberId, boolean hasExistingRoutine,
                                   int daysPerWeek, SplitType splitType) {
@@ -103,6 +114,36 @@ public class RoutineService {
         routineExerciseRepository.saveAll(exercises);
 
         return RoutineResult.from(routine, exercises, null);
+    }
+
+    @Transactional
+    public RoutineResult.ExerciseResult addExercise(Long memberId, Long routineId,
+                                                    String dayLabel, String exerciseName,
+                                                    int targetSets, int targetReps, double targetWeightKg) {
+        Routine routine = routineRepository.findById(routineId)
+                .orElseThrow(() -> new NoSuchElementException("루틴을 찾을 수 없습니다."));
+        if (!routine.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("본인의 루틴만 수정할 수 있습니다.");
+        }
+        List<RoutineExercise> existing =
+                routineExerciseRepository.findByRoutineIdOrderByDayLabelAscOrderIndexAsc(routineId);
+        int nextOrder = (int) existing.stream().filter(e -> e.getDayLabel().equals(dayLabel)).count();
+        RoutineExercise exercise = RoutineExercise.create(
+                routineId, dayLabel, exerciseName, targetSets, targetReps, targetWeightKg, nextOrder);
+        routineExerciseRepository.save(exercise);
+        return RoutineResult.ExerciseResult.from(exercise);
+    }
+
+    @Transactional
+    public void deleteExercise(Long memberId, Long routineId, Long exerciseId) {
+        Routine routine = routineRepository.findById(routineId)
+                .orElseThrow(() -> new NoSuchElementException("루틴을 찾을 수 없습니다."));
+        if (!routine.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("본인의 루틴만 수정할 수 있습니다.");
+        }
+        RoutineExercise exercise = routineExerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new NoSuchElementException("운동을 찾을 수 없습니다."));
+        routineExerciseRepository.delete(exercise);
     }
 
     @Transactional

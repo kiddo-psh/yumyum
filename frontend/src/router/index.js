@@ -14,6 +14,7 @@ import NotFoundView from '@/views/NotFoundView.vue';
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import OnboardingView from '@/views/OnboardingView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
+import RoutineDetailView from '@/views/RoutineDetailView.vue';
 import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
 import RoutineView from '@/views/RoutineView.vue';
 
@@ -116,6 +117,14 @@ const routes = [
         component: RoutineOnboardingView,
         meta: {
           title: '운동 루틴 만들기',
+        },
+      },
+      {
+        path: 'routine/:routineId',
+        name: 'routine-detail',
+        component: RoutineDetailView,
+        meta: {
+          title: '루틴 상세',
         },
       },
       {

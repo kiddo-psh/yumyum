@@ -21,8 +21,8 @@ export const useBadgeStore = defineStore('badge', () => {
   const earnedBadges = computed(() => badges.value.filter((b) => b.earned));
 
   async function loadCollection(force = false) {
-    if (loading.value) return;
     if (loaded.value && !force) return;
+    if (loading.value) return;
 
     loading.value = true;
     error.value = null;

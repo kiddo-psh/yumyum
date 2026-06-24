@@ -24,8 +24,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { apiClient } from '@/services/apiClient';
+import { clearTokens } from '@/services/auth';
 import { getMyProfile, getNyamStatus, getCurrentProgram } from '@/api/my';
+import { logout as logoutApi } from '@/api/auth';
 import NyamSection from '@/components/my/NyamSection.vue';
 import ProfileSection from '@/components/my/ProfileSection.vue';
 import ProgramSection from '@/components/my/ProgramSection.vue';
@@ -70,9 +71,13 @@ function onProfileUpdated(updated) {
 }
 
 async function logout() {
-  await apiClient.post('/auth/logout');
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  router.push('/');
+  try {
+    await logoutApi();
+  } catch {
+    // 서버 오류여도 클라이언트 토큰은 항상 정리한다
+  } finally {
+    clearTokens();
+    router.push('/');
+  }
 }
 </script>

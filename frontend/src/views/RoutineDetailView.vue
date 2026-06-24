@@ -353,6 +353,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getRoutine, updateExercise, addExercise, deleteExercise, recordSession } from '@/api/routine'
+import { useBadgeStore } from '@/stores/badge'
+
+const badgeStore = useBadgeStore()
 
 const route = useRoute()
 const routineId = Number(route.params.routineId)
@@ -553,7 +556,8 @@ async function finishWorkout() {
         completed: s.completed,
       }))
     )
-    await recordSession(routineId, { sessionDate: today, caloriesBurned: calories, sets })
+    const sessionResult = await recordSession(routineId, { sessionDate: today, caloriesBurned: calories, sets })
+    badgeStore.celebrate(sessionResult)
     doneCalories.value = calories
     workoutMode.value = false
     selectedDay.value = ''

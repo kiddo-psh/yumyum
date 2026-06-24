@@ -120,6 +120,7 @@ const selectedFile = ref(null)
 const previewUrl = ref(null)
 const errorMessage = ref('')
 const sizeError = ref('')
+const capturedMealType = ref('')
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024  // 10MB
 
@@ -141,8 +142,9 @@ function onFileSelected(event) {
 
 async function startAnalysis() {
   phase.value = 'analyzing'
+  capturedMealType.value = inferMealType()
   try {
-    const result = await analyzePhoto(selectedFile.value, inferMealType())
+    const result = await analyzePhoto(selectedFile.value, capturedMealType.value)
     analysisResult.value = {
       detectedItems: result.detectedItems ?? [],
       totalKcal: result.totalKcal ?? 0,
@@ -158,7 +160,7 @@ async function startAnalysis() {
 async function saveMeal() {
   phase.value = 'saving'
   try {
-    const meal = await recordPhotoMeal(inferMealType(), analysisResult.value.detectedItems)
+    const meal = await recordPhotoMeal(capturedMealType.value, analysisResult.value.detectedItems)
     badgeStore.celebrate(meal)
     router.push('/log')
   } catch {
@@ -171,6 +173,7 @@ function reset() {
   phase.value = 'idle'
   analysisResult.value = null
   selectedFile.value = null
+  capturedMealType.value = ''
   if (previewUrl.value) {
     URL.revokeObjectURL(previewUrl.value)
     previewUrl.value = null

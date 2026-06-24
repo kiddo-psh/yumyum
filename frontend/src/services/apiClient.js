@@ -128,7 +128,6 @@ async function performRequest(path, options, allowReissue) {
     ...fetchOptions,
     headers,
   });
-  const data = await parseResponse(response);
 
   if (!response.ok) {
     if (response.status === 401 && allowReissue && path !== REISSUE_PATH) {
@@ -141,17 +140,20 @@ async function performRequest(path, options, allowReissue) {
 
     // 재발급까지 실패한 401이면 세션을 정리하고 로그인 화면으로 보낸다.
     if (response.status === 401) {
-      console.warn(`[auth] 401 (재발급 실패) — ${fetchOptions.method ?? 'GET'} ${path}`, data);
+      console.warn(`[auth] 401 (재발급 실패) — ${fetchOptions.method ?? 'GET'} ${path}`);
       redirectToLogin();
     }
 
+    // parseResponse 실패(비JSON 바디 등)는 null 로 폴백한다.
+    let errData = null;
+    try { errData = await parseResponse(response); } catch { /* ignore */ }
     throw new ApiError('API request failed', {
       status: response.status,
-      data,
+      data: errData,
     });
   }
 
-  return data;
+  return parseResponse(response);
 }
 
 export const apiClient = {

@@ -23,6 +23,6 @@ public class AiChatController {
             @AuthenticationPrincipal Long memberId,
             @RequestBody ChatRequest request
     ) {
-        return ResponseEntity.ok(ChatResponse.from(aiMealService.chat(request.message())));
+        return ResponseEntity.ok(ChatResponse.from(aiMealService.chat(memberId, request.message())));
     }
 }

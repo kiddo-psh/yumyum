@@ -164,6 +164,7 @@
           <p class="text-body-md mb-6 text-on-surface-variant">{{ recommendation.reason }}</p>
           <div class="flex gap-4">
             <RouterLink
+              v-if="hasRecommendation"
               :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
               class="bg-primary text-white px-8 py-3 neo-brutal-border rounded-lg font-bold flex items-center gap-2 hover:-translate-y-1 transition-transform"
             >
@@ -176,7 +177,7 @@
               @click="loadRecommendation"
             >
               <span class="material-symbols-outlined">refresh</span>
-              {{ state.recommendLoading ? '요청 중...' : '다시 추천' }}
+              {{ state.recommendLoading ? '요청 중...' : (hasRecommendation ? '다시 추천' : '추천 받기') }}
             </button>
           </div>
         </div>
@@ -317,6 +318,8 @@ const macros = computed(() => [
     colorClass: 'bg-fat',
   },
 ])
+
+const hasRecommendation = computed(() => Boolean(state.recommendData?.recommendations?.[0]))
 
 const recommendation = computed(() => {
   const rec = state.recommendData?.recommendations?.[0]

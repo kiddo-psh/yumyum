@@ -111,6 +111,9 @@
         style="font-variation-settings:'FILL' 1;"
       >add</span>
     </button>
+
+    <!-- 뱃지/스트릭 획득 연출 (기록 응답 piggyback) -->
+    <BadgeCelebrationOverlay />
   </div>
 </template>
 
@@ -121,6 +124,7 @@ import { useRouter } from 'vue-router';
 import { logout as logoutRequest } from '@/api/auth';
 import { clearTokens } from '@/services/auth';
 import { useBadgeStore } from '@/stores/badge';
+import BadgeCelebrationOverlay from '@/components/badge/BadgeCelebrationOverlay.vue';
 
 const router = useRouter();
 

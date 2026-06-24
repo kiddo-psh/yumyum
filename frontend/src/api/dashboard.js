@@ -52,3 +52,7 @@ export function recordMeal({ type, date, foodCode, amountGrams }) {
   if (type) body.type = type;
   return apiClient.post('/meals', body);
 }
+
+export function getHomeComment() {
+  return apiClient.get('/home/comment')
+}

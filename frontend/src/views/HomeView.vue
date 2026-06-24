@@ -223,6 +223,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import {
   getCalorieBalance,
   getDailySummary,
+  getHomeComment,
   getLastMealRecommendation,
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
@@ -240,6 +241,8 @@ const state = reactive({
 
 const progressCircle = ref(null)
 const strokeDashoffset = ref(circumference)
+
+const aiComment = ref(null)
 
 const newWeight = ref(null)
 const weightSubmitting = ref(false)
@@ -266,6 +269,7 @@ const achievementMessage = computed(() => {
 })
 
 const coachMessage = computed(() => {
+  if (aiComment.value) return aiComment.value
   if (state.balance?.lastMealRecommendTrigger) return '마지막 끼니 추천이 준비됐어요!'
   return `${formatNumber(remainingCalories.value)} kcal 남았어요. 기록해볼까요?`
 })
@@ -325,6 +329,14 @@ onMounted(async () => {
 
   if (state.balance?.lastMealRecommendTrigger) {
     loadRecommendation()
+  }
+
+  // AI 코멘트 비동기 로드 (실패 시 정적 fallback 유지)
+  try {
+    const res = await getHomeComment()
+    aiComment.value = res.comment
+  } catch {
+    // aiComment null 유지 → coachMessage computed가 정적 fallback 반환
   }
 })
 

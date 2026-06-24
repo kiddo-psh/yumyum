@@ -1,5 +1,6 @@
 package com.ssafy.manager.program.application;
 
+import com.ssafy.manager.global.time.EffectiveDateResolver;
 import com.ssafy.manager.member.application.MemberOnboardedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +8,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.time.LocalDate;
 
 /**
  * 온보딩 완료 후 Program(+오늘 DailyGoal)을 자동 생성한다.
@@ -29,7 +28,7 @@ public class ProgramOnboardingListener {
     @Async
     public void on(MemberOnboardedEvent event) {
         try {
-            programService.create(event.memberId(), LocalDate.now(), 4);
+            programService.create(event.memberId(), EffectiveDateResolver.today(), 4);
             log.info("[ProgramOnboarding] Program 생성 완료: memberId={}", event.memberId());
         } catch (IllegalStateException e) {
             log.info("[ProgramOnboarding] 이미 활성 Program 있음, 건너뜀: memberId={}", event.memberId());

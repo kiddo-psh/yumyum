@@ -242,6 +242,7 @@ import {
   getLastMealRecommendation,
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
+import { getEffectiveToday } from '@/utils/effectiveDate'
 
 const RADIUS = 42
 const circumference = 2 * Math.PI * RADIUS
@@ -264,7 +265,7 @@ const weightSubmitting = ref(false)
 const weightError = ref('')
 const weightSuccess = ref(false)
 
-const today = formatDate(new Date())
+const today = formatDate(getEffectiveToday())
 
 const targetCalories = computed(() => state.balance?.targetCalories ?? state.summary?.targetCalories ?? 1800)
 const intakeCalories = computed(() => state.balance?.intakeCalories ?? state.summary?.achievedCalories ?? 0)

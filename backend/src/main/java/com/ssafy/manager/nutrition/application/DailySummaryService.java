@@ -5,7 +5,6 @@ import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import com.ssafy.manager.nutrition.domain.MealItem;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.presentation.dto.DailySummaryResponse;
-import com.ssafy.manager.program.application.DailyGoalCreationService;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +19,12 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class DailySummaryService {
 
-    private final DailyGoalCreationService dailyGoalCreationService;
     private final DailyGoalRepository dailyGoalRepository;
     private final MemberStatsRepository memberStatsRepository;
     private final MealItemRepository mealItemRepository;
 
     @Transactional(readOnly = true)
     public DailySummaryResponse getSummary(Long memberId, LocalDate date) {
-        dailyGoalCreationService.ensureGoalExists(memberId, date);
         DailyGoal goal = dailyGoalRepository.findByMemberIdAndDate(memberId, date)
                 .orElseThrow(() -> new NoSuchElementException("해당 날짜의 DailyGoal이 없습니다."));
 

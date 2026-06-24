@@ -3,7 +3,6 @@ package com.ssafy.manager.nutrition.application;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.nutrition.presentation.dto.CalorieBalanceResponse;
-import com.ssafy.manager.program.application.DailyGoalCreationService;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
@@ -18,7 +17,6 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class CalorieBalanceService {
 
-    private final DailyGoalCreationService dailyGoalCreationService;
     private final DailyGoalRepository dailyGoalRepository;
     private final MealItemRepository mealItemRepository;
     private final MealRepository mealRepository;
@@ -26,7 +24,6 @@ public class CalorieBalanceService {
 
     @Transactional(readOnly = true)
     public CalorieBalanceResponse getBalance(Long memberId, LocalDate date, LocalTime currentTime) {
-        dailyGoalCreationService.ensureGoalExists(memberId, date);
         DailyGoal goal = dailyGoalRepository.findByMemberIdAndDate(memberId, date).orElse(null);
         if (goal == null) {
             return new CalorieBalanceResponse(0, 0.0, 0, 0.0, 0, false);

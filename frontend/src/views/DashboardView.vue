@@ -211,6 +211,7 @@ import {
   getWeightHistory,
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
+import { getEffectiveToday } from '@/utils/effectiveDate'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 const CHART_W = 500
@@ -231,7 +232,7 @@ const state = reactive({
 
 const viewMode = ref('daily')
 
-const today = formatDate(new Date())
+const today = formatDate(getEffectiveToday())
 const todayFormatted = formatDisplayDate(new Date())
 
 const newWeight = ref(null)

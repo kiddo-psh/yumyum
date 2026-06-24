@@ -16,7 +16,11 @@
 
         <!-- 뱃지 획득 -->
         <template v-else>
-          <span class="text-6xl leading-none block mb-4 animate-bounce">{{ item.badge.icon }}</span>
+          <BadgeImage
+            :code="item.badge.code"
+            :alt="item.badge.name"
+            class="w-24 h-24 mx-auto mb-4 animate-bounce"
+          />
           <p class="text-label-lg text-primary mb-1">뱃지 획득!</p>
           <p class="text-headline-lg text-on-background leading-tight">{{ item.badge.name }}</p>
           <p class="text-body-md text-on-surface-variant mt-2 leading-relaxed">{{ item.badge.description }}</p>
@@ -39,6 +43,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useBadgeStore } from '@/stores/badge';
+import BadgeImage from '@/components/badge/BadgeImage.vue';
 
 const store = useBadgeStore();
 const { current: item, queue } = storeToRefs(store);

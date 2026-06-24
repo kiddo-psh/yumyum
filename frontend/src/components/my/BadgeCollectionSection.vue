@@ -19,30 +19,34 @@
     <div v-else class="flex flex-col gap-8">
       <div v-for="group in groups" :key="group.category">
         <h3 class="text-label-lg text-on-surface-variant mb-3">{{ group.label }}</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <article
+        <div class="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-5">
+          <div
             v-for="badge in group.badges"
             :key="badge.code"
-            class="neo-brutal-border rounded-xl p-4 flex flex-col items-center text-center gap-2 transition-transform"
-            :class="badge.earned ? 'bg-white hover:-translate-y-1' : 'bg-gray-100'"
+            class="group relative flex items-center justify-center"
           >
-            <span
-              class="text-4xl leading-none"
-              :class="{ 'grayscale opacity-40': !badge.earned }"
-            >{{ badge.icon }}</span>
-            <p
-              class="text-body-md font-bold"
-              :class="badge.earned ? 'text-on-background' : 'text-on-surface-variant'"
-            >{{ badge.name }}</p>
-            <p class="text-label-lg text-on-surface-variant leading-snug">{{ badge.description }}</p>
-            <p v-if="badge.earned" class="text-[10px] text-primary mt-auto">
-              {{ formatEarnedAt(badge.earnedAt) }}
-            </p>
-            <span
-              v-else
-              class="material-symbols-outlined text-base text-on-surface-variant mt-auto"
-            >lock</span>
-          </article>
+            <BadgeImage
+              :code="badge.code"
+              :alt="badge.name"
+              :locked="!badge.earned"
+              class="w-full aspect-square transition-transform group-hover:-translate-y-1"
+            />
+
+            <!-- hover 정보 -->
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 mb-2 w-44 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white neo-brutal-border rounded-lg p-3 text-center"
+            >
+              <p
+                class="text-body-md font-bold"
+                :class="badge.earned ? 'text-on-background' : 'text-on-surface-variant'"
+              >{{ badge.name }}</p>
+              <p class="text-label-lg text-on-surface-variant leading-snug mt-1">{{ badge.description }}</p>
+              <p
+                class="text-[10px] mt-1"
+                :class="badge.earned ? 'text-primary' : 'text-on-surface-variant'"
+              >{{ badge.earned ? formatEarnedAt(badge.earnedAt) : '아직 획득 전' }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -52,6 +56,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 
+import BadgeImage from '@/components/badge/BadgeImage.vue';
 import { useBadgeStore } from '@/stores/badge';
 
 const store = useBadgeStore();

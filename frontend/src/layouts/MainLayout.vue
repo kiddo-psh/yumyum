@@ -41,25 +41,23 @@
         </RouterLink>
       </nav>
 
-      <!-- 획득한 뱃지 -->
+      <!-- 획득한 뱃지 (테두리 없이 이미지만) -->
       <RouterLink
         v-if="earnedBadges.length"
         to="/my"
-        class="mt-auto neo-brutal-border bg-white rounded-xl p-3 flex items-center gap-2 hover:-translate-y-0.5 transition-transform"
+        class="mt-auto flex items-center gap-1 flex-wrap"
         title="뱃지 도감 보기"
       >
-        <span class="material-symbols-outlined text-on-surface-variant text-lg flex-shrink-0">military_tech</span>
-        <div class="flex items-center gap-1 flex-1 min-w-0">
-          <span
-            v-for="badge in previewBadges"
-            :key="badge.code"
-            class="text-xl leading-none"
-            :title="badge.name"
-          >{{ badge.icon }}</span>
-        </div>
+        <BadgeImage
+          v-for="badge in previewBadges"
+          :key="badge.code"
+          :code="badge.code"
+          :alt="badge.name"
+          class="w-9 h-9 hover:-translate-y-0.5 transition-transform"
+        />
         <span
           v-if="extraBadgeCount > 0"
-          class="text-label-lg text-on-surface-variant flex-shrink-0"
+          class="text-label-lg text-on-surface-variant"
         >+{{ extraBadgeCount }}</span>
       </RouterLink>
 
@@ -125,6 +123,7 @@ import { logout as logoutRequest } from '@/api/auth';
 import { clearTokens } from '@/services/auth';
 import { useBadgeStore } from '@/stores/badge';
 import BadgeCelebrationOverlay from '@/components/badge/BadgeCelebrationOverlay.vue';
+import BadgeImage from '@/components/badge/BadgeImage.vue';
 
 const router = useRouter();
 

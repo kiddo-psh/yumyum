@@ -34,4 +34,10 @@ public interface RoutineSessionRepository extends JpaRepository<RoutineSession, 
                                                           @Param("to") LocalDate to);
 
     List<RoutineSession> findByMemberIdAndSessionDateBetween(Long memberId, LocalDate from, LocalDate to);
+
+    long countByMemberId(Long memberId);
+
+    @Query("SELECT COUNT(rs) FROM RoutineSession rs " +
+           "WHERE rs.memberId = :memberId AND FUNCTION('DAYOFWEEK', rs.sessionDate) IN (1, 7)")
+    long countWeekendByMemberId(@Param("memberId") Long memberId);
 }

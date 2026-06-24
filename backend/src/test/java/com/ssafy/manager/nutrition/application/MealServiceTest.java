@@ -1,6 +1,5 @@
 package com.ssafy.manager.nutrition.application;
 
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
 import com.ssafy.manager.nutrition.domain.MealType;
@@ -16,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,7 +34,7 @@ class MealServiceTest {
     @Mock MealRepository mealRepository;
     @Mock MealItemRepository mealItemRepository;
     @Mock DailyGoalRepository dailyGoalRepository;
-    @Mock StreakService streakService;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks MealService mealService;
 
@@ -59,7 +59,7 @@ class MealServiceTest {
                 NOON
         );
 
-        verify(streakService).increment(MEMBER_ID, TODAY);
+        verify(eventPublisher).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 
     @Test
@@ -77,7 +77,7 @@ class MealServiceTest {
                 NOON
         );
 
-        verify(streakService, never()).increment(MEMBER_ID, TODAY);
+        verify(eventPublisher, never()).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 
     @Test
@@ -97,7 +97,7 @@ class MealServiceTest {
                 NOON
         );
 
-        verify(streakService).increment(MEMBER_ID, TODAY);
+        verify(eventPublisher).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 
     @ParameterizedTest(name = "{0} 미달 시 Streak 미증가")
@@ -118,7 +118,7 @@ class MealServiceTest {
                 NOON
         );
 
-        verify(streakService, never()).increment(MEMBER_ID, TODAY);
+        verify(eventPublisher, never()).publishEvent(new MealGoalAchievedEvent(MEMBER_ID, TODAY));
     }
 
     @Test

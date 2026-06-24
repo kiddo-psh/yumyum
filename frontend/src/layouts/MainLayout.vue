@@ -45,7 +45,7 @@
       <RouterLink
         v-if="earnedBadges.length"
         to="/my"
-        class="mt-auto flex items-center gap-1 flex-wrap"
+        class="mt-auto flex items-center gap-1 flex-wrap px-4"
         title="뱃지 도감 보기"
       >
         <BadgeImage

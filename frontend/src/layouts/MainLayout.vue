@@ -7,11 +7,8 @@
     >
       <!-- Brand -->
       <div class="mb-8 flex items-center gap-3">
-        <div class="w-12 h-12 bg-nyam-mint rounded-full flex items-center justify-center neo-brutal-border flex-shrink-0">
-          <span
-            class="material-symbols-outlined text-on-background"
-            style="font-variation-settings:'FILL' 1;"
-          >pets</span>
+        <div class="w-12 h-12 bg-nyam-mint rounded-full flex items-center justify-center neo-brutal-border flex-shrink-0 overflow-hidden">
+          <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-10 h-10 object-contain" />
         </div>
         <div>
           <h1 class="text-display-md font-sans text-on-background tracking-tighter leading-none">

@@ -3,7 +3,7 @@
   <header class="flex justify-between items-center mb-10 w-full">
     <div class="flex items-center gap-4">
       <div class="relative w-16 h-16 bg-nyam-mint rounded-xl neo-brutal-border flex items-center justify-center overflow-visible flex-shrink-0">
-        <span class="material-symbols-outlined text-4xl text-on-background" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
+        <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-12 h-12 object-contain" />
         <div v-if="currentStreak > 0" class="absolute -top-2 -right-2 bg-warning neo-brutal-border px-2 py-1 rounded-full text-[10px] font-bold text-on-background">
           🔥 {{ currentStreak }}일
         </div>
@@ -55,8 +55,8 @@
           <p class="text-body-lg text-on-surface-variant mb-6">
             목표까지 단 {{ 100 - calorieProgress }}% 남았네요. <br />조금만 더 힘내볼까요?
           </p>
-          <div class="relative w-48 h-48 bg-nyam-mint neo-brutal-border rounded-2xl p-6 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[80px] text-on-background" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
+          <div class="relative w-48 h-48 bg-nyam-mint neo-brutal-border rounded-2xl p-4 flex items-center justify-center">
+            <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-full h-full object-contain" />
           </div>
         </div>
 

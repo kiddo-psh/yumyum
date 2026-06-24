@@ -37,6 +37,19 @@ export function clearTokens() {
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem('onboardingCompleted');
+}
+
+export function markOnboardingComplete() {
+  localStorage.setItem('onboardingCompleted', 'true');
+}
+
+export function markOnboardingIncomplete() {
+  localStorage.setItem('onboardingCompleted', 'false');
+}
+
+export function isOnboardingCompleted() {
+  return localStorage.getItem('onboardingCompleted');
 }
 
 // 카카오 인가 페이지로 전체 페이지 전환(SPA 라우팅 아님).

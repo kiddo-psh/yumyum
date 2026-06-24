@@ -55,16 +55,11 @@ onMounted(async () => {
     nyamError.value = profileResult[1].reason;
   }
 
-  // Program은 memberId 필요
-  if (profile.value?.memberId) {
-    const programResult = await Promise.allSettled([getCurrentProgram(profile.value.memberId)]);
-    if (programResult[0].status === 'fulfilled') {
-      program.value = programResult[0].value;
-    } else {
-      programError.value = programResult[0].reason;
-    }
+  const programResult = await Promise.allSettled([getCurrentProgram()]);
+  if (programResult[0].status === 'fulfilled') {
+    program.value = programResult[0].value;
   } else {
-    programError.value = new Error('프로필 로딩 실패로 Program을 조회할 수 없습니다.');
+    programError.value = programResult[0].reason;
   }
 });
 

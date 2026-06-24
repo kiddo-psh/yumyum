@@ -46,6 +46,10 @@ public class RoutineService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
+        if (!member.isOnboardingCompleted()) {
+            throw new com.ssafy.manager.member.domain.OnboardingRequiredException("루틴 생성 전 온보딩을 완료해주세요.");
+        }
+
         String healthGoal = programRepository
                 .findByMemberIdAndStatus(memberId, ProgramStatus.ACTIVE)
                 .map(p -> toHealthGoal(p.getType()))

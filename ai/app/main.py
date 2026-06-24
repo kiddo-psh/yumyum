@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import ai_meal, ai_plan, ai_routine, food, ai_report, ai_coach, ai_chat, ai_coaching
+from app.routers import ai_meal, ai_plan, ai_routine, food, ai_report, ai_coach, ai_chat, ai_coaching, ai_home
 from app.services import rag_service
 from app.config import settings
 
@@ -28,6 +28,7 @@ app.include_router(ai_report.router)
 app.include_router(ai_coach.router)
 app.include_router(ai_chat.router)
 app.include_router(ai_coaching.router)
+app.include_router(ai_home.router)
 
 
 @app.get("/health", tags=["Health"])

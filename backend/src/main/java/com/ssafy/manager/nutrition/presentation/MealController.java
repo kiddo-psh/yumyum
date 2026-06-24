@@ -1,5 +1,6 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.global.time.EffectiveDateResolver;
 import com.ssafy.manager.growth.application.EarnedBadgeCollector;
 import com.ssafy.manager.growth.application.StreakChangeHolder;
 import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
@@ -83,7 +84,7 @@ public class MealController {
             @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) LocalDate date
     ) {
-        LocalDate targetDate = date != null ? date : LocalDate.now();
+        LocalDate targetDate = date != null ? date : EffectiveDateResolver.today();
         List<MealResponse> meals = mealService.listByDate(memberId, targetDate).stream()
                 .map(MealResponse::from)
                 .toList();

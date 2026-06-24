@@ -79,7 +79,7 @@ public class FoodBulkLoadService {
     private int batchInsert(List<Item> items) {
         String sql = """
                 INSERT IGNORE INTO foods
-                    (food_code, name, calories_per_100g, carbs_per_100g, protein_per_100g, fat_per_100g, fiber_per_100g)
+                    (food_code, name, calories_per100g, carbs_per100g, protein_per100g, fat_per100g, fiber_per100g)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
         int[][] result = jdbcTemplate.batchUpdate(sql, items, 500, (ps, item) -> {

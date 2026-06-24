@@ -154,11 +154,12 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { addMealItem, recordMeal, searchFoods } from '@/api/dashboard';
 import { useBadgeStore } from '@/stores/badge';
+import { getEffectiveToday } from '@/utils/effectiveDate';
 
 const route = useRoute();
 const router = useRouter();
 const badgeStore = useBadgeStore();
-const todayDate = formatDate(new Date());
+const todayDate = formatDate(getEffectiveToday());
 const isManualMode = computed(() => route.meta.mode === 'manual');
 const mealId = computed(() => route.query.mealId ? Number(route.query.mealId) : null);
 const query = ref(typeof route.query.q === 'string' ? route.query.q : '');

@@ -280,13 +280,14 @@ import {
   searchFoods,
 } from '@/api/dashboard'
 import { useBadgeStore } from '@/stores/badge'
+import { getEffectiveToday } from '@/utils/effectiveDate'
 
 const badgeStore = useBadgeStore()
 
 const MACRO_TARGETS = { carbs: 250, protein: 120, fat: 60 }
 const ORDINALS = ['첫', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열']
 
-const currentDate = ref(new Date())
+const currentDate = ref(getEffectiveToday())
 const state = reactive({
   loading: true,
   summary: null,
@@ -311,12 +312,13 @@ const search = reactive({
   saving: false,
 })
 
-const isToday = computed(() => formatDate(currentDate.value) === formatDate(new Date()))
+const isToday = computed(() => formatDate(currentDate.value) === formatDate(getEffectiveToday()))
 
 const displayDate = computed(() => {
   const d = currentDate.value
-  if (formatDate(d) === formatDate(new Date())) return '오늘'
-  const yesterday = new Date()
+  const today = getEffectiveToday()
+  if (formatDate(d) === formatDate(today)) return '오늘'
+  const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   if (formatDate(d) === formatDate(yesterday)) return '어제'
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
@@ -518,7 +520,7 @@ function nextDay() {
   currentDate.value = d
 }
 
-function goToday() { currentDate.value = new Date() }
+function goToday() { currentDate.value = getEffectiveToday() }
 
 function clamp(v) { return Math.max(0, Math.min(100, v)) }
 

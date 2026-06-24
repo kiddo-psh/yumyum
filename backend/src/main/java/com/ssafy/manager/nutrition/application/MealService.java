@@ -1,6 +1,7 @@
 package com.ssafy.manager.nutrition.application;
 
 import com.ssafy.manager.global.exception.ForbiddenException;
+import com.ssafy.manager.global.time.EffectiveDateResolver;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
@@ -31,7 +32,7 @@ public class MealService {
 
     @Transactional
     public Meal record(MealCommand command, LocalDateTime recordedAt) {
-        LocalDate effectiveDate = effectiveDateOf(recordedAt);
+        LocalDate effectiveDate = EffectiveDateResolver.resolve(recordedAt);
         MealType resolvedType = command.type() != null ? command.type() : inferMealType(recordedAt);
 
         Meal meal = new Meal(command.memberId(), resolvedType, command.date(), effectiveDate,
@@ -93,10 +94,10 @@ public class MealService {
 
     @Transactional
     public Meal recordFromPhoto(PhotoMealCommand command, LocalDateTime recordedAt) {
-        LocalDate effectiveDate = effectiveDateOf(recordedAt);
+        LocalDate effectiveDate = EffectiveDateResolver.resolve(recordedAt);
         MealType resolvedType = command.mealType() != null ? command.mealType() : inferMealType(recordedAt);
 
-        Meal meal = new Meal(command.memberId(), resolvedType, recordedAt.toLocalDate(), effectiveDate,
+        Meal meal = new Meal(command.memberId(), resolvedType, effectiveDate, effectiveDate,
                 MealSource.PHOTO, recordedAt);
         for (PhotoMealItemCommand item : command.items()) {
             meal.addAiItem(item.name(), item.estimatedGrams(),
@@ -116,12 +117,6 @@ public class MealService {
     @Transactional(readOnly = true)
     public List<Meal> listByDate(Long memberId, LocalDate date) {
         return mealRepository.findAllByMemberIdAndDate(memberId, date);
-    }
-
-    private LocalDate effectiveDateOf(LocalDateTime recordedAt) {
-        return recordedAt.getHour() < 4
-                ? recordedAt.toLocalDate().minusDays(1)
-                : recordedAt.toLocalDate();
     }
 
     private MealType inferMealType(LocalDateTime recordedAt) {

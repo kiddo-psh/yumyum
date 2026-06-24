@@ -109,8 +109,10 @@
 import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { analyzePhoto, recordPhotoMeal } from '@/api/meal'
+import { useBadgeStore } from '@/stores/badge'
 
 const router = useRouter()
+const badgeStore = useBadgeStore()
 
 const phase = ref('idle')        // 'idle' | 'analyzing' | 'result' | 'saving' | 'error'
 const analysisResult = ref(null)
@@ -156,7 +158,8 @@ async function startAnalysis() {
 async function saveMeal() {
   phase.value = 'saving'
   try {
-    await recordPhotoMeal(inferMealType(), analysisResult.value.detectedItems)
+    const meal = await recordPhotoMeal(inferMealType(), analysisResult.value.detectedItems)
+    badgeStore.celebrate(meal)
     router.push('/log')
   } catch {
     phase.value = 'error'

@@ -153,9 +153,11 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { addMealItem, recordMeal, searchFoods } from '@/api/dashboard';
+import { useBadgeStore } from '@/stores/badge';
 
 const route = useRoute();
 const router = useRouter();
+const badgeStore = useBadgeStore();
 const todayDate = formatDate(new Date());
 const isManualMode = computed(() => route.meta.mode === 'manual');
 const mealId = computed(() => route.query.mealId ? Number(route.query.mealId) : null);
@@ -229,7 +231,8 @@ async function handleRecord() {
       await addMealItem(mealId.value, { foodCode: recordForm.foodCode, amountGrams: recordForm.amountGrams });
       router.push('/log');
     } else {
-      await recordMeal(recordForm);
+      const meal = await recordMeal(recordForm);
+      badgeStore.celebrate(meal);
       recordState.success = true;
     }
   } catch (error) {

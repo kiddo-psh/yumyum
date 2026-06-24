@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,6 @@ public class HomeCommentService {
     private final AiHomeCommentClient aiHomeCommentClient;
     private final StringRedisTemplate redisTemplate;
 
-    @Transactional(readOnly = true)
     public String getComment(Long memberId) {
         String cacheKey = CACHE_KEY_PREFIX + memberId;
 

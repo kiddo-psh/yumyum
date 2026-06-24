@@ -103,4 +103,31 @@ class HomeCommentServiceTest {
         assertThat(result).isEqualTo("오늘도 건강한 하루 보내세요!");
         verify(valueOps, never()).set(any(), any(), anyLong(), any());
     }
+
+    @Test
+    void Redis_읽기_오류시_FastAPI를_직접_호출한다() {
+        given(redisTemplate.opsForValue()).willReturn(valueOps);
+        given(valueOps.get(CACHE_KEY)).willThrow(new org.springframework.data.redis.RedisConnectionFailureException("연결 실패"));
+
+        Member member = mock(Member.class);
+        given(member.getHealthGoal()).willReturn(HealthGoal.MUSCLE);
+        given(memberRepository.findById(MEMBER_ID)).willReturn(Optional.of(member));
+
+        MemberStats stats = new MemberStats(Streak.of(3), Streak.of(3), LocalDate.now().minusDays(1));
+        given(memberStatsRepository.findByMemberId(MEMBER_ID)).willReturn(Optional.of(stats));
+
+        DailyGoal goal = DailyGoal.of(MEMBER_ID, LocalDate.now(), 2000.0);
+        given(dailyGoalRepository.findByMemberIdAndDate(eq(MEMBER_ID), any())).willReturn(Optional.of(goal));
+        given(mealItemRepository.sumProteinByMemberIdAndEffectiveDate(eq(MEMBER_ID), any())).willReturn(50.0);
+        given(mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(eq(MEMBER_ID), any())).willReturn(130.0);
+        given(mealItemRepository.sumFatByMemberIdAndEffectiveDate(eq(MEMBER_ID), any())).willReturn(30.0);
+
+        given(aiHomeCommentClient.request(any(AiHomeCommentClientRequest.class)))
+                .willReturn(new AiHomeCommentClientResponse("직접 호출 코멘트"));
+
+        String result = homeCommentService.getComment(MEMBER_ID);
+
+        assertThat(result).isEqualTo("직접 호출 코멘트");
+        verify(aiHomeCommentClient).request(any());
+    }
 }

@@ -20,7 +20,12 @@ public class WeightService {
 
     @Transactional
     public Weight record(Long memberId, double weightKg, LocalDate recordedDate) {
-        return weightRepository.save(Weight.create(memberId, weightKg, recordedDate));
+        return weightRepository.findByMemberIdAndRecordedDate(memberId, recordedDate)
+                .map(existing -> {
+                    existing.update(weightKg);
+                    return existing;
+                })
+                .orElseGet(() -> weightRepository.save(Weight.create(memberId, weightKg, recordedDate)));
     }
 
     @Transactional(readOnly = true)

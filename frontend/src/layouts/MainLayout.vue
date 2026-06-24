@@ -98,16 +98,19 @@
       <RouterView />
     </main>
 
-    <!-- Floating Action Button -->
+    <!-- AI 채팅 패널 -->
+    <AiChatPanel />
+
+    <!-- Floating Action Button — AI 영양 상담 -->
     <button
       class="fixed bottom-10 right-10 w-20 h-20 bg-primary neo-brutal-border rounded-full flex items-center justify-center neo-brutal-shadow hover:scale-110 active:translate-y-2 transition-all z-50 text-white"
-      aria-label="빠른 식단 기록"
-      @click="$router.push('/meals/search')"
+      :aria-label="chatStore.isOpen ? '채팅 닫기' : 'AI 영양 상담'"
+      @click="chatStore.toggle()"
     >
       <span
         class="material-symbols-outlined text-4xl"
         style="font-variation-settings:'FILL' 1;"
-      >add</span>
+      >{{ chatStore.isOpen ? 'close' : 'psychology' }}</span>
     </button>
 
     <!-- 뱃지/스트릭 획득 연출 (기록 응답 piggyback) -->
@@ -122,12 +125,15 @@ import { useRouter } from 'vue-router';
 import { logout as logoutRequest } from '@/api/auth';
 import { clearTokens } from '@/services/auth';
 import { useBadgeStore } from '@/stores/badge';
+import { useChatStore } from '@/stores/chat';
+import AiChatPanel from '@/components/AiChatPanel.vue';
 import BadgeCelebrationOverlay from '@/components/badge/BadgeCelebrationOverlay.vue';
 import BadgeImage from '@/components/badge/BadgeImage.vue';
 
 const router = useRouter();
 
 const badgeStore = useBadgeStore();
+const chatStore = useChatStore();
 
 const PREVIEW_LIMIT = 5;
 const earnedBadges = computed(() => badgeStore.earnedBadges);

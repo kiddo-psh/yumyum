@@ -98,10 +98,8 @@
     </div>
   </div>
 
-  <!-- Row 2: 체중 추세 + AI 채팅 -->
-  <div class="grid grid-cols-12 gap-8">
-    <!-- 체중 추세 그래프 -->
-    <div class="col-span-7 bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
+  <!-- 체중 추세 -->
+  <div class="bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
       <!-- 헤더 -->
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-headline-lg text-on-background">체중 추세</h2>
@@ -203,80 +201,14 @@
         </form>
       </div>
     </div>
-
-    <!-- AI 채팅 -->
-    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl flex flex-col overflow-hidden neo-brutal-card-hover" style="min-height: 380px;">
-      <div class="flex items-center gap-3 p-6 border-b-[3px] border-on-background">
-        <div class="w-10 h-10 bg-nyam-mint neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
-        </div>
-        <div>
-          <h2 class="text-headline-md text-on-background">AI 영양 상담</h2>
-          <p class="text-xs text-on-surface-variant">냠냠 코치에게 질문해보세요</p>
-        </div>
-      </div>
-
-      <!-- 메시지 목록 -->
-      <div ref="chatContainer" class="flex-1 overflow-y-auto p-6 space-y-4" style="max-height: 260px;">
-        <div v-if="!chat.messages.length" class="text-center text-on-surface-variant py-8">
-          <span class="material-symbols-outlined text-4xl block mb-2 opacity-30" style="font-variation-settings:'FILL' 1;">chat</span>
-          <p class="text-body-sm">"오늘 식단 어떻게 해야 할까요?"</p>
-          <p class="text-body-sm">"단백질 더 먹으려면?"</p>
-          <p class="text-body-sm opacity-60 mt-2 text-xs">무엇이든 물어보세요</p>
-        </div>
-        <div
-          v-for="(msg, i) in chat.messages"
-          :key="i"
-          class="flex"
-          :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
-        >
-          <div
-            class="max-w-[80%] px-4 py-3 rounded-xl text-body-sm font-bold neo-brutal-border"
-            :class="msg.role === 'user' ? 'bg-primary text-white' : 'bg-white text-on-background'"
-          >
-            {{ msg.content }}
-          </div>
-        </div>
-        <div v-if="chat.loading" class="flex justify-start">
-          <div class="bg-white neo-brutal-border px-4 py-3 rounded-xl flex items-center gap-2">
-            <span class="material-symbols-outlined animate-spin text-sm text-on-surface-variant">progress_activity</span>
-            <span class="text-body-sm text-on-surface-variant">생각 중...</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 입력창 -->
-      <div class="p-4 border-t-[3px] border-on-background">
-        <p v-if="chat.error" class="text-xs text-danger font-bold mb-2">{{ chat.error }}</p>
-        <div class="flex gap-3">
-          <input
-            v-model="chat.input"
-            type="text"
-            placeholder="질문을 입력하세요..."
-            class="flex-1 px-4 py-3 neo-brutal-border rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-            :disabled="chat.loading"
-            @keydown.enter.prevent="sendMessage"
-          />
-          <button
-            class="w-12 h-12 bg-primary neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0 hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:translate-y-0"
-            :disabled="chat.loading || !chat.input.trim()"
-            @click="sendMessage"
-          >
-            <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1;">send</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import {
   getWeeklyCalendar,
   getWeightHistory,
-  sendChatMessage,
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
 
@@ -297,16 +229,7 @@ const state = reactive({
   weights: [],
 })
 
-const chat = reactive({
-  messages: [],
-  input: '',
-  loading: false,
-  error: '',
-})
-
 const viewMode = ref('daily')
-
-const chatContainer = ref(null)
 
 const today = formatDate(new Date())
 const todayFormatted = formatDisplayDate(new Date())
@@ -527,33 +450,6 @@ async function submitWeight() {
     weightSubmitError.value = '체중 기록에 실패했어요.'
   } finally {
     submitting.value = false
-  }
-}
-
-async function sendMessage() {
-  const msg = chat.input.trim()
-  if (!msg || chat.loading) return
-  chat.messages.push({ role: 'user', content: msg })
-  chat.input = ''
-  chat.error = ''
-  chat.loading = true
-  await scrollChat()
-  try {
-    const res = await sendChatMessage(msg)
-    chat.messages.push({ role: 'ai', content: res.answer ?? '응답을 받았습니다.' })
-  } catch (err) {
-    chat.error = err?.data?.message ?? '잠시 후 다시 시도해주세요.'
-    chat.messages.push({ role: 'ai', content: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.' })
-  } finally {
-    chat.loading = false
-    await scrollChat()
-  }
-}
-
-async function scrollChat() {
-  await nextTick()
-  if (chatContainer.value) {
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
   }
 }
 

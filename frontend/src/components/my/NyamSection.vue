@@ -14,10 +14,9 @@
 
     <!-- 데이터 -->
     <template v-else>
-      <div class="w-24 h-24 neo-brutal-border rounded-full flex items-center justify-center bg-white flex-shrink-0"
+      <div class="w-24 h-24 neo-brutal-border rounded-full flex items-center justify-center bg-white flex-shrink-0 overflow-hidden"
            :class="iconAnimationClass">
-        <span class="material-symbols-outlined text-5xl text-on-background"
-              style="font-variation-settings:'FILL' 1;">pets</span>
+        <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-20 h-20 object-contain" />
       </div>
 
       <div>

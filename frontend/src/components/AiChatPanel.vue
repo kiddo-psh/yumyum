@@ -8,8 +8,8 @@
       <!-- 헤더 -->
       <div class="flex items-center justify-between px-5 py-4 border-b-[3px] border-on-background flex-shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-nyam-mint neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
+          <div class="w-9 h-9 bg-nyam-mint neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-7 h-7 object-contain" />
           </div>
           <div>
             <p class="text-label-lg font-black text-on-background leading-none">AI 영양 상담</p>

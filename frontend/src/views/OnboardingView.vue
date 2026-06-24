@@ -4,7 +4,7 @@
       <!-- 상단 헤더 + 진행 바 -->
       <div class="onboarding-header">
         <div class="onboarding-brand">
-          <span class="material-symbols-outlined brand-icon" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
+          <img src="/nyam/nyamnyam.png" alt="냠냠이" class="brand-icon" />
           <span class="brand-name">냠냠코치</span>
         </div>
         <div class="step-progress">
@@ -314,7 +314,9 @@ async function submit() {
 }
 
 .brand-icon {
-  font-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: contain;
 }
 
 .brand-name {

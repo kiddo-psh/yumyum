@@ -1,21 +1,30 @@
 <template>
   <!-- Header -->
-  <header class="flex justify-between items-center mb-10">
-    <div>
-      <h1 class="text-display-md text-on-background">
-        운동 루틴
-      </h1>
-      <p class="text-body-md text-on-surface-variant mt-1">
-        등록된 운동 루틴을 확인하고 새 루틴을 만들 수 있습니다.
-      </p>
+  <header class="mb-10">
+    <div class="flex justify-between items-start mb-3">
+      <div>
+        <h1 class="text-display-md text-on-background">
+          운동 루틴
+        </h1>
+        <p class="text-body-md text-on-surface-variant mt-1">
+          등록된 운동 루틴을 확인하고 새 루틴을 만들 수 있습니다.
+        </p>
+      </div>
+      <RouterLink
+        v-if="routines.length"
+        to="/routine/onboarding"
+        class="flex items-center gap-2 bg-primary text-on-primary neo-brutal-border rounded-xl px-5 py-3 text-label-lg hover:-translate-y-0.5 active:translate-y-1 transition-all shrink-0"
+      >
+        <span class="material-symbols-outlined">add</span>
+        <span>새 루틴 만들기</span>
+      </RouterLink>
     </div>
     <RouterLink
-      v-if="routines.length"
-      to="/routine/onboarding"
-      class="flex items-center gap-2 bg-primary text-on-primary neo-brutal-border rounded-xl px-5 py-3 text-label-lg hover:-translate-y-0.5 active:translate-y-1 transition-all"
+      to="/routine/history"
+      class="inline-flex items-center gap-1.5 neo-brutal-border rounded-xl bg-white px-4 py-2 text-label-lg text-on-surface-variant hover:text-primary hover:border-primary transition-colors"
     >
-      <span class="material-symbols-outlined">add</span>
-      <span>새 루틴 만들기</span>
+      <span class="material-symbols-outlined text-base">calendar_month</span>
+      운동 기록 보기
     </RouterLink>
   </header>
 

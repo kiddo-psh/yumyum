@@ -15,6 +15,7 @@ import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import OnboardingView from '@/views/OnboardingView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
 import RoutineDetailView from '@/views/RoutineDetailView.vue';
+import RoutineHistoryView from '@/views/RoutineHistoryView.vue';
 import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
 import RoutineView from '@/views/RoutineView.vue';
 
@@ -117,6 +118,14 @@ const routes = [
         component: RoutineOnboardingView,
         meta: {
           title: '운동 루틴 만들기',
+        },
+      },
+      {
+        path: 'routine/history',
+        name: 'routine-history',
+        component: RoutineHistoryView,
+        meta: {
+          title: '운동 기록',
         },
       },
       {

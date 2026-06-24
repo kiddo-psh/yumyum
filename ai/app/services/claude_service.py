@@ -1,3 +1,4 @@
+import json
 import httpx
 from app.config import settings
 
@@ -43,7 +44,69 @@ async def _call_gms(prompt: str, model: str, max_tokens: int) -> str:
 
 def _mock_response(prompt: str) -> str:
     """개발용 mock 응답 (크레딧 절약). JSON 요청 여부에 따라 형식 분리."""
-    if "JSON" in prompt or "json" in prompt:
+    if "체크인" in prompt:
+        return "2주 동안 꾸준히 노력하셨어요! 달성률이 낮더라도 포기하지 마세요. 목표를 조금 조정하면 더 오래 지속 가능한 건강 습관을 만들 수 있습니다."
+
+    elif "운동 코칭" in prompt:
+        return (
+            "스쿼트 동작 시 무릎이 발끝을 넘지 않도록 주의하고, 코어를 단단히 잡아주세요. "
+            "현재 성공률을 보면 하체 운동 집중이 필요합니다. "
+            "다음 주는 무게를 유지하며 자세 완성도를 높이는 데 집중해보세요!"
+        )
+
+    elif "칼로리 조정" in prompt:
+        return "체중 변화 추세를 분석해 목표 칼로리를 조정했습니다. 새로운 목표에 맞춰 식단을 구성해보세요!"
+
+    elif "리포트" in prompt or "주차" in prompt:
+        return "이번 주도 꾸준히 노력하셨네요! 칼로리 달성률이 안정적으로 유지되고 있어요. 다음 주에는 단백질 섭취를 조금 더 신경 써보세요."
+
+    elif "영양 균형" in prompt or "diet" in prompt.lower():
+        return "오늘 식단을 분석한 결과, 전반적으로 균형 잡힌 하루를 보내셨네요! 단백질 섭취를 조금 더 늘리면 목표 달성에 가까워질 거예요."
+
+    elif "조정" in prompt or "adjust" in prompt.lower():
+        return "분석 결과를 반영했습니다. 꾸준한 노력이 빛을 발하고 있어요! 다음 주도 현재 강도를 유지하며 도전해보세요."
+
+    elif "루틴" in prompt or "routine" in prompt.lower():
+        return json.dumps({
+            "routine_name": "4일 상체/하체 분할 루틴",
+            "days": [
+                {
+                    "day_label": "상체",
+                    "exercises": [
+                        {"name": "벤치프레스", "sets": 4, "reps": 8, "weight_kg": 60.0},
+                        {"name": "덤벨 숄더프레스", "sets": 3, "reps": 10, "weight_kg": 18.0},
+                        {"name": "랫풀다운", "sets": 3, "reps": 10, "weight_kg": 45.0}
+                    ]
+                },
+                {
+                    "day_label": "하체",
+                    "exercises": [
+                        {"name": "바벨 스쿼트", "sets": 4, "reps": 8, "weight_kg": 80.0},
+                        {"name": "레그프레스", "sets": 3, "reps": 12, "weight_kg": 120.0},
+                        {"name": "루마니안 데드리프트", "sets": 3, "reps": 10, "weight_kg": 60.0}
+                    ]
+                },
+                {
+                    "day_label": "상체",
+                    "exercises": [
+                        {"name": "인클라인 벤치프레스", "sets": 3, "reps": 10, "weight_kg": 50.0},
+                        {"name": "바벨 로우", "sets": 4, "reps": 8, "weight_kg": 55.0},
+                        {"name": "바벨 컬", "sets": 3, "reps": 12, "weight_kg": 25.0}
+                    ]
+                },
+                {
+                    "day_label": "하체",
+                    "exercises": [
+                        {"name": "핵 스쿼트", "sets": 4, "reps": 10, "weight_kg": 70.0},
+                        {"name": "레그 컬", "sets": 3, "reps": 12, "weight_kg": 40.0},
+                        {"name": "카프레이즈", "sets": 4, "reps": 15, "weight_kg": 0.0}
+                    ]
+                }
+            ],
+            "ai_comment": "근육량 증가를 위해 복합운동 위주로 구성했습니다. 점진적으로 무게를 늘려보세요!"
+        }, ensure_ascii=False)
+
+    elif "JSON" in prompt or "json" in prompt:
         return (
             '[{"name":"닭가슴살 샐러드","kcal":380,"protein_g":42,"carb_g":18,"fat_g":12,'
             '"reason":"단백질 보충에 최적"},'
@@ -52,4 +115,88 @@ def _mock_response(prompt: str) -> str:
             '{"name":"연어구이+고구마","kcal":390,"protein_g":35,"carb_g":32,"fat_g":14,'
             '"reason":"오메가3 + 복합 탄수화물"}]'
         )
-    return "오늘 하루도 균형 잡힌 식단으로 건강 목표에 가까워지고 있어요! 단백질 섭취에 특히 신경 써보세요."
+    else:
+        return "오늘 하루도 균형 잡힌 식단으로 건강 목표에 가까워지고 있어요! 단백질 섭취에 특히 신경 써보세요."
+
+
+async def call_claude_vision(
+    image_base64: str,
+    media_type: str,
+    prompt: str,
+    model: str | None = None,
+    max_tokens: int = 800,
+) -> str:
+    """
+    Claude Vision API 호출. 이미지 + 텍스트 프롬프트를 받아 분석 결과를 문자열로 반환.
+    dev 환경에서는 mock JSON 응답 반환.
+    """
+    if settings.env == "dev":
+        return _mock_vision_response()
+
+    return await _call_gms_vision(
+        image_base64=image_base64,
+        media_type=media_type,
+        prompt=prompt,
+        model=model or "claude-opus-4-5-20251101",
+        max_tokens=max_tokens,
+    )
+
+
+async def _call_gms_vision(
+    image_base64: str, media_type: str, prompt: str, model: str, max_tokens: int
+) -> str:
+    url = f"{settings.gms_base_url}/v1/messages"
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": settings.gms_api_key,
+        "anthropic-version": settings.anthropic_version,
+    }
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": media_type,
+                        "data": image_base64,
+                    },
+                },
+                {"type": "text", "text": prompt},
+            ],
+        }],
+    }
+
+    async with httpx.AsyncClient(timeout=25) as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+
+    data = response.json()
+    return data["content"][0]["text"]
+
+
+def _mock_vision_response() -> str:
+    return json.dumps({
+        "detected_items": [
+            {
+                "name": "닭가슴살",
+                "estimated_grams": 150.0,
+                "kcal": 165.0,
+                "protein_g": 31.0,
+                "carb_g": 0.0,
+                "fat_g": 3.6,
+            },
+            {
+                "name": "현미밥",
+                "estimated_grams": 200.0,
+                "kcal": 278.0,
+                "protein_g": 5.6,
+                "carb_g": 58.0,
+                "fat_g": 1.6,
+            },
+        ],
+        "ai_comment": "[MOCK] 고단백 균형 식단이네요! 단백질 섭취가 훌륭합니다.",
+    }, ensure_ascii=False)

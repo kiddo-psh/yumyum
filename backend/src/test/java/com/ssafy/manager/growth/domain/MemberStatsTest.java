@@ -14,24 +14,24 @@ class MemberStatsTest {
 
     @BeforeEach
     void setUp() {
-        stats = new MemberStats(3, 3, today.minusDays(1));
+        stats = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(1));
     }
 
     @Test
     void 어제_하루_목표를_달성했으면_스트릭이_증가한다() {
         stats.incrementStreak(today);
 
-        assertThat(stats.getCurrentStreak()).isEqualTo(4);
+        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(4));
         assertThat(stats.getLastAchievedDate()).isEqualTo(today);
     }
 
     @Test
     void 마지막_달성일이_이틀_전이면_스트릭이_1로_초기화된다() {
-        MemberStats oldStats = new MemberStats(3, 3, today.minusDays(2));
+        MemberStats oldStats = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(2));
 
         oldStats.incrementStreak(today);
 
-        assertThat(oldStats.getCurrentStreak()).isEqualTo(1);
+        assertThat(oldStats.getCurrentStreak()).isEqualTo(Streak.of(1));
         assertThat(oldStats.getLastAchievedDate()).isEqualTo(today);
     }
 
@@ -39,7 +39,57 @@ class MemberStatsTest {
     void 현재_스트릭이_최대_스트릭_기록을_초과하면_기록이_갱신된다() {
         stats.incrementStreak(today);
 
-        assertThat(stats.getMaxStreak()).isEqualTo(4);
+        assertThat(stats.getMaxStreak()).isEqualTo(Streak.of(4));
         assertThat(stats.getLastAchievedDate()).isEqualTo(today);
+    }
+
+    @Test
+    void 스트릭을_리셋하면_currentStreak이_0이_되고_갱신일은_유지된다() {
+        stats.resetStreak();
+
+        assertThat(stats.getCurrentStreak()).isEqualTo(Streak.of(0));
+        assertThat(stats.getLastAchievedDate()).isEqualTo(today.minusDays(1));
+    }
+
+    @Test
+    void lastAchievedDate가_null이면_스트릭이_만료된다() {
+        MemberStats fresh = new MemberStats(Streak.of(0), Streak.of(0), null);
+
+        assertThat(fresh.isStreakExpired(today)).isTrue();
+    }
+
+    @Test
+    void lastAchievedDate가_어제면_스트릭이_만료되지_않는다() {
+        MemberStats achieved = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(1));
+
+        assertThat(achieved.isStreakExpired(today)).isFalse();
+    }
+
+    @Test
+    void lastAchievedDate가_어제가_아니면_스트릭이_만료된다() {
+        MemberStats old = new MemberStats(Streak.of(3), Streak.of(3), today.minusDays(2));
+
+        assertThat(old.isStreakExpired(today)).isTrue();
+    }
+
+    @Test
+    void 같은_날_다시_달성해도_스트릭은_변하지_않는다() {
+        MemberStats sameDay = new MemberStats(Streak.of(5), Streak.of(5), today);
+
+        sameDay.incrementStreak(today);
+
+        assertThat(sameDay.getCurrentStreak()).isEqualTo(Streak.of(5));
+        assertThat(sameDay.getLastAchievedDate()).isEqualTo(today);
+    }
+
+    @Test
+    void 과거_날짜로_달성하면_현재_스트릭이_변하지_않는다() {
+        // 오늘(lastAchievedDate=오늘) 달성 후 이틀 전 식단 수정 → 과거 날짜로 increment 호출
+        MemberStats live = new MemberStats(Streak.of(10), Streak.of(10), today);
+
+        live.incrementStreak(today.minusDays(2));
+
+        assertThat(live.getCurrentStreak()).isEqualTo(Streak.of(10));
+        assertThat(live.getLastAchievedDate()).isEqualTo(today);
     }
 }

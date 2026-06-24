@@ -28,7 +28,8 @@ public class KakaoOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        Long memberId = (Long) oAuth2User.getAttribute("memberId");
+        Long memberId = oAuth2User.getAttribute("memberId");
+        boolean needsOnboarding = Boolean.TRUE.equals(oAuth2User.getAttribute("needsOnboarding"));
 
         String accessToken = jwtProvider.createAccessToken(memberId);
         String refreshToken = jwtProvider.createRefreshToken(memberId);
@@ -39,6 +40,7 @@ public class KakaoOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUrl)
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
+                .queryParam("needsOnboarding", needsOnboarding)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

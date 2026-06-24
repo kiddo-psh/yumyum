@@ -1,8 +1,15 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.growth.application.EarnedBadgeCollector;
+import com.ssafy.manager.growth.application.StreakChangeHolder;
+import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
+import com.ssafy.manager.nutrition.application.MealItemCommand;
 import com.ssafy.manager.nutrition.application.MealService;
+import com.ssafy.manager.nutrition.domain.Meal;
+import com.ssafy.manager.nutrition.presentation.dto.MealItemRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealRequest;
 import com.ssafy.manager.nutrition.presentation.dto.MealResponse;
+import com.ssafy.manager.nutrition.presentation.dto.PhotoMealRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,17 +26,56 @@ import java.util.List;
 public class MealController {
 
     private final MealService mealService;
+    private final EarnedBadgeCollector earnedBadgeCollector;
+    private final StreakChangeHolder streakChangeHolder;
+
+    @PostMapping("/photo")
+    public ResponseEntity<MealResponse> recordFromPhoto(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhotoMealRequest request,
+            UriComponentsBuilder uriBuilder
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+        Meal meal = mealService.recordFromPhoto(request.toCommand(memberId), now);
+        return ResponseEntity.created(
+                uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder)));
+    }
 
     @PostMapping
-    public ResponseEntity<Void> record(
+    public ResponseEntity<MealResponse> record(
             @AuthenticationPrincipal Long memberId,
             @RequestBody MealRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        Long mealId = mealService.record(request.toCommand(memberId), LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        Meal meal = mealService.record(request.toCommand(memberId, request.type()), now);
         return ResponseEntity.created(
-                uriBuilder.path("/meals/{id}").buildAndExpand(mealId).toUri()
-        ).build();
+                uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder)));
+    }
+
+    @PostMapping("/{id}/items")
+    public ResponseEntity<MealResponse> addItem(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long id,
+            @RequestBody MealItemRequest request
+    ) {
+        return ResponseEntity.ok(
+                MealResponse.from(mealService.addItem(id, memberId,
+                        new MealItemCommand(request.foodCode(), request.amountGrams())))
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long id
+    ) {
+        mealService.delete(id, memberId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

@@ -1,6 +1,7 @@
 package com.ssafy.manager.nutrition.application;
 
 import com.ssafy.manager.growth.infrastructure.persistence.MemberStatsRepository;
+import com.ssafy.manager.member.domain.OnboardingRequiredException;
 import com.ssafy.manager.nutrition.domain.MealItem;
 import com.ssafy.manager.nutrition.infrastructure.persistence.MealItemRepository;
 import com.ssafy.manager.nutrition.presentation.dto.DailySummaryResponse;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +26,10 @@ public class DailySummaryService {
     @Transactional(readOnly = true)
     public DailySummaryResponse getSummary(Long memberId, LocalDate date) {
         DailyGoal goal = dailyGoalRepository.findByMemberIdAndDate(memberId, date)
-                .orElseThrow(() -> new IllegalArgumentException("해당 날짜의 DailyGoal이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 날짜의 DailyGoal이 없습니다."));
 
         var stats = memberStatsRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("MemberStats가 없습니다."));
+                .orElseThrow(() -> new OnboardingRequiredException("온보딩이 필요합니다."));
 
         List<MealItem> items = mealItemRepository.findAllByMemberIdAndEffectiveDate(memberId, date);
         double totalCarbs   = items.stream().mapToDouble(MealItem::getCarbs).sum();
@@ -38,8 +40,8 @@ public class DailySummaryService {
                 (int) goal.getTargetValue(),
                 goal.getAchievedValue(),
                 goal.isAchieved(),
-                stats.getCurrentStreak(),
-                stats.getMaxStreak(),
+                stats.getCurrentStreak().count(),
+                stats.getMaxStreak().count(),
                 totalCarbs,
                 totalProtein,
                 totalFat

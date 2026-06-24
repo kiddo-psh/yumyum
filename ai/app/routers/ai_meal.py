@@ -1,8 +1,13 @@
 import json
 
 from fastapi import APIRouter, HTTPException
-from app.schemas.meal import LastRecommendRequest, LastRecommendResponse, MealRecommendation
-from app.services.claude_service import call_claude
+from app.schemas.meal import (
+    LastRecommendRequest, LastRecommendResponse, MealRecommendation,
+    DietAnalyzeRequest, DietAnalyzeResponse,
+    PhotoAnalyzeRequest, DetectedItem, PhotoAnalyzeResponse,
+)
+from app.services.claude_service import call_claude, call_claude_vision
+from app.services.diet_service import calculate_diet_analysis
 
 router = APIRouter(prefix="/ai/meal", tags=["AI Meal"])
 
@@ -84,4 +89,93 @@ JSON 배열 형식으로만 응답하세요:
         recommendations=recommendations,
         priority_nutrient=priority,
         ai_comment=f"오늘 {priority} 섭취가 가장 부족합니다. 아래 식단으로 하루를 마무리해보세요!",
+    )
+
+
+@router.post("/diet-analyze", response_model=DietAnalyzeResponse)
+async def diet_analyze(req: DietAnalyzeRequest):
+    """
+    F701 - 식단 영양 균형 분석
+    Spring이 오늘의 식단 합산값과 목표값을 전송하면
+    달성률·균형 점수·부족/과다 영양소·AI 코멘트를 반환한다.
+    """
+    rates, balance_score, weak, excess = calculate_diet_analysis(
+        total_kcal=req.total_kcal,
+        total_protein_g=req.total_protein_g,
+        total_carb_g=req.total_carb_g,
+        total_fat_g=req.total_fat_g,
+        target_kcal=req.target_kcal,
+        target_protein_g=req.target_protein_g,
+        target_carb_g=req.target_carb_g,
+        target_fat_g=req.target_fat_g,
+    )
+
+    weak_label   = "·".join(weak)   if weak   else "없음"
+    excess_label = "·".join(excess) if excess else "없음"
+    prompt = (
+        f"사용자 목표: {req.health_goal}, 날짜: {req.meal_date}\n"
+        f"영양 균형 분석 — 균형 점수: {balance_score:.0f}/100\n"
+        f"달성률: 칼로리 {rates['calorie_rate']:.0f}%, 단백질 {rates['protein_rate']:.0f}%, "
+        f"탄수화물 {rates['carb_rate']:.0f}%, 지방 {rates['fat_rate']:.0f}%\n"
+        f"부족: {weak_label} / 과다: {excess_label}\n"
+        "위 결과를 바탕으로 사용자에게 2~3문장으로 격려와 개선 방향을 한국어로 제안하세요."
+    )
+
+    ai_comment = await call_claude(prompt, max_tokens=300)
+
+    return DietAnalyzeResponse(
+        calorie_rate=rates["calorie_rate"],
+        protein_rate=rates["protein_rate"],
+        carb_rate=rates["carb_rate"],
+        fat_rate=rates["fat_rate"],
+        balance_score=balance_score,
+        weak_nutrients=weak,
+        excess_nutrients=excess,
+        ai_comment=ai_comment,
+    )
+
+
+@router.post("/analyze-photo", response_model=PhotoAnalyzeResponse)
+async def analyze_photo(req: PhotoAnalyzeRequest):
+    """
+    Vision AI 사진 식단 분석.
+    이미지 base64를 받아 Claude Vision으로 음식 감지 + 영양소 추정.
+    Spring이 multipart → base64 변환 후 호출.
+    """
+    prompt = (
+        f"이 사진에 있는 음식을 모두 감지하고 영양소를 추정해주세요. 식사 유형: {req.meal_type}\n\n"
+        "아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):\n"
+        '{"detected_items": [{"name": "음식명(한국어)", "estimated_grams": 숫자, '
+        '"kcal": 숫자, "protein_g": 숫자, "carb_g": 숫자, "fat_g": 숫자}], '
+        '"ai_comment": "한 문장 한국어 코멘트"}\n\n'
+        "음식이 감지되지 않으면 detected_items를 빈 배열로 반환하세요."
+    )
+
+    try:
+        raw = await call_claude_vision(
+            image_base64=req.image_base64,
+            media_type=req.media_type,
+            prompt=prompt,
+            max_tokens=800,
+        )
+        cleaned = raw.strip()
+        if "```" in cleaned:
+            parts = cleaned.split("```")
+            cleaned = parts[1] if len(parts) > 1 else cleaned
+            if cleaned.lower().startswith("json"):
+                cleaned = cleaned[4:]
+        data = json.loads(cleaned)
+        items = [DetectedItem(**item) for item in data.get("detected_items", [])]
+        total_kcal = sum(i.kcal for i in items)
+        ai_comment = data.get("ai_comment", "")
+    except Exception as e:
+        print(f"[analyze_photo] vision 분석 실패 — {type(e).__name__}: {e}")
+        items = []
+        total_kcal = 0.0
+        ai_comment = "음식을 인식하지 못했어요. 다시 촬영해보세요."
+
+    return PhotoAnalyzeResponse(
+        detected_items=items,
+        total_kcal=total_kcal,
+        ai_comment=ai_comment,
     )

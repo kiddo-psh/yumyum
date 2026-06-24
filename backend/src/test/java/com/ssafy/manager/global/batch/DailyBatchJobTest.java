@@ -1,6 +1,7 @@
 package com.ssafy.manager.global.batch;
 
 import com.ssafy.manager.growth.application.StreakResetService;
+import com.ssafy.manager.nyam.application.NyamBodyDailyUpdateService;
 import com.ssafy.manager.program.application.DailyGoalCreationService;
 import com.ssafy.manager.program.application.ProgramCompletionService;
 import com.ssafy.manager.program.application.WeeklyReportService;
@@ -20,6 +21,7 @@ class DailyBatchJobTest {
 
     @Mock ProgramCompletionService programCompletionService;
     @Mock StreakResetService streakResetService;
+    @Mock NyamBodyDailyUpdateService nyamBodyDailyUpdateService;
     @Mock DailyGoalCreationService dailyGoalCreationService;
     @Mock WeeklyReportService weeklyReportService;
 
@@ -32,9 +34,10 @@ class DailyBatchJobTest {
         job.run(TODAY);
 
         InOrder order = inOrder(programCompletionService, streakResetService,
-                dailyGoalCreationService, weeklyReportService);
+                nyamBodyDailyUpdateService, dailyGoalCreationService, weeklyReportService);
         order.verify(programCompletionService).completeExpired(TODAY);
-        order.verify(streakResetService).resetUnachievedFor(TODAY.minusDays(1));
+        order.verify(streakResetService).resetUnachievedFor(TODAY);
+        order.verify(nyamBodyDailyUpdateService).updateFor(TODAY);
         order.verify(dailyGoalCreationService).createForActivePrograms(TODAY);
         order.verify(weeklyReportService).createStubs(TODAY);
     }

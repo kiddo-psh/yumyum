@@ -28,13 +28,14 @@ Member가 하루 단위로 달성해야 하는 목표. 달성(`achieved`) 또는
 
 - DailyGoal은 Program에 종속되지 않는다. Program 없이도 존재하며 Streak에 기여한다.
 - 달성 기준(targetValue): 칼로리(kcal) 기반. Program이 없으면 Member.sex 기반 기본값(남성 2400 kcal / 여성 1800 kcal, 온보딩 완료 시 TDEE로 대체)을 따른다. Program이 활성이면 TDEE를 Program 타입(MUSCLE/DIET/HEALTH)에 따라 조정한 값을 적용한다.
-- DailyGoal의 달성 여부가 **Streak** 카운트의 기준이 된다.
+- DailyGoal 달성은 **Streak** 증가 트리거 중 하나다 (다른 하나는 RoutineSession 완료).
 - **DailyGoal**이 아닌 용어: ~~일일 미션~~(게이미피케이션 용어와 혼동), ~~daily_goals~~(기술 레이어 테이블명)
 
 ## Streak (연속 달성)
 
-Member가 DailyGoal을 연속으로 달성한 일수. 하루라도 달성하지 못하면 0으로 리셋된다.
+Member가 하루 단위 활동을 연속으로 달성한 일수. 하루라도 달성하지 못하면 0으로 리셋된다.
 
+- **증가 트리거**: 그날의 DailyGoal(식단 목표)을 처음 달성하거나, 그날 할당된 RoutineSession을 완료할 때. 둘 중 무엇이든 먼저 일어나면 그날의 Streak이 증가하며, 같은 날 두 번째 활동은 Streak을 추가로 올리지 않는다 (하루 1회).
 - `current_streak`: 현재 연속 달성일
 - `max_streak`: 역대 최고 Streak 기록
 - Streak이 끊길 위험이 있을 때 냠냠이가 Member에게 푸시 알림을 보낸다.
@@ -53,6 +54,22 @@ Member가 DailyGoal을 연속으로 달성한 일수. 하루라도 달성하지 
   - `DEFAULT` — 그 외 기본 메시지
 - 2차 MVP에서 외형·메시지 구현. 3차 MVP에서 스킨 해금(G103) 추가.
 - **Nyam**이 아닌 용어: ~~캐릭터~~(일반 명사), ~~마스코트~~(비공식)
+
+## Badge (뱃지)
+
+특정 조건을 달성한 Member에게 부여되는 성취 표식의 **카탈로그 정의**. 전 회원이 공유하는 마스터 데이터로, 뱃지 종류당 하나만 존재한다.
+
+- 이름·아이콘·획득 조건을 가진다. (조건 표현 방식은 추후 확정)
+- Member가 직접 소유하지 않는다. 획득 사실은 **MemberBadge**로 표현된다.
+- **Badge**가 아닌 용어: ~~BadgeDefinition~~(중복), ~~업적~~(비공식)
+
+## MemberBadge (회원 뱃지)
+
+특정 Member가 특정 Badge를 획득한 기록. 획득 시각(`earnedAt`)을 가진다.
+
+- (Member, Badge) 쌍은 유일하다. 같은 Badge를 두 번 획득할 수 없다.
+- G602 "뱃지 컬렉션"은 전체 Badge 카탈로그에 회원의 MemberBadge를 매핑한 결과(획득 + 미획득)다.
+- **MemberBadge**가 아닌 용어: ~~BadgeAward~~, ~~획득 뱃지~~(비공식)
 
 ## HealthGoal (건강 목표)
 

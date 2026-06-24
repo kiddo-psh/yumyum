@@ -38,6 +38,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private ActivityLevel activityLevel;
 
+    @Enumerated(EnumType.STRING)
+    private HealthGoal healthGoal;
+
     public Member(String oauthProvider, String oauthId, String email) {
         this.oauthProvider = oauthProvider;
         this.oauthId = oauthId;
@@ -46,12 +49,15 @@ public class Member {
         this.onboardingCompleted = false;
     }
 
-    public Member(Sex sex, int birthYear, double heightCm, double weightKg, ActivityLevel activityLevel) {
+    public void completeOnboarding(Sex sex, int birthYear, double heightCm, double weightKg,
+                                   ActivityLevel activityLevel, HealthGoal healthGoal) {
         this.sex = sex;
         this.birthYear = birthYear;
         this.heightCm = heightCm;
         this.weightKg = weightKg;
         this.activityLevel = activityLevel;
+        this.healthGoal = healthGoal;
+        this.onboardingCompleted = true;
     }
 
     public int age(int currentYear) {

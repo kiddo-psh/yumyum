@@ -1,4 +1,4 @@
 package com.ssafy.manager.nutrition.application;
 
-public record MealItemCommand(Long foodId, double amountGrams) {
+public record MealItemCommand(String foodCode, double amountGrams) {
 }

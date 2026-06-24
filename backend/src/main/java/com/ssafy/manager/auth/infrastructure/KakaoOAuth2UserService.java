@@ -31,6 +31,7 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attrs = new HashMap<>(oAuth2User.getAttributes());
         attrs.put("memberId", member.getId());
+        attrs.put("needsOnboarding", !member.isOnboardingCompleted());
 
         return new DefaultOAuth2User(List.of(), attrs, "id");
     }

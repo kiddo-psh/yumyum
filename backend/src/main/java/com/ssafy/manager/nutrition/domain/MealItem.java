@@ -22,7 +22,8 @@ public class MealItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meal_id")
     private Meal meal;
-    private Long foodId;
+    private String foodCode;
+    private String foodName;
     private double amountGrams;
     private double calories;
     private double carbs;
@@ -49,7 +50,17 @@ public class MealItem {
                 food.getFatPer100g() * amountGrams / 100,
                 food.getFiberPer100g() * amountGrams / 100
         );
-        item.foodId = food.getId();
+        item.foodCode = food.getFoodCode();
+        item.foodName = food.getName();
+        return item;
+    }
+
+    public static MealItem fromAiEstimate(String itemName, double amountGrams,
+                                           double kcal, double protein,
+                                           double carb, double fat) {
+        MealItem item = new MealItem(amountGrams, kcal, carb, protein, fat, 0.0);
+        item.foodCode = null;
+        item.foodName = itemName;
         return item;
     }
 

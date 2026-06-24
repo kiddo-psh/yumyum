@@ -78,3 +78,7 @@ pnpm-debug.log*
 
 ### AI Agents ###
 .claude/
+
+### Dev log (local only) ###
+docs/DEVLOG.md
+frontend/pr-body.md

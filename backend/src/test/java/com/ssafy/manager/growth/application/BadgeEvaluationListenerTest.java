@@ -120,4 +120,42 @@ class BadgeEvaluationListenerTest {
         verify(memberBadgeRepository, never()).save(org.mockito.ArgumentMatchers.any());
         verify(earnedBadgeCollector, never()).add(org.mockito.ArgumentMatchers.any());
     }
+
+    @Test
+    void 스트릭_3일_도달시_초보_조련사_발행() {
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.NOVICE_TAMER)).willReturn(false);
+
+        listener().on(new StreakIncreasedEvent(MEMBER_ID, 3));
+
+        verify(earnedBadgeCollector).add(Badge.NOVICE_TAMER);
+        verify(earnedBadgeCollector, never()).add(Badge.LEGENDARY_TAMER);
+    }
+
+    @Test
+    void 스트릭_30일_도달시_초보와_전설_조련사_모두_발행() {
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.NOVICE_TAMER)).willReturn(false);
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.LEGENDARY_TAMER)).willReturn(false);
+
+        listener().on(new StreakIncreasedEvent(MEMBER_ID, 30));
+
+        verify(earnedBadgeCollector).add(Badge.NOVICE_TAMER);
+        verify(earnedBadgeCollector).add(Badge.LEGENDARY_TAMER);
+    }
+
+    @Test
+    void 스트릭_2일은_아무_뱃지도_발행하지_않는다() {
+        listener().on(new StreakIncreasedEvent(MEMBER_ID, 2));
+
+        verify(memberBadgeRepository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(earnedBadgeCollector, never()).add(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void 이미_보유한_스트릭_뱃지는_재발행하지_않는다() {
+        given(memberBadgeRepository.existsByMemberIdAndBadge(MEMBER_ID, Badge.NOVICE_TAMER)).willReturn(true);
+
+        listener().on(new StreakIncreasedEvent(MEMBER_ID, 5));
+
+        verify(memberBadgeRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
 }

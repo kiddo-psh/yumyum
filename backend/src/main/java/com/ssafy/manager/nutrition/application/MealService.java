@@ -1,7 +1,6 @@
 package com.ssafy.manager.nutrition.application;
 
 import com.ssafy.manager.global.exception.ForbiddenException;
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.nutrition.domain.Food;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.FoodRepository;
@@ -27,7 +26,6 @@ public class MealService {
     private final MealRepository mealRepository;
     private final MealItemRepository mealItemRepository;
     private final DailyGoalRepository dailyGoalRepository;
-    private final StreakService streakService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -45,13 +43,13 @@ public class MealService {
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(command.memberId(), effectiveDate);
 
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, command.memberId(), effectiveDate));
 
         eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;
     }
 
-    private void updateGoalAndStreak(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {
+    private void updateDailyGoalProgress(DailyGoal goal, double totalCalories, Long memberId, LocalDate effectiveDate) {
         boolean wasAchieved = goal.isAchieved();
         double totalProtein = mealItemRepository.sumProteinByMemberIdAndEffectiveDate(memberId, effectiveDate);
         double totalCarbs   = mealItemRepository.sumCarbsByMemberIdAndEffectiveDate(memberId, effectiveDate);
@@ -59,7 +57,7 @@ public class MealService {
 
         goal.recalculate(totalCalories, totalProtein, totalCarbs, totalFat);
         if (!wasAchieved && goal.isAchieved()) {
-            streakService.increment(memberId, effectiveDate);
+            eventPublisher.publishEvent(new MealGoalAchievedEvent(memberId, effectiveDate));
         }
     }
 
@@ -76,7 +74,7 @@ public class MealService {
         LocalDate effectiveDate = meal.getEffectiveDate();
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(memberId, effectiveDate);
         dailyGoalRepository.findByMemberIdAndDate(memberId, effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, memberId, effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, memberId, effectiveDate));
 
         return meal;
     }
@@ -106,7 +104,7 @@ public class MealService {
         double totalCalories = mealItemRepository.sumCaloriesByMemberIdAndEffectiveDate(
                 command.memberId(), effectiveDate);
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
-                .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
+                .ifPresent(goal -> updateDailyGoalProgress(goal, totalCalories, command.memberId(), effectiveDate));
 
         eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;

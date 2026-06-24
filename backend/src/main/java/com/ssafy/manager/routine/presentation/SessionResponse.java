@@ -1,6 +1,7 @@
 package com.ssafy.manager.routine.presentation;
 
 import com.ssafy.manager.growth.domain.Badge;
+import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
 import com.ssafy.manager.routine.application.RoutineSessionResult;
 
 import java.time.LocalDate;
@@ -15,7 +16,8 @@ public record SessionResponse(
         LocalDateTime completedAt,
         int caloriesBurned,
         List<SetResponse> sets,
-        List<EarnedBadgeResponse> newlyEarnedBadges
+        List<EarnedBadgeResponse> newlyEarnedBadges,
+        StreakChangeResponse streak
 ) {
     public record SetResponse(
             Long id,
@@ -39,7 +41,8 @@ public record SessionResponse(
         }
     }
 
-    public static SessionResponse from(RoutineSessionResult result, List<Badge> earnedBadges) {
+    public static SessionResponse from(RoutineSessionResult result, List<Badge> earnedBadges,
+                                       StreakChangeResponse streak) {
         return new SessionResponse(
                 result.sessionId(), result.routineId(), result.memberId(),
                 result.sessionDate(), result.completedAt(),
@@ -48,7 +51,8 @@ public record SessionResponse(
                         .map(s -> new SetResponse(s.id(), s.exerciseId(), s.exerciseName(),
                                 s.setNumber(), s.actualReps(), s.actualWeightKg(), s.completed()))
                         .toList(),
-                earnedBadges.stream().map(EarnedBadgeResponse::from).toList()
+                earnedBadges.stream().map(EarnedBadgeResponse::from).toList(),
+                streak
         );
     }
 }

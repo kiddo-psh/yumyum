@@ -7,6 +7,7 @@ import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
 import com.ssafy.manager.growth.application.EarnedBadgeCollector;
+import com.ssafy.manager.growth.application.StreakChangeHolder;
 import com.ssafy.manager.routine.application.RoutineSessionResult;
 import com.ssafy.manager.routine.application.RoutineSessionService;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ class RoutineSessionControllerTest {
     @Autowired ObjectMapper objectMapper;
     @MockitoBean RoutineSessionService routineSessionService;
     @MockitoBean EarnedBadgeCollector earnedBadgeCollector;
+    @MockitoBean StreakChangeHolder streakChangeHolder;
     @MockitoBean KakaoOAuth2UserService kakaoOAuth2UserService;
     @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 

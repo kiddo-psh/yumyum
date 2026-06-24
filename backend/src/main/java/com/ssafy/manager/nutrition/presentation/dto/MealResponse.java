@@ -1,6 +1,7 @@
 package com.ssafy.manager.nutrition.presentation.dto;
 
 import com.ssafy.manager.growth.domain.Badge;
+import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.MealType;
 
@@ -12,7 +13,8 @@ public record MealResponse(
         MealType type,
         LocalDate date,
         List<MealItemResponse> items,
-        List<EarnedBadgeResponse> newlyEarnedBadges
+        List<EarnedBadgeResponse> newlyEarnedBadges,
+        StreakChangeResponse streak
 ) {
     public record EarnedBadgeResponse(
             String code,
@@ -27,16 +29,17 @@ public record MealResponse(
     }
 
     public static MealResponse from(Meal meal) {
-        return from(meal, List.of());
+        return from(meal, List.of(), null);
     }
 
-    public static MealResponse from(Meal meal, List<Badge> earnedBadges) {
+    public static MealResponse from(Meal meal, List<Badge> earnedBadges, StreakChangeResponse streak) {
         return new MealResponse(
                 meal.getId(),
                 meal.getType(),
                 meal.getDate(),
                 meal.getItems().stream().map(MealItemResponse::from).toList(),
-                earnedBadges.stream().map(EarnedBadgeResponse::from).toList()
+                earnedBadges.stream().map(EarnedBadgeResponse::from).toList(),
+                streak
         );
     }
 }

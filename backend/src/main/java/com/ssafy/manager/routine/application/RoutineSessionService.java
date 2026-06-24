@@ -1,6 +1,5 @@
 package com.ssafy.manager.routine.application;
 
-import com.ssafy.manager.growth.application.StreakService;
 import com.ssafy.manager.routine.domain.RoutineSession;
 import com.ssafy.manager.routine.domain.SessionSet;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineRepository;
@@ -23,7 +22,6 @@ public class RoutineSessionService {
     private final RoutineSessionRepository routineSessionRepository;
     private final SessionSetRepository sessionSetRepository;
     private final RoutineAiAdjustService routineAiAdjustService;
-    private final StreakService streakService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -55,7 +53,6 @@ public class RoutineSessionService {
                         i.setNumber(), i.actualReps(), i.actualWeightKg(), i.completed()))
                 .toList();
         sessionSetRepository.saveAll(sets);
-        streakService.increment(memberId, sessionDate);
         eventPublisher.publishEvent(new WorkoutLoggedEvent(memberId, sessionDate));
         return RoutineSessionResult.from(session, sets);
     }

@@ -14,7 +14,9 @@ public enum Badge {
     ALL_RIGHT("올라잇!!!🔥🔥🔥", "🔥", "운동 세션을 100회 수행했어요", BadgeCategory.WORKOUT),
     WEEKEND_WARRIOR("주말 전사", "🏋️", "주말에 운동 세션을 10회 수행했어요", BadgeCategory.WORKOUT),
     VEGGIE_MANIA("채소매니아", "🥬", "식이섬유가 풍부한 식사를 20회 기록했어요", BadgeCategory.DIET),
-    CHICKEN_BREAST_EVANGELIST("닭가슴살 전도사", "🍗", "닭가슴살이 들어간 식사를 30회 기록했어요", BadgeCategory.DIET);
+    CHICKEN_BREAST_EVANGELIST("닭가슴살 전도사", "🍗", "닭가슴살이 들어간 식사를 30회 기록했어요", BadgeCategory.DIET),
+    NOVICE_TAMER("초보 냠냠이 조련사", "🐣", "3일 연속 목표를 달성했어요", BadgeCategory.STREAK),
+    LEGENDARY_TAMER("전설의 냠냠이 조련사", "👑", "30일 연속 목표를 달성했어요", BadgeCategory.STREAK);
 
     private final String displayName;
     private final String icon;

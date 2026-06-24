@@ -1,6 +1,8 @@
 package com.ssafy.manager.routine.presentation;
 
 import com.ssafy.manager.growth.application.EarnedBadgeCollector;
+import com.ssafy.manager.growth.application.StreakChangeHolder;
+import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
 import com.ssafy.manager.routine.application.RoutineSessionResult;
 import com.ssafy.manager.routine.application.RoutineSessionService;
 import com.ssafy.manager.routine.application.SessionSetInput;
@@ -22,6 +24,7 @@ public class RoutineSessionController {
 
     private final RoutineSessionService routineSessionService;
     private final EarnedBadgeCollector earnedBadgeCollector;
+    private final StreakChangeHolder streakChangeHolder;
 
     @PostMapping("/sessions")
     public ResponseEntity<SessionResponse> recordSession(
@@ -34,7 +37,8 @@ public class RoutineSessionController {
         RoutineSessionResult result = routineSessionService.recordSession(
                 memberId, request.routineId(), request.sessionDate(),
                 request.caloriesBurned(), inputs);
-        SessionResponse body = SessionResponse.from(result, earnedBadgeCollector.getEarned());
+        SessionResponse body = SessionResponse.from(result, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 }

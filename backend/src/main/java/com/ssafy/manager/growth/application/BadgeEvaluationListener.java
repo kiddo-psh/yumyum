@@ -26,6 +26,9 @@ public class BadgeEvaluationListener {
     private static final long CHICKEN_BREAST_THRESHOLD = 30;
     private static final String CHICKEN_BREAST_KEYWORD = "닭가슴살";
 
+    private static final int NOVICE_TAMER_THRESHOLD = 3;
+    private static final int LEGENDARY_TAMER_THRESHOLD = 30;
+
     private final BadgeService badgeService;
     private final RoutineSessionRepository routineSessionRepository;
     private final MealRepository mealRepository;
@@ -53,6 +56,19 @@ public class BadgeEvaluationListener {
         if (mealRepository.countMealsContainingFoodNameByMemberId(memberId, CHICKEN_BREAST_KEYWORD)
                 >= CHICKEN_BREAST_THRESHOLD) {
             badgeService.grant(memberId, Badge.CHICKEN_BREAST_EVANGELIST);
+        }
+    }
+
+    @EventListener
+    public void on(StreakIncreasedEvent event) {
+        Long memberId = event.memberId();
+        int streak = event.currentStreak();
+
+        if (streak >= LEGENDARY_TAMER_THRESHOLD) {
+            badgeService.grant(memberId, Badge.LEGENDARY_TAMER);
+        }
+        if (streak >= NOVICE_TAMER_THRESHOLD) {
+            badgeService.grant(memberId, Badge.NOVICE_TAMER);
         }
     }
 }

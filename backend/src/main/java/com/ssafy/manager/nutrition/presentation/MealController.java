@@ -1,6 +1,8 @@
 package com.ssafy.manager.nutrition.presentation;
 
 import com.ssafy.manager.growth.application.EarnedBadgeCollector;
+import com.ssafy.manager.growth.application.StreakChangeHolder;
+import com.ssafy.manager.growth.presentation.dto.StreakChangeResponse;
 import com.ssafy.manager.nutrition.application.MealItemCommand;
 import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.domain.Meal;
@@ -25,6 +27,7 @@ public class MealController {
 
     private final MealService mealService;
     private final EarnedBadgeCollector earnedBadgeCollector;
+    private final StreakChangeHolder streakChangeHolder;
 
     @PostMapping("/photo")
     public ResponseEntity<MealResponse> recordFromPhoto(
@@ -36,7 +39,8 @@ public class MealController {
         Meal meal = mealService.recordFromPhoto(request.toCommand(memberId), now);
         return ResponseEntity.created(
                 uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
-        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned()));
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder)));
     }
 
     @PostMapping
@@ -49,7 +53,8 @@ public class MealController {
         Meal meal = mealService.record(request.toCommand(memberId, request.type()), now);
         return ResponseEntity.created(
                 uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
-        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned()));
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder)));
     }
 
     @PostMapping("/{id}/items")

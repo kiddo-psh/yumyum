@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,6 +47,7 @@ public class StreakIntegrationTest {
     @Mock MealItemRepository mealItemRepository;
     @Mock DailyGoalRepository dailyGoalRepository;
     @Mock RoutineAiAdjustService routineAiAdjustService;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     RoutineSessionService routineSessionService;
     MealService mealService;
@@ -64,7 +66,8 @@ public class StreakIntegrationTest {
                 routineSessionRepository,
                 sessionSetRepository,
                 routineAiAdjustService,
-                streakService()
+                streakService(),
+                eventPublisher
         );
 
         mealService = new MealService(

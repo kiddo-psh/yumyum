@@ -1,5 +1,6 @@
 package com.ssafy.manager.routine.presentation;
 
+import com.ssafy.manager.growth.domain.Badge;
 import com.ssafy.manager.routine.application.RoutineSessionResult;
 
 import java.time.LocalDate;
@@ -13,7 +14,8 @@ public record SessionResponse(
         LocalDate sessionDate,
         LocalDateTime completedAt,
         int caloriesBurned,
-        List<SetResponse> sets
+        List<SetResponse> sets,
+        List<EarnedBadgeResponse> newlyEarnedBadges
 ) {
     public record SetResponse(
             Long id,
@@ -25,7 +27,19 @@ public record SessionResponse(
             boolean completed
     ) {}
 
-    public static SessionResponse from(RoutineSessionResult result) {
+    public record EarnedBadgeResponse(
+            String code,
+            String name,
+            String icon,
+            String description
+    ) {
+        public static EarnedBadgeResponse from(Badge badge) {
+            return new EarnedBadgeResponse(
+                    badge.name(), badge.getDisplayName(), badge.getIcon(), badge.getDescription());
+        }
+    }
+
+    public static SessionResponse from(RoutineSessionResult result, List<Badge> earnedBadges) {
         return new SessionResponse(
                 result.sessionId(), result.routineId(), result.memberId(),
                 result.sessionDate(), result.completedAt(),
@@ -33,7 +47,8 @@ public record SessionResponse(
                 result.sets().stream()
                         .map(s -> new SetResponse(s.id(), s.exerciseId(), s.exerciseName(),
                                 s.setNumber(), s.actualReps(), s.actualWeightKg(), s.completed()))
-                        .toList()
+                        .toList(),
+                earnedBadges.stream().map(EarnedBadgeResponse::from).toList()
         );
     }
 }

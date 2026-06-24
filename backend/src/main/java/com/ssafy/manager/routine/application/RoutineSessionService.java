@@ -7,6 +7,7 @@ import com.ssafy.manager.routine.infrastructure.persistence.RoutineRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.RoutineSessionRepository;
 import com.ssafy.manager.routine.infrastructure.persistence.SessionSetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class RoutineSessionService {
     private final SessionSetRepository sessionSetRepository;
     private final RoutineAiAdjustService routineAiAdjustService;
     private final StreakService streakService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public RoutineSessionResult recordSession(Long memberId, Long routineId,
@@ -54,6 +56,7 @@ public class RoutineSessionService {
                 .toList();
         sessionSetRepository.saveAll(sets);
         streakService.increment(memberId, sessionDate);
+        eventPublisher.publishEvent(new WorkoutLoggedEvent(memberId, sessionDate));
         return RoutineSessionResult.from(session, sets);
     }
 }

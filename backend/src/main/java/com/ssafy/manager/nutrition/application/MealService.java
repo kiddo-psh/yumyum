@@ -11,6 +11,7 @@ import com.ssafy.manager.nutrition.infrastructure.persistence.MealRepository;
 import com.ssafy.manager.program.domain.DailyGoal;
 import com.ssafy.manager.program.infrastructure.persistence.DailyGoalRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class MealService {
     private final MealItemRepository mealItemRepository;
     private final DailyGoalRepository dailyGoalRepository;
     private final StreakService streakService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Meal record(MealCommand command, LocalDateTime recordedAt) {
@@ -45,6 +47,7 @@ public class MealService {
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
                 .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
 
+        eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;
     }
 
@@ -105,6 +108,7 @@ public class MealService {
         dailyGoalRepository.findByMemberIdAndDate(command.memberId(), effectiveDate)
                 .ifPresent(goal -> updateGoalAndStreak(goal, totalCalories, command.memberId(), effectiveDate));
 
+        eventPublisher.publishEvent(new MealRecordedEvent(command.memberId(), meal.getId()));
         return meal;
     }
 

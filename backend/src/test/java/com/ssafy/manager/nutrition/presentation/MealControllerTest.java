@@ -6,6 +6,7 @@ import com.ssafy.manager.auth.infrastructure.KakaoOAuthSuccessHandler;
 import com.ssafy.manager.global.config.JwtConfig;
 import com.ssafy.manager.global.config.SecurityConfig;
 import com.ssafy.manager.global.exception.GlobalExceptionHandler;
+import com.ssafy.manager.growth.application.EarnedBadgeCollector;
 import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.domain.Meal;
 import com.ssafy.manager.nutrition.domain.MealType;
@@ -40,6 +41,7 @@ class MealControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @MockitoBean MealService mealService;
+    @MockitoBean EarnedBadgeCollector earnedBadgeCollector;
     @MockitoBean KakaoOAuth2UserService kakaoOAuth2UserService;
     @MockitoBean KakaoOAuthSuccessHandler kakaoOAuthSuccessHandler;
 

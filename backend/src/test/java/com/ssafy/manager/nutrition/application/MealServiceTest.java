@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ class MealServiceTest {
     @Mock MealItemRepository mealItemRepository;
     @Mock DailyGoalRepository dailyGoalRepository;
     @Mock StreakService streakService;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks MealService mealService;
 

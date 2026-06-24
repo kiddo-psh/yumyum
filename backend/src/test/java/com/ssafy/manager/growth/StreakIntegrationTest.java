@@ -75,7 +75,8 @@ public class StreakIntegrationTest {
                 mealRepository,
                 mealItemRepository,
                 dailyGoalRepository,
-                streakService()
+                streakService(),
+                eventPublisher
         );
     }
 

@@ -1,5 +1,6 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.growth.application.EarnedBadgeCollector;
 import com.ssafy.manager.nutrition.application.MealItemCommand;
 import com.ssafy.manager.nutrition.application.MealService;
 import com.ssafy.manager.nutrition.domain.Meal;
@@ -23,6 +24,7 @@ import java.util.List;
 public class MealController {
 
     private final MealService mealService;
+    private final EarnedBadgeCollector earnedBadgeCollector;
 
     @PostMapping("/photo")
     public ResponseEntity<MealResponse> recordFromPhoto(
@@ -34,7 +36,7 @@ public class MealController {
         Meal meal = mealService.recordFromPhoto(request.toCommand(memberId), now);
         return ResponseEntity.created(
                 uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
-        ).body(MealResponse.from(meal));
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned()));
     }
 
     @PostMapping
@@ -47,7 +49,7 @@ public class MealController {
         Meal meal = mealService.record(request.toCommand(memberId, request.type()), now);
         return ResponseEntity.created(
                 uriBuilder.path("/meals/{id}").buildAndExpand(meal.getId()).toUri()
-        ).body(MealResponse.from(meal));
+        ).body(MealResponse.from(meal, earnedBadgeCollector.getEarned()));
     }
 
     @PostMapping("/{id}/items")

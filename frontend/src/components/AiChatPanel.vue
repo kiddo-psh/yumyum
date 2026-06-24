@@ -22,7 +22,7 @@
             title="대화 초기화"
             @click="chat.clear()"
           >
-            초기화
+            새 대화
           </button>
           <button
             class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-variant transition-colors"

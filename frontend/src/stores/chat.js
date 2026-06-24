@@ -1,19 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { sendChatMessage } from '@/api/dashboard'
 
-const STORAGE_KEY = 'nyam_chat_messages'
-
 export const useChatStore = defineStore('chat', () => {
-  const messages = ref(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'))
+  const messages = ref([])
   const isOpen = ref(false)
   const input = ref('')
   const loading = ref(false)
   const error = ref('')
-
-  watch(messages, (val) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
-  }, { deep: true })
 
   function toggle() {
     isOpen.value = !isOpen.value
@@ -39,7 +33,6 @@ export const useChatStore = defineStore('chat', () => {
 
   function clear() {
     messages.value = []
-    localStorage.removeItem(STORAGE_KEY)
   }
 
   return { messages, isOpen, input, loading, error, toggle, send, clear }

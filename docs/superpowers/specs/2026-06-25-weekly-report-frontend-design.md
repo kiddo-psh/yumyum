@@ -1,6 +1,7 @@
 # 주간 리포트(WeeklyReport) 프론트 화면 + 평가 트리거 설계
 
 작성일: 2026-06-25
+작성자: g0rnn
 브랜치: feature/ai-report
 
 ## 1. 배경 / 목적

@@ -1,16 +1,25 @@
 <template>
   <div class="flex min-h-screen bg-background">
+    <!-- 모바일 오버레이 -->
+    <Transition name="sidebar-overlay">
+      <div
+        v-if="sidebarOpen && !isLg"
+        class="fixed inset-0 bg-black/40 z-30"
+        @click="closeSidebar"
+      />
+    </Transition>
+
     <!-- SideNavBar -->
     <aside
       class="fixed left-0 top-0 h-full w-sidebar-width border-r-[3px] border-on-background bg-sub-background flex flex-col gap-base z-40"
-      style="padding: 24px;"
+      :style="asideStyle"
     >
-      <!-- Brand -->
+      <!-- Brand + 닫기 버튼 -->
       <div class="mb-8 flex items-center gap-3">
         <div class="w-12 h-12 bg-nyam-mint rounded-full flex items-center justify-center neo-brutal-border flex-shrink-0 overflow-hidden">
           <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-10 h-10 object-contain" />
         </div>
-        <div>
+        <div class="flex-1 min-w-0">
           <h1 class="text-display-md font-sans text-on-background tracking-tighter leading-none">
             NyamNyam
           </h1>
@@ -18,6 +27,14 @@
             Coaching Buddy
           </p>
         </div>
+        <button
+          type="button"
+          class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface hover:text-on-background transition-colors neo-brutal-border"
+          aria-label="메뉴 닫기"
+          @click="closeSidebar"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
       </div>
 
       <!-- Nav -->
@@ -87,10 +104,23 @@
       </div>
     </aside>
 
+    <!-- 메뉴 열기 버튼 (사이드바 닫혔을 때) -->
+    <Transition name="fade">
+      <button
+        v-if="!sidebarOpen"
+        type="button"
+        class="fixed top-5 left-5 z-50 w-11 h-11 bg-surface neo-brutal-border rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+        aria-label="메뉴 열기"
+        @click="openSidebar"
+      >
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </Transition>
+
     <!-- Main Content -->
     <main
-      class="ml-sidebar-width flex-1 min-h-screen"
-      style="padding: 40px; max-width: calc(1440px - 280px);"
+      class="flex-1 min-h-screen"
+      :style="mainStyle"
     >
       <RouterView />
     </main>
@@ -116,8 +146,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { logout as logoutRequest } from '@/api/auth';
 import { clearTokens } from '@/services/auth';
@@ -128,18 +158,60 @@ import BadgeCelebrationOverlay from '@/components/badge/BadgeCelebrationOverlay.
 import BadgeImage from '@/components/badge/BadgeImage.vue';
 
 const router = useRouter();
+const route = useRoute();
 
 const badgeStore = useBadgeStore();
 const chatStore = useChatStore();
+
+const LG = 1024
+const isLg = ref(window.innerWidth >= LG)
+const sidebarOpen = ref(isLg.value)
+
+function openSidebar()  { sidebarOpen.value = true }
+function closeSidebar() { sidebarOpen.value = false }
+
+function handleResize() {
+  const lg = window.innerWidth >= LG
+  isLg.value = lg
+  if (!lg) sidebarOpen.value = false
+  else sidebarOpen.value = true
+}
+
+// 모바일에서 페이지 이동 시 사이드바 자동 닫기
+watch(() => route.path, () => {
+  if (!isLg.value) closeSidebar()
+})
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+  badgeStore.loadCollection()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+const SIDEBAR_WIDTH = '280px'
+const TRANSITION = 'transform 300ms cubic-bezier(0.22, 1, 0.36, 1)'
+const MAIN_TRANSITION = 'margin-left 300ms cubic-bezier(0.22, 1, 0.36, 1)'
+
+const asideStyle = computed(() => ({
+  padding: '24px',
+  transform: sidebarOpen.value ? 'translateX(0)' : 'translateX(-100%)',
+  transition: TRANSITION,
+}))
+
+const mainStyle = computed(() => ({
+  marginLeft: sidebarOpen.value && isLg.value ? SIDEBAR_WIDTH : '0',
+  padding: '40px',
+  maxWidth: sidebarOpen.value && isLg.value ? `calc(1440px - ${SIDEBAR_WIDTH})` : '1440px',
+  transition: MAIN_TRANSITION,
+}))
 
 const PREVIEW_LIMIT = 5;
 const earnedBadges = computed(() => badgeStore.earnedBadges);
 const previewBadges = computed(() => earnedBadges.value.slice(0, PREVIEW_LIMIT));
 const extraBadgeCount = computed(() => Math.max(0, earnedBadges.value.length - PREVIEW_LIMIT));
-
-onMounted(() => {
-  badgeStore.loadCollection();
-});
 
 const navItems = [
   { to: '/',        label: '홈',        icon: 'home' },
@@ -160,3 +232,23 @@ async function onLogout() {
   }
 }
 </script>
+
+<style scoped>
+.sidebar-overlay-enter-active,
+.sidebar-overlay-leave-active {
+  transition: opacity 200ms ease;
+}
+.sidebar-overlay-enter-from,
+.sidebar-overlay-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 150ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

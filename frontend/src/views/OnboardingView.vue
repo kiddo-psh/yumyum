@@ -1,12 +1,23 @@
 <template>
   <div class="min-h-screen bg-sub-background flex items-center justify-center p-5">
-    <div class="w-full max-w-[640px] bg-background neo-brutal-border rounded neo-brutal-shadow overflow-hidden">
+    <div class="w-full max-w-[640px] flex flex-col items-center gap-6">
+
+      <!-- 냠냠코치 큰 이미지 -->
+      <div class="flex flex-col items-center gap-3">
+        <img src="/nyam/nyam_coach.png" alt="냠냠코치" class="w-36 h-36 object-contain" />
+        <div class="text-center">
+          <p class="text-headline-lg font-bold text-on-background">냠냠코치</p>
+          <p class="text-body-md text-on-surface-variant">맞춤 건강 플랜을 만들어드릴게요!</p>
+        </div>
+      </div>
+
+    <div class="w-full bg-background neo-brutal-border rounded neo-brutal-shadow overflow-hidden">
 
       <!-- Progress header -->
       <div class="px-8 pt-7 pb-6 border-b-[3px] border-on-background">
         <div class="flex items-center gap-2.5 mb-5">
-          <div class="w-8 h-8 bg-nyam-mint rounded-full neo-brutal-border flex items-center justify-center overflow-hidden flex-shrink-0">
-            <img src="/nyam/nyamnyam.png" alt="" aria-hidden="true" class="w-6 h-6 object-contain" />
+          <div class="w-8 h-8 bg-nyam-mint rounded-xl neo-brutal-border flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img src="/nyam/nyam_logo.png" alt="" aria-hidden="true" class="w-6 h-6 object-contain" />
           </div>
           <span class="text-label-lg text-on-background">냠냠코치</span>
         </div>
@@ -179,6 +190,7 @@
         </button>
       </div>
 
+    </div>
     </div>
   </div>
 </template>

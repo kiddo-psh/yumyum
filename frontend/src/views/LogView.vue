@@ -1,268 +1,230 @@
 <template>
-  <!-- Header -->
-  <header class="flex justify-between items-center mb-10 w-full">
-    <div>
-      <h2 class="text-headline-lg text-on-background">식단 기록</h2>
-      <p class="text-body-md text-on-surface-variant">하루 목표 칼로리를 채워보세요.</p>
-    </div>
-    <div class="flex items-center gap-2 neo-brutal-border rounded-xl px-4 py-3 bg-white">
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-surface rounded-lg transition-colors" @click="prevDay">
-        <span class="material-symbols-outlined">chevron_left</span>
-      </button>
-      <button class="text-label-lg font-bold min-w-[130px] text-center hover:text-primary transition-colors" @click="goToday">
-        {{ displayDate }}
-      </button>
-      <button
-        class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-        :class="isToday ? 'opacity-30 cursor-not-allowed' : 'hover:bg-surface'"
-        :disabled="isToday"
-        @click="nextDay"
-      >
-        <span class="material-symbols-outlined">chevron_right</span>
-      </button>
-    </div>
-  </header>
+  <div class="max-w-4xl mx-auto w-full">
 
-  <!-- 로딩 -->
-  <div v-if="state.loading" class="flex items-center gap-4 text-on-surface-variant mb-8">
-    <span class="material-symbols-outlined animate-spin">progress_activity</span>
-    <span class="text-body-md">식단 기록을 불러오는 중...</span>
-  </div>
-
-  <template v-else>
-    <div class="grid grid-cols-12 gap-8">
-      <!-- 좌측: 칼로리 요약 + 끼니 목록 -->
-      <div class="col-span-8 space-y-6">
-        <!-- 칼로리 요약 카드 -->
-        <div class="bg-surface neo-brutal-border rounded-xl p-6 neo-brutal-card-hover">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <p class="text-label-lg text-on-surface-variant mb-1">오늘의 칼로리</p>
-              <h3 class="text-headline-lg font-black text-on-background">
-                {{ formatNumber(totalCalories) }}
-                <span class="text-body-lg text-on-surface-variant font-normal">/ {{ formatNumber(targetCalories) }} kcal</span>
-              </h3>
-            </div>
-            <div class="w-14 h-14 bg-primary neo-brutal-border rounded-2xl flex items-center justify-center flex-shrink-0">
-              <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1;">restaurant</span>
-            </div>
-          </div>
-          <div class="w-full h-3 bg-white neo-brutal-border rounded-full overflow-hidden mb-2">
-            <div class="h-full bg-primary border-r-[3px] border-on-background transition-all duration-700" :style="{ width: calorieProgress + '%' }" />
-          </div>
-          <div class="flex justify-between mb-3">
-            <span class="text-xs text-on-surface-variant">{{ calorieProgress }}% 달성</span>
-            <span class="text-xs text-on-surface-variant">남은 {{ formatNumber(remainingCalories) }} kcal</span>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <div v-for="macro in macros" :key="macro.key" class="text-center">
-              <p class="text-xs font-bold text-on-surface-variant mb-1">{{ macro.label }}</p>
-              <div class="h-24 w-full bg-white neo-brutal-border rounded-lg relative flex flex-col justify-end overflow-hidden">
-                <div class="w-full border-t-[3px] border-on-background transition-all duration-700" :class="macro.colorClass" :style="{ height: macro.percent + '%' }" />
-                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold">{{ formatNumber(macro.current) }}g</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 끼니 카드 목록 -->
-        <div class="space-y-6">
-          <div
-            v-for="(meal, index) in state.meals"
-            :key="meal.id"
-            class="bg-surface neo-brutal-border rounded-xl overflow-hidden neo-brutal-card-hover"
-          >
-            <!-- 끼니 헤더 -->
-            <div class="flex items-center justify-between p-6 border-b-[3px] border-on-background">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span class="font-black text-white text-lg">{{ index + 1 }}</span>
-                </div>
-                <div>
-                  <h3 class="text-headline-md font-bold">{{ ordinal(index + 1) }} 끼니</h3>
-                  <p class="text-body-sm text-on-surface-variant">
-                    {{ mealCalories(meal) > 0 ? formatNumber(mealCalories(meal)) + ' kcal · ' + meal.items.length + '가지' : '음식을 추가해보세요' }}
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <button
-                  class="flex items-center gap-2 bg-white px-4 py-2 neo-brutal-border rounded-lg font-bold text-sm hover:-translate-y-1 transition-transform"
-                  @click="toggleSearch(meal.id)"
-                >
-                  <span class="material-symbols-outlined text-lg">{{ search.mealId === meal.id ? 'close' : 'add' }}</span>
-                  {{ search.mealId === meal.id ? '닫기' : '식단 추가' }}
-                </button>
-                <button
-                  class="w-9 h-9 flex items-center justify-center hover:bg-surface rounded-lg transition-colors text-on-surface-variant"
-                  :disabled="state.deleting === meal.id"
-                  @click="handleDelete(meal.id)"
-                >
-                  <span class="material-symbols-outlined text-xl">{{ state.deleting === meal.id ? 'progress_activity' : 'delete' }}</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 음식 목록 -->
-            <div v-if="meal.items?.length > 0" class="divide-y-[3px] divide-on-background">
-              <div v-for="item in meal.items" :key="item.foodCode" class="flex items-center justify-between px-6 py-4">
-                <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-white neo-brutal-border rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-on-surface-variant text-xl" style="font-variation-settings:'FILL' 1;">nutrition</span>
-                  </div>
-                  <div>
-                    <p class="font-bold text-on-background">{{ item.foodName }}</p>
-                    <p class="text-body-sm text-on-surface-variant">{{ formatNumber(item.amountGrams) }}g · 단백질 {{ formatNumber(item.protein) }}g</p>
-                  </div>
-                </div>
-                <p class="font-bold text-primary">{{ formatNumber(item.calories) }} kcal</p>
-              </div>
-            </div>
-
-            <!-- 인라인 식단 추가 패널 -->
-            <div v-if="search.mealId === meal.id" class="border-t-[3px] border-on-background bg-white p-6 space-y-4">
-              <div class="flex gap-3">
-                <input
-                  v-model="search.query"
-                  type="search"
-                  placeholder="음식 이름 검색 (예: 닭가슴살)"
-                  class="flex-1 px-4 py-3 neo-brutal-border rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  @keydown.enter.prevent="handleSearch"
-                />
-                <button
-                  class="px-5 py-3 bg-primary text-white neo-brutal-border rounded-lg font-bold hover:-translate-y-0.5 transition-transform"
-                  :disabled="search.loading"
-                  @click="handleSearch"
-                >
-                  <span v-if="search.loading" class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
-                  <span v-else class="material-symbols-outlined text-xl">search</span>
-                </button>
-              </div>
-
-              <div v-if="search.results.length > 0" class="neo-brutal-border rounded-lg overflow-hidden max-h-52 overflow-y-auto">
-                <button
-                  v-for="food in search.results"
-                  :key="food.foodCode"
-                  class="w-full flex items-center justify-between px-4 py-3 hover:bg-surface transition-colors border-b-[2px] border-on-background last:border-b-0 text-left"
-                  :class="search.selected?.foodCode === food.foodCode ? 'bg-primary text-white' : ''"
-                  @click="selectFood(food)"
-                >
-                  <span class="font-bold">{{ food.name }}</span>
-                  <span class="text-sm opacity-70">100g당 {{ formatNumber(food.caloriesPer100g) }} kcal</span>
-                </button>
-              </div>
-
-              <div v-if="search.selected" class="flex items-center gap-3 p-4 bg-surface neo-brutal-border rounded-lg">
-                <div class="flex-1">
-                  <p class="font-bold text-on-background mb-1">{{ search.selected.name }}</p>
-                  <p class="text-body-sm text-on-surface-variant">
-                    {{ formatNumber(search.amount) }}g = 약 {{ formatNumber(search.selected.caloriesPer100g * search.amount / 100) }} kcal
-                  </p>
-                </div>
-                <input
-                  v-model.number="search.amount"
-                  type="number"
-                  min="1"
-                  step="10"
-                  class="w-24 px-3 py-2 neo-brutal-border rounded-lg text-center font-bold focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <span class="text-body-md font-bold text-on-surface-variant">g</span>
-                <button
-                  class="px-5 py-3 bg-primary text-white neo-brutal-border rounded-lg font-bold hover:-translate-y-0.5 transition-transform flex items-center gap-2"
-                  :disabled="search.saving"
-                  @click="confirmAdd(meal.id)"
-                >
-                  <span v-if="search.saving" class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
-                  <span v-else class="material-symbols-outlined text-xl">check</span>
-                  추가
-                </button>
-              </div>
-            </div>
-
-            <div v-if="!meal.items?.length && search.mealId !== meal.id" class="px-6 py-8 text-center text-on-surface-variant text-body-md">
-              위 '식단 추가' 버튼으로 음식을 추가하세요.
-            </div>
-          </div>
-
-          <div v-if="state.meals.length === 0" class="py-16 flex flex-col items-center gap-3 text-on-surface-variant">
-            <span class="material-symbols-outlined text-5xl opacity-30">restaurant_menu</span>
-            <p class="text-body-md">아직 오늘 기록한 끼니가 없어요.</p>
-            <p class="text-body-sm opacity-60">아래 버튼으로 첫 끼니를 추가해보세요.</p>
-          </div>
-        </div>
-
-        <!-- 끼니 추가 버튼 -->
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h2 class="text-headline-lg text-on-background">식단 기록</h2>
+        <p class="text-body-md text-on-surface-variant mt-0.5">하루 목표 칼로리를 채워보세요.</p>
+      </div>
+      <div class="flex items-center gap-2 neo-brutal-border rounded-xl px-4 py-3 bg-white">
+        <button class="w-8 h-8 flex items-center justify-center hover:bg-surface rounded-lg transition-colors" @click="prevDay">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <button class="text-label-lg font-bold min-w-[130px] text-center hover:text-primary transition-colors" @click="goToday">
+          {{ displayDate }}
+        </button>
         <button
-          class="flex items-center justify-center gap-3 w-full py-5 neo-brutal-border rounded-xl font-bold text-headline-md transition-transform"
-          :class="state.meals.length >= MAX_MEALS
-            ? 'bg-surface text-on-surface-variant cursor-not-allowed opacity-50'
-            : 'bg-primary text-white hover:-translate-y-1'"
-          :disabled="state.meals.length >= MAX_MEALS"
-          @click="addMeal"
+          class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+          :class="isToday ? 'opacity-30 cursor-not-allowed' : 'hover:bg-surface'"
+          :disabled="isToday"
+          @click="nextDay"
         >
-          <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">
-            {{ state.meals.length >= MAX_MEALS ? 'block' : 'add_circle' }}
-          </span>
-          {{ state.meals.length >= MAX_MEALS ? `하루 최대 ${MAX_MEALS}끼니` : '끼니 추가' }}
+          <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
+    </header>
 
-      <!-- 우측 사이드바: 냠냠코치 + 마지막 끼니 추천 -->
-      <div class="col-span-4 space-y-6">
-        <!-- 냠냠 코치 -->
-        <div class="bg-warning neo-brutal-border rounded-xl p-6">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 bg-white neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">cruelty_free</span>
-            </div>
-            <span class="font-black text-on-background">냠냠 코치</span>
-          </div>
-          <p class="text-body-md text-on-background font-bold leading-relaxed">{{ coachMessage }}</p>
-        </div>
+    <!-- 로딩 -->
+    <div v-if="state.loading" class="flex items-center gap-4 text-on-surface-variant mb-8">
+      <span class="material-symbols-outlined animate-spin">progress_activity</span>
+      <span class="text-body-md">식단 기록을 불러오는 중...</span>
+    </div>
 
-        <!-- 마지막 끼니 추천 -->
-        <div class="bg-surface neo-brutal-border rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-black text-on-background">마지막 끼니 추천</h3>
-            <button
-              class="bg-white neo-brutal-border rounded-lg px-3 py-2 text-xs font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
-              :disabled="recommend.loading || !canRecommend"
-              @click="loadRecommendation"
-            >
-              {{ recommend.loading ? '로딩 중' : '추천 받기' }}
-            </button>
-          </div>
+    <template v-else>
+      <div class="space-y-6">
 
-          <p v-if="!canRecommend" class="text-xs text-on-surface-variant bg-white neo-brutal-border rounded-lg p-3">
-            오후 5시 이후, 잔여 칼로리가 1끼 분량일 때 활성화됩니다.
-          </p>
-
-          <template v-else>
-            <p v-if="recommend.error" class="text-xs text-danger font-bold mb-3">
-              {{ recommend.error }}
-            </p>
-            <div v-if="primaryRecommendation" class="bg-white neo-brutal-border rounded-xl p-4 space-y-2">
-              <p class="font-bold text-on-background">{{ primaryRecommendation.name }}</p>
-              <p class="text-xs text-on-surface-variant">{{ primaryRecommendation.reason }}</p>
-              <div class="flex justify-between items-center pt-3 border-t-[2px] border-outline">
-                <div>
-                  <p class="text-xs text-on-surface-variant font-bold">예상 칼로리</p>
-                  <p class="font-black text-primary">{{ formatKcal(primaryRecommendation.kcal) }}</p>
+          <!-- 칼로리 요약 카드 -->
+          <div class="bg-white neo-brutal-border rounded-xl p-7">
+            <!-- 칼로리 헤더 -->
+            <div class="flex items-end justify-between mb-6">
+              <div>
+                <p class="text-label-lg text-on-surface-variant mb-2">오늘의 칼로리</p>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-numeral-xl text-on-background leading-none">{{ formatNumber(totalCalories) }}</span>
+                  <span class="text-headline-md text-on-surface-variant">kcal</span>
                 </div>
-                <RouterLink
-                  :to="{ name: 'meal-manual', query: { q: primaryRecommendation.name } }"
-                  class="bg-primary text-white neo-brutal-border rounded-lg px-4 py-2 text-xs font-bold flex items-center gap-1 hover:-translate-y-1 transition-transform"
-                >
-                  <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">add_circle</span>
-                  기록
-                </RouterLink>
+              </div>
+              <div class="text-right">
+                <p class="text-body-md text-on-surface-variant">목표</p>
+                <p class="text-headline-lg font-bold text-on-background">{{ formatNumber(targetCalories) }} kcal</p>
               </div>
             </div>
-          </template>
-        </div>
+
+            <!-- 칼로리 프로그레스 바 -->
+            <div class="h-8 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+              <div class="h-full bg-primary transition-all duration-700" :style="{ width: calorieProgress + '%' }" />
+            </div>
+            <div class="flex justify-between mt-3 mb-8">
+              <span class="text-body-md font-bold text-primary">{{ calorieProgress }}% 달성</span>
+              <span class="text-body-md text-on-surface-variant">{{ formatNumber(remainingCalories) }} kcal 남음</span>
+            </div>
+
+            <!-- 영양소 -->
+            <div class="grid grid-cols-3 gap-6 pt-6 border-t-[3px] border-on-background">
+              <div v-for="macro in macros" :key="macro.key">
+                <div class="flex justify-between items-baseline mb-3">
+                  <span class="text-body-md font-bold text-on-background">{{ macro.label }}</span>
+                  <span class="text-label-lg text-on-surface-variant">{{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ MACRO_TARGETS[macro.key] }}g</span></span>
+                </div>
+                <div class="h-5 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+                  <div class="h-full transition-all duration-700" :class="macro.colorClass" :style="{ width: macro.percent + '%' }" />
+                </div>
+                <p class="text-label-lg text-on-surface-variant mt-2">{{ macro.percent }}%</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 끼니 카드 목록 -->
+          <div class="space-y-5">
+            <div
+              v-for="(meal, index) in state.meals"
+              :key="meal.id"
+              class="bg-surface neo-brutal-border rounded-xl overflow-hidden"
+            >
+              <!-- 끼니 헤더 -->
+              <div class="flex items-center justify-between p-5 border-b-[3px] border-on-background">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-primary neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="font-bold text-on-primary text-lg">{{ index + 1 }}</span>
+                  </div>
+                  <div>
+                    <h3 class="text-headline-md font-bold">{{ ordinal(index + 1) }} 끼니</h3>
+                    <p class="text-label-lg text-on-surface-variant mt-0.5">
+                      {{ mealCalories(meal) > 0 ? formatNumber(mealCalories(meal)) + ' kcal · ' + meal.items.length + '가지' : '음식을 추가해보세요' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="flex items-center gap-1.5 bg-white px-4 py-2 neo-brutal-border rounded-lg text-label-lg font-bold hover:-translate-y-0.5 transition-transform"
+                    @click="toggleSearch(meal.id)"
+                  >
+                    <span class="material-symbols-outlined text-base">{{ search.mealId === meal.id ? 'close' : 'add' }}</span>
+                    {{ search.mealId === meal.id ? '닫기' : '추가' }}
+                  </button>
+                  <button
+                    class="w-9 h-9 flex items-center justify-center hover:bg-surface rounded-lg transition-colors text-on-surface-variant"
+                    :disabled="state.deleting === meal.id"
+                    @click="handleDelete(meal.id)"
+                  >
+                    <span class="material-symbols-outlined text-xl">{{ state.deleting === meal.id ? 'progress_activity' : 'delete' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 음식 목록 -->
+              <div v-if="meal.items?.length > 0" class="divide-y-[3px] divide-on-background">
+                <div v-for="item in meal.items" :key="item.foodCode" class="flex items-center justify-between px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white neo-brutal-border rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="material-symbols-outlined text-on-surface-variant text-xl" style="font-variation-settings:'FILL' 1;">nutrition</span>
+                    </div>
+                    <div>
+                      <p class="font-bold text-on-background">{{ item.foodName }}</p>
+                      <p class="text-label-lg text-on-surface-variant mt-0.5">{{ formatNumber(item.amountGrams) }}g · 단백질 {{ formatNumber(item.protein) }}g</p>
+                    </div>
+                  </div>
+                  <p class="font-bold text-primary flex-shrink-0">{{ formatNumber(item.calories) }} kcal</p>
+                </div>
+              </div>
+
+              <!-- 인라인 식단 추가 패널 -->
+              <div v-if="search.mealId === meal.id" class="border-t-[3px] border-on-background bg-white p-5 space-y-4">
+                <div class="flex gap-3">
+                  <input
+                    v-model="search.query"
+                    type="search"
+                    placeholder="음식 이름 검색 (예: 닭가슴살)"
+                    class="flex-1 px-4 py-3 neo-brutal-border rounded-xl text-body-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                    @keydown.enter.prevent="handleSearch"
+                  />
+                  <button
+                    class="px-5 py-3 bg-primary text-on-primary neo-brutal-border rounded-xl text-label-lg font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-50"
+                    :disabled="search.loading"
+                    @click="handleSearch"
+                  >
+                    <span v-if="search.loading" class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+                    <span v-else class="material-symbols-outlined text-xl">search</span>
+                  </button>
+                </div>
+
+                <div v-if="search.results.length > 0" class="neo-brutal-border rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                  <button
+                    v-for="food in search.results"
+                    :key="food.foodCode"
+                    class="w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-on-background last:border-b-0 text-left transition-colors"
+                    :class="search.selected?.foodCode === food.foodCode ? 'bg-primary text-on-primary' : 'bg-white hover:bg-surface'"
+                    @click="selectFood(food)"
+                  >
+                    <span class="font-bold">{{ food.name }}</span>
+                    <span
+                      class="text-label-lg"
+                      :class="search.selected?.foodCode === food.foodCode ? 'text-on-primary/70' : 'text-on-surface-variant'"
+                    >100g당 {{ formatNumber(food.caloriesPer100g) }} kcal</span>
+                  </button>
+                </div>
+
+                <div v-if="search.selected" class="flex items-center gap-3 p-4 bg-surface neo-brutal-border rounded-xl">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-on-background truncate mb-1">{{ search.selected.name }}</p>
+                    <p class="text-label-lg text-on-surface-variant">
+                      {{ formatNumber(search.amount) }}g = 약 {{ formatNumber(search.selected.caloriesPer100g * search.amount / 100) }} kcal
+                    </p>
+                  </div>
+                  <input
+                    v-model.number="search.amount"
+                    type="number"
+                    min="1"
+                    step="10"
+                    class="w-24 px-3 py-2 neo-brutal-border rounded-xl text-center font-bold focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                  />
+                  <span class="text-body-md font-bold text-on-surface-variant">g</span>
+                  <button
+                    class="px-5 py-3 bg-primary text-on-primary neo-brutal-border rounded-xl text-label-lg font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-50 flex items-center gap-2"
+                    :disabled="search.saving"
+                    @click="confirmAdd(meal.id)"
+                  >
+                    <span v-if="search.saving" class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+                    <span v-else class="material-symbols-outlined text-xl">check</span>
+                    추가
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="!meal.items?.length && search.mealId !== meal.id" class="px-5 py-8 text-center text-on-surface-variant text-body-md">
+                '추가' 버튼으로 음식을 기록하세요.
+              </div>
+            </div>
+
+            <div v-if="state.meals.length === 0" class="py-16 flex flex-col items-center gap-4 text-on-surface-variant">
+              <div class="w-16 h-16 bg-surface neo-brutal-border rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl opacity-30" style="font-variation-settings:'FILL' 1;">restaurant_menu</span>
+              </div>
+              <div class="text-center">
+                <p class="text-body-md">아직 오늘 기록한 끼니가 없어요.</p>
+                <p class="text-label-lg text-on-surface-variant opacity-60 mt-1">아래 버튼으로 첫 끼니를 추가해보세요.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 끼니 추가 버튼 -->
+          <button
+            class="flex items-center justify-center gap-3 w-full py-5 neo-brutal-border rounded-xl text-label-lg font-bold transition-all duration-150"
+            :class="state.meals.length >= MAX_MEALS
+              ? 'bg-surface text-on-surface-variant cursor-not-allowed opacity-50'
+              : 'bg-primary text-on-primary neo-brutal-shadow hover:-translate-y-0.5'"
+            :disabled="state.meals.length >= MAX_MEALS"
+            @click="addMeal"
+          >
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">
+              {{ state.meals.length >= MAX_MEALS ? 'block' : 'add_circle' }}
+            </span>
+            {{ state.meals.length >= MAX_MEALS ? `하루 최대 ${MAX_MEALS}끼니` : '끼니 추가' }}
+          </button>
       </div>
-    </div>
-  </template>
+    </template>
+  </div>
 </template>
 
 <script setup>

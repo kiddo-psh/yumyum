@@ -1,4 +1,5 @@
 <template>
+  <div class="max-w-4xl mx-auto w-full">
   <header class="mb-6">
     <RouterLink
       to="/routine"
@@ -17,14 +18,14 @@
       <!-- 월 네비게이션 -->
       <div class="flex items-center justify-between mb-5">
         <button
-          class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl bg-surface hover:bg-nyam-mint/20 transition-colors"
+          class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl bg-surface hover:bg-surface transition-colors"
           @click="prevMonth"
         >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
         <span class="text-headline-md text-on-background font-bold">{{ currentYear }}년 {{ currentMonth }}월</span>
         <button
-          class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl bg-surface hover:bg-nyam-mint/20 transition-colors"
+          class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl bg-surface hover:bg-surface transition-colors"
           :disabled="isCurrentMonth"
           :class="isCurrentMonth ? 'opacity-30 cursor-not-allowed' : ''"
           @click="nextMonth"
@@ -38,7 +39,7 @@
         <span
           v-for="d in ['일','월','화','수','목','금','토']"
           :key="d"
-          class="text-body-sm text-on-surface-variant text-center py-1.5"
+          class="text-label-lg text-on-surface-variant text-center py-1.5"
           :class="d === '일' ? 'text-danger' : d === '토' ? 'text-primary' : ''"
         >{{ d }}</span>
       </div>
@@ -63,7 +64,7 @@
         </div>
       </div>
 
-      <div v-if="loading" class="flex items-center justify-center gap-2 text-on-surface-variant mt-3 text-label-sm">
+      <div v-if="loading" class="flex items-center justify-center gap-2 text-on-surface-variant mt-3 text-xs">
         <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
         불러오는 중...
       </div>
@@ -71,12 +72,12 @@
       <!-- 이달 통계 -->
       <div v-if="!loading && sessions.length" class="mt-4 pt-4 border-t border-outline flex gap-4">
         <div class="flex-1 text-center">
-          <p class="text-display-sm text-primary font-bold">{{ sessions.length }}</p>
-          <p class="text-label-sm text-on-surface-variant">이달 운동</p>
+          <p class="text-headline-lg text-primary font-bold">{{ sessions.length }}</p>
+          <p class="text-xs text-on-surface-variant">이달 운동</p>
         </div>
         <div class="flex-1 text-center">
-          <p class="text-display-sm text-primary font-bold">{{ totalCalories.toLocaleString() }}</p>
-          <p class="text-label-sm text-on-surface-variant">총 칼로리</p>
+          <p class="text-headline-lg text-primary font-bold">{{ totalCalories.toLocaleString() }}</p>
+          <p class="text-xs text-on-surface-variant">총 칼로리</p>
         </div>
       </div>
     </div>
@@ -108,19 +109,19 @@
         </div>
 
         <!-- 요약 -->
-        <div class="bg-nyam-mint/20 neo-brutal-border rounded-xl p-4 grid grid-cols-2 gap-4">
+        <div class="bg-surface neo-brutal-border rounded-xl p-4 grid grid-cols-2 gap-4">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">local_fire_department</span>
             <div>
-              <p class="text-label-sm text-on-surface-variant">소모 칼로리</p>
-              <p class="text-headline-sm text-on-background font-bold">{{ selectedSession.caloriesBurned }} kcal</p>
+              <p class="text-xs text-on-surface-variant">소모 칼로리</p>
+              <p class="text-headline-md text-on-background font-bold">{{ selectedSession.caloriesBurned }} kcal</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">check_circle</span>
             <div>
-              <p class="text-label-sm text-on-surface-variant">완료 세트</p>
-              <p class="text-headline-sm text-on-background font-bold">{{ completedSets }} / {{ selectedSession.sets.length }}</p>
+              <p class="text-xs text-on-surface-variant">완료 세트</p>
+              <p class="text-headline-md text-on-background font-bold">{{ completedSets }} / {{ selectedSession.sets.length }}</p>
             </div>
           </div>
         </div>
@@ -133,7 +134,7 @@
         >
           <p class="text-body-lg font-bold text-on-background mb-3">{{ ex.exerciseName }}</p>
           <div class="grid gap-1.5">
-            <div class="grid grid-cols-[2rem_1fr_1fr_1.5rem] gap-2 text-label-sm text-on-surface-variant px-1">
+            <div class="grid grid-cols-[2rem_1fr_1fr_1.5rem] gap-2 text-xs text-on-surface-variant px-1">
               <span class="text-center">#</span>
               <span class="text-center">횟수</span>
               <span class="text-center">무게</span>
@@ -143,9 +144,9 @@
               v-for="s in ex.sets"
               :key="s.setNumber"
               class="grid grid-cols-[2rem_1fr_1fr_1.5rem] gap-2 items-center rounded-lg px-1 py-1.5"
-              :class="s.completed ? 'bg-nyam-mint/20' : 'bg-surface'"
+              :class="s.completed ? 'bg-white' : 'bg-surface'"
             >
-              <span class="text-label-sm text-on-surface-variant text-center">{{ s.setNumber }}</span>
+              <span class="text-xs text-on-surface-variant text-center">{{ s.setNumber }}</span>
               <span class="text-body-md text-on-background text-center">{{ s.actualReps }}회</span>
               <span class="text-body-md text-on-background text-center">{{ s.actualWeightKg }}kg</span>
               <span
@@ -159,6 +160,7 @@
       </div>
     </div>
 
+  </div>
   </div>
 </template>
 
@@ -204,7 +206,7 @@ const totalCalories = computed(() => sessions.value.reduce((sum, s) => sum + s.c
 
 function cellClass(cell) {
   if (cell.dateStr === selectedDate.value) return 'bg-primary text-white'
-  if (cell.session) return 'bg-nyam-mint/30 text-on-background hover:bg-nyam-mint/60'
+  if (cell.session) return 'bg-white neo-brutal-border text-on-background hover:bg-outline'
   if (cell.dateStr === todayStr) return 'ring-2 ring-primary text-primary hover:bg-surface'
   return 'text-on-background hover:bg-surface'
 }
@@ -261,3 +263,5 @@ async function loadSessions() {
 watch([currentYear, currentMonth], loadSessions)
 onMounted(loadSessions)
 </script>
+
+

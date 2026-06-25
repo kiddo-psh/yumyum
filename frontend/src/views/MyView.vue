@@ -1,24 +1,29 @@
 <template>
-  <header class="flex justify-between items-center mb-10">
-    <div>
+  <div class="max-w-4xl mx-auto w-full">
+
+    <header class="mb-10">
       <h1 class="text-display-md text-on-background">마이페이지</h1>
-    </div>
-  </header>
+    </header>
 
-  <div class="flex flex-col gap-8">
-    <NyamSection :nyam="nyam" :error="nyamError" />
-    <ProfileSection :profile="profile" :error="profileError" @updated="onProfileUpdated" />
-    <ProgramSection :program="program" :error="programError" />
-    <ReportSection />
-    <BadgeCollectionSection />
+    <div class="flex flex-col gap-8">
+      <NyamSection :nyam="nyam" :error="nyamError" />
+      <ProfileSection :profile="profile" :error="profileError" @updated="onProfileUpdated" />
+      <ProgramSection :program="program" :error="programError" />
+      <ReportSection />
+      <BadgeCollectionSection />
 
-    <!-- 로그아웃 -->
-    <div class="flex justify-end">
-      <button class="px-6 py-3 neo-brutal-border rounded-xl text-label-lg text-danger hover:bg-surface transition-colors"
-              @click="logout">
-        로그아웃
-      </button>
+      <!-- 로그아웃 -->
+      <div class="flex justify-end pt-2">
+        <button
+          class="flex items-center gap-2 px-6 py-3 neo-brutal-border rounded-xl text-label-lg font-bold text-danger hover:bg-danger hover:text-white hover:-translate-y-0.5 transition-all duration-150"
+          @click="logout"
+        >
+          <span class="material-symbols-outlined text-base">logout</span>
+          로그아웃
+        </button>
+      </div>
     </div>
+
   </div>
 </template>
 

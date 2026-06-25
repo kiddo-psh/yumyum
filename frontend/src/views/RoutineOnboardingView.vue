@@ -184,12 +184,13 @@
     <h2 class="text-headline-lg text-on-background">
       {{ result.name }}
     </h2>
-    <p
+    <div
       v-if="result.aiComment"
-      class="bg-surface neo-brutal-border rounded-lg p-4 text-body-md text-on-background mt-4"
+      class="bg-surface neo-brutal-border rounded-xl p-5 flex items-start gap-3 mt-4"
     >
-      {{ result.aiComment }}
-    </p>
+      <img src="/nyam/nyam_coach.png" alt="냠냠코치" class="w-9 h-9 object-contain flex-shrink-0 mt-0.5" />
+      <p class="text-body-md text-on-background leading-relaxed">{{ result.aiComment }}</p>
+    </div>
 
     <p class="text-label-sm text-on-surface-variant mt-5 mb-2">세트·횟수·무게를 조정하려면 바로 수정하세요.</p>
 

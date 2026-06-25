@@ -1,151 +1,177 @@
 <template>
-  <section class="meal-action">
-    <header class="meal-action__header">
+  <div class="max-w-2xl mx-auto w-full">
+
+    <!-- Header -->
+    <header class="mb-8">
       <RouterLink
         :to="mealId ? '/log' : '/'"
-        class="back-link"
+        class="inline-flex items-center gap-1 text-label-lg text-on-surface-variant hover:text-on-background transition-colors mb-3"
       >
-        {{ mealId ? '식단 기록으로' : '대시보드로' }}
+        <span class="material-symbols-outlined text-base">chevron_left</span>
+        {{ mealId ? '식단 기록으로' : '홈으로' }}
       </RouterLink>
-      <h1>{{ mealId ? '음식 추가' : isManualMode ? '직접 입력' : '음식 검색' }}</h1>
-      <p>
-        {{ mealId ? '기존 끼니에 음식을 추가합니다.' : isManualMode ? 'Food를 검색해 MealRequest 형식으로 식단을 저장합니다.' : 'GET /foods?query=... 형식으로 음식 마스터 데이터를 조회합니다.' }}
+      <h1 class="text-display-md text-on-background">
+        {{ mealId ? '음식 추가' : isManualMode ? '식단 기록' : '음식 검색' }}
+      </h1>
+      <p class="text-body-md text-on-surface-variant mt-1">
+        {{ mealId ? '기존 끼니에 음식을 추가합니다.' : isManualMode ? '음식을 검색하고 섭취량을 입력하세요.' : '음식 영양 정보를 조회합니다.' }}
       </p>
     </header>
 
-    <form
-      class="search-box"
-      @submit.prevent="handleSearch"
-    >
-      <label for="food-query">검색어</label>
-      <div>
+    <!-- 검색 -->
+    <div class="bg-surface neo-brutal-border rounded-xl p-6 mb-6">
+      <form class="flex gap-3" @submit.prevent="handleSearch">
         <input
           id="food-query"
           v-model.trim="query"
           type="search"
-          placeholder="예: 닭가슴살"
-        >
+          placeholder="음식 이름 검색 (예: 닭가슴살)"
+          class="flex-1 px-4 py-3 neo-brutal-border rounded-xl text-body-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+        />
         <button
           type="submit"
           :disabled="searchState.loading"
+          class="px-5 py-3 bg-primary text-on-primary neo-brutal-border rounded-xl text-label-lg font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-50 flex items-center gap-1"
         >
+          <span v-if="searchState.loading" class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+          <span v-else class="material-symbols-outlined text-xl">search</span>
           {{ searchState.loading ? '검색 중' : '검색' }}
         </button>
+      </form>
+
+      <p v-if="searchState.error" class="text-danger text-label-lg font-bold mt-3 p-3 bg-white neo-brutal-border rounded-xl">
+        {{ searchState.error }}
+      </p>
+    </div>
+
+    <!-- 검색 결과 -->
+    <template v-if="searchState.success">
+      <div v-if="foods.length > 0" class="bg-surface neo-brutal-border rounded-xl overflow-hidden mb-6">
+        <p class="px-5 py-3 border-b-[3px] border-on-background text-label-lg font-bold text-on-surface-variant">
+          {{ foods.length }}개 결과
+        </p>
+        <div class="divide-y-[3px] divide-on-background max-h-80 overflow-y-auto">
+          <button
+            v-for="food in foods"
+            :key="food.id"
+            type="button"
+            class="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
+            :class="selectedFood?.id === food.id ? 'bg-primary text-on-primary' : 'bg-white hover:bg-surface'"
+            @click="selectFood(food)"
+          >
+            <div>
+              <p class="font-bold">{{ food.name }}</p>
+              <p
+                class="text-label-lg mt-0.5"
+                :class="selectedFood?.id === food.id ? 'text-on-primary/70' : 'text-on-surface-variant'"
+              >
+                100g당 {{ formatNumber(food.caloriesPer100g) }} kcal · 단백질 {{ formatNumber(food.proteinPer100g) }}g
+              </p>
+            </div>
+            <span
+              v-if="selectedFood?.id === food.id"
+              class="material-symbols-outlined text-on-primary ml-3 shrink-0"
+              style="font-variation-settings:'FILL' 1;"
+            >check_circle</span>
+          </button>
+        </div>
       </div>
-    </form>
 
-    <p
-      v-if="searchState.error"
-      class="status status--error"
-    >
-      {{ searchState.error }}
-    </p>
-    <p
-      v-else-if="searchState.success"
-      class="status status--success"
-    >
-      {{ foods.length }}개 Food를 불러왔습니다.
-    </p>
+      <div v-else class="bg-surface neo-brutal-border rounded-xl p-10 text-center text-on-surface-variant mb-6">
+        <span class="material-symbols-outlined text-4xl opacity-30 block mb-2">search_off</span>
+        <p class="text-body-md">검색 결과가 없어요.</p>
+        <p class="text-label-lg opacity-60 mt-1">다른 이름으로 검색해 보세요.</p>
+      </div>
+    </template>
 
-    <div class="meal-action__grid">
-      <article class="food-list">
-        <h2>검색 결과</h2>
-        <p
-          v-if="searchState.loading"
-          class="empty-state"
-        >
-          서버에서 Food 목록을 가져오는 중입니다.
-        </p>
-        <p
-          v-else-if="!foods.length"
-          class="empty-state"
-        >
-          검색 결과가 없습니다.
-        </p>
-        <button
-          v-for="food in foods"
-          v-else
-          :key="food.id"
-          type="button"
-          class="food-row"
-          :class="{ 'food-row--selected': selectedFood?.id === food.id }"
-          @click="selectFood(food)"
-        >
-          <span>
-            <strong>{{ food.name }}</strong>
-            <small>100g 기준 {{ formatNumber(food.caloriesPer100g) }} kcal</small>
-          </span>
-          <b>P {{ formatNumber(food.proteinPer100g) }}g</b>
-        </button>
-      </article>
+    <!-- 기록 폼 (manual / mealId 모드) -->
+    <div v-if="(isManualMode || mealId) && selectedFood" class="bg-white neo-brutal-border rounded-xl p-6">
+      <!-- 선택된 음식 요약 -->
+      <div class="flex items-center gap-3 mb-5 p-4 bg-surface neo-brutal-border rounded-xl">
+        <div class="w-10 h-10 bg-primary neo-brutal-border rounded-xl flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-on-primary" style="font-variation-settings:'FILL' 1;">nutrition</span>
+        </div>
+        <div>
+          <p class="font-bold text-on-background">{{ selectedFood.name }}</p>
+          <p class="text-label-lg text-on-surface-variant">100g당 {{ formatNumber(selectedFood.caloriesPer100g) }} kcal</p>
+        </div>
+      </div>
 
-      <article
-        v-if="isManualMode"
-        class="record-panel"
-      >
-        <h2>Meal 저장</h2>
-        <form @submit.prevent="handleRecord">
-          <label>
-            Meal 타입
-            <select v-model="recordForm.type">
-              <option value="BREAKFAST">BREAKFAST</option>
-              <option value="LUNCH">LUNCH</option>
-              <option value="DINNER">DINNER</option>
-              <option value="SNACK">SNACK</option>
-            </select>
-          </label>
-          <label>
-            날짜
-            <input
-              v-model="recordForm.date"
-              type="date"
-              required
-            >
-          </label>
-          <label>
-            Food Code
-            <input
-              v-model="recordForm.foodCode"
-              type="text"
-              required
-            >
-          </label>
-          <label>
-            섭취량(g)
+      <form class="space-y-5" @submit.prevent="handleRecord">
+        <div v-if="!mealId">
+          <label class="text-label-lg font-bold text-on-background mb-2 block">끼니 타입</label>
+          <select
+            v-model="recordForm.type"
+            class="w-full px-4 py-3 neo-brutal-border rounded-xl text-body-md bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="BREAKFAST">아침</option>
+            <option value="LUNCH">점심</option>
+            <option value="DINNER">저녁</option>
+            <option value="SNACK">간식</option>
+          </select>
+        </div>
+
+        <div v-if="!mealId">
+          <label class="text-label-lg font-bold text-on-background mb-2 block">날짜</label>
+          <input
+            v-model="recordForm.date"
+            type="date"
+            required
+            class="w-full px-4 py-3 neo-brutal-border rounded-xl text-body-md bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div>
+          <label class="text-label-lg font-bold text-on-background mb-2 block">섭취량</label>
+          <div class="flex items-center gap-3">
             <input
               v-model="recordForm.amountGrams"
               type="number"
               min="1"
               step="1"
               required
-            >
-          </label>
-          <button
-            class="submit-button"
-            type="submit"
-            :disabled="recordState.loading"
-          >
-            {{ recordState.loading ? '저장 중' : 'Meal 저장' }}
-          </button>
-        </form>
+              class="flex-1 px-4 py-3 neo-brutal-border rounded-xl text-body-md text-center bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <span class="text-body-md font-bold text-on-surface-variant shrink-0">g</span>
+          </div>
+          <p class="text-label-lg text-primary mt-2 font-bold">
+            ≈ {{ formatNumber(selectedFood.caloriesPer100g * recordForm.amountGrams / 100) }} kcal
+          </p>
+        </div>
 
-        <p
-          v-if="recordState.error"
-          class="status status--error"
-        >
+        <p v-if="recordState.error" class="text-danger text-label-lg font-bold p-3 bg-surface neo-brutal-border rounded-xl">
           {{ recordState.error }}
         </p>
-        <p
-          v-else-if="recordState.success"
-          class="status status--success"
-        >
-          Meal이 저장되었습니다. 대시보드에서 오늘 기록을 다시 확인하세요.
-        </p>
 
-        <pre class="request-preview">{{ requestPreview }}</pre>
-      </article>
+        <div
+          v-if="recordState.success"
+          class="flex items-center gap-2 text-success text-label-lg font-bold p-3 bg-surface neo-brutal-border rounded-xl"
+        >
+          <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1;">check_circle</span>
+          식단이 기록되었습니다.
+        </div>
+
+        <button
+          type="submit"
+          :disabled="recordState.loading"
+          class="w-full py-4 bg-primary text-on-primary neo-brutal-border neo-brutal-shadow rounded-xl text-label-lg font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <span v-if="recordState.loading" class="material-symbols-outlined animate-spin">progress_activity</span>
+          <span v-else class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">save</span>
+          {{ recordState.loading ? '저장 중...' : '기록 저장' }}
+        </button>
+      </form>
     </div>
-  </section>
+
+    <div
+      v-else-if="(isManualMode || mealId) && !selectedFood && foods.length > 0"
+      class="bg-surface neo-brutal-border rounded-xl p-8 text-center text-on-surface-variant"
+    >
+      <span class="material-symbols-outlined text-4xl opacity-30 block mb-2" style="font-variation-settings:'FILL' 1;">touch_app</span>
+      <p class="text-body-md">위 목록에서 음식을 선택하면 기록 폼이 나타납니다.</p>
+    </div>
+
+  </div>
 </template>
 
 <script setup>
@@ -261,196 +287,9 @@ function formatNumber(value) {
 
 function formatApiError(error, fallbackMessage) {
   if (error?.status === 401) {
-    return '로그인이 필요합니다. Authorization: Bearer accessToken 헤더가 필요합니다.';
+    return '로그인이 필요합니다. 다시 로그인해 주세요.';
   }
 
   return error?.data?.message ?? fallbackMessage;
 }
 </script>
-
-<style scoped>
-.meal-action {
-  display: grid;
-  gap: 24px;
-}
-
-.meal-action__header {
-  display: grid;
-  gap: 6px;
-}
-
-.back-link {
-  width: fit-content;
-  color: var(--color-success);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.meal-action__header h1,
-.food-list h2,
-.record-panel h2 {
-  margin: 0;
-  color: var(--color-text-strong);
-}
-
-.meal-action__header p {
-  margin: 0;
-  color: var(--color-text-muted);
-}
-
-.search-box,
-.food-list,
-.record-panel {
-  padding: 24px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-}
-
-.search-box {
-  display: grid;
-  gap: 10px;
-}
-
-.search-box label,
-.record-panel label {
-  color: var(--color-text-strong);
-  font-weight: 800;
-}
-
-.search-box div {
-  display: flex;
-  gap: 12px;
-}
-
-input,
-select {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text-strong);
-}
-
-button {
-  min-height: 44px;
-  border: 2px solid #1e5000;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  box-shadow: var(--shadow-press-green);
-  color: #1e5000;
-  font-weight: 800;
-}
-
-button:active {
-  transform: translateY(3px);
-  box-shadow: none;
-}
-
-.search-box button {
-  min-width: 96px;
-}
-
-.meal-action__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 24px;
-  align-items: start;
-}
-
-.food-list {
-  display: grid;
-  gap: 12px;
-}
-
-.food-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  border-color: #e5e5e5;
-  background: var(--color-surface);
-  box-shadow: 0 3px 0 #e5e5e5;
-  color: var(--color-text);
-  text-align: left;
-}
-
-.food-row--selected {
-  border-color: var(--color-accent-strong);
-  background: var(--color-accent);
-  box-shadow: var(--shadow-press-yellow);
-  color: var(--color-accent-strong);
-}
-
-.food-row strong,
-.food-row small {
-  display: block;
-}
-
-.food-row small {
-  color: var(--color-text-muted);
-}
-
-.food-row b {
-  white-space: nowrap;
-}
-
-.record-panel form {
-  display: grid;
-  gap: 14px;
-}
-
-.record-panel label {
-  display: grid;
-  gap: 6px;
-}
-
-.submit-button {
-  margin-top: 4px;
-}
-
-.request-preview {
-  overflow: auto;
-  margin: 16px 0 0;
-  padding: 14px;
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-.status,
-.empty-state {
-  margin: 0;
-  padding: 12px 14px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  font-weight: 700;
-}
-
-.status--error {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.status--success {
-  border-color: var(--color-primary);
-  color: var(--color-success);
-}
-
-@media (max-width: 860px) {
-  .search-box div,
-  .meal-action__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .search-box div {
-    display: grid;
-  }
-}
-</style>

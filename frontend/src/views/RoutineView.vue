@@ -1,6 +1,7 @@
 <template>
+  <div class="max-w-4xl mx-auto w-full">
   <!-- Header -->
-  <header class="mb-10">
+  <header class="mb-8">
     <div class="flex justify-between items-start mb-3">
       <div>
         <h1 class="text-display-md text-on-background">
@@ -50,7 +51,7 @@
     v-else-if="!routines.length"
     class="bg-white neo-brutal-border rounded-xl flex flex-col items-center text-center gap-4 px-6 py-16"
   >
-    <div class="w-20 h-20 bg-nyam-mint rounded-full neo-brutal-border flex items-center justify-center">
+    <div class="w-20 h-20 bg-white rounded-full neo-brutal-border flex items-center justify-center">
       <span
         class="material-symbols-outlined text-on-background text-4xl"
         style="font-variation-settings:'FILL' 1;"
@@ -72,35 +73,40 @@
   </div>
 
   <!-- 루틴 목록 -->
-  <ul
-    v-else
-    class="grid grid-cols-1 md:grid-cols-2 gap-6"
-  >
+  <ul v-else class="flex flex-col gap-4">
     <li v-for="routine in routines" :key="routine.routineId">
       <RouterLink
         :to="{ name: 'routine-detail', params: { routineId: routine.routineId } }"
-        class="bg-white neo-brutal-border rounded-xl p-6 flex items-center justify-between gap-4 neo-brutal-card-hover block"
+        class="bg-white neo-brutal-border rounded-xl p-8 block hover:-translate-y-1 transition-all duration-200 group"
       >
-        <div class="min-w-0">
-          <h2 class="text-headline-md text-on-background truncate">
-            {{ routine.name }}
-          </h2>
-          <p class="text-body-md text-on-surface-variant mt-1">
-            주 {{ routine.daysPerWeek }}회
-          </p>
-        </div>
-        <div class="flex items-center gap-3 shrink-0">
+        <!-- 상단: 뱃지 + 화살표 -->
+        <div class="flex items-center justify-between mb-6">
           <span
-            class="neo-brutal-border rounded-full px-3 py-1.5 text-label-lg"
-            :class="routine.aiGenerated ? 'bg-nyam-mint text-on-background' : 'bg-surface text-on-surface-variant'"
+            class="neo-brutal-border rounded-xl px-4 py-2 text-label-lg font-bold"
+            :class="routine.aiGenerated ? 'bg-on-background text-white' : 'bg-surface text-on-surface-variant'"
           >
             {{ routine.aiGenerated ? 'AI 생성' : '직접 등록' }}
           </span>
-          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          <span class="material-symbols-outlined text-2xl text-on-surface-variant group-hover:text-primary transition-colors">
+            arrow_forward
+          </span>
+        </div>
+
+        <!-- 루틴 이름 -->
+        <h2 class="text-display-md font-bold text-on-background mb-7">
+          {{ routine.name }}
+        </h2>
+
+        <!-- 주 N회 -->
+        <div class="flex items-end gap-2 pt-6 border-t-[3px] border-on-background">
+          <span class="text-body-md text-on-surface-variant mb-1">주</span>
+          <span class="text-numeral-xl text-primary leading-none">{{ routine.daysPerWeek }}</span>
+          <span class="text-headline-md text-on-surface-variant mb-1">회</span>
         </div>
       </RouterLink>
     </li>
   </ul>
+  </div>
 </template>
 
 <script setup>

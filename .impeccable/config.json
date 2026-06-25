@@ -14,6 +14,18 @@
         "value": "rgba(0, 0, 0, 0.85)",
         "reason": "Kakao official brand text color required by Kakao brand guidelines",
         "createdAt": "2026-06-25T03:25:39.350Z"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "4px",
+        "reason": "Inline code radius inside prose-chat markdown renderer — typography context, not UI chrome",
+        "createdAt": "2026-06-25T06:43:26.852Z"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "8px",
+        "reason": "Code block radius inside prose-chat markdown renderer — typography context, not UI chrome",
+        "createdAt": "2026-06-25T06:43:26.925Z"
       }
     ]
   }

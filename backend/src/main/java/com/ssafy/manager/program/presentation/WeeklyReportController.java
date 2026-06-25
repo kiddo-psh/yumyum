@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -38,5 +39,23 @@ public class WeeklyReportController {
         WeeklyReport report = weeklyReportRepository.findByProgramIdAndWeekNumber(programId, weekNumber)
                 .orElseThrow(() -> new NoSuchElementException("WeeklyReport를 찾을 수 없습니다."));
         return ResponseEntity.ok(WeeklyReportResponse.from(report));
+    }
+
+    @GetMapping("/{programId}/weekly-reports")
+    public ResponseEntity<List<WeeklyReportResponse>> getWeeklyReports(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long programId
+    ) {
+        Program program = programRepository.findById(programId)
+                .orElseThrow(() -> new NoSuchElementException("Program을 찾을 수 없습니다."));
+        if (!program.getMemberId().equals(memberId)) {
+            throw new ForbiddenException("접근 권한이 없습니다.");
+        }
+        List<WeeklyReportResponse> reports = weeklyReportRepository
+                .findByProgramIdOrderByWeekNumberAsc(programId)
+                .stream()
+                .map(WeeklyReportResponse::from)
+                .toList();
+        return ResponseEntity.ok(reports);
     }
 }

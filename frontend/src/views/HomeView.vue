@@ -42,6 +42,9 @@
       </div>
     </header>
 
+    <!-- 주간 리포트 발행 알림 -->
+    <ReportNotificationBanner />
+
     <!-- 플랜 생성 대기 -->
     <div v-if="!state.loading && !isProgramReady" class="mb-8">
       <div class="bg-surface neo-brutal-border rounded-xl p-12 flex flex-col items-center justify-center gap-6 text-center" style="min-height: 320px;">
@@ -200,6 +203,7 @@ import {
   getLastMealRecommendation,
 } from '@/api/dashboard'
 import { getEffectiveToday } from '@/utils/effectiveDate'
+import ReportNotificationBanner from '@/components/home/ReportNotificationBanner.vue'
 
 
 const state = reactive({

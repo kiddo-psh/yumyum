@@ -1,10 +1,6 @@
 package com.ssafy.manager.program.presentation;
 
-import com.ssafy.manager.global.exception.ForbiddenException;
-import com.ssafy.manager.program.domain.Program;
-import com.ssafy.manager.program.domain.WeeklyReport;
-import com.ssafy.manager.program.infrastructure.persistence.ProgramRepository;
-import com.ssafy.manager.program.infrastructure.persistence.WeeklyReportRepository;
+import com.ssafy.manager.program.application.WeeklyReportQueryService;
 import com.ssafy.manager.program.presentation.dto.WeeklyReportResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/programs")
 @RequiredArgsConstructor
 public class WeeklyReportController {
 
-    private final ProgramRepository programRepository;
-    private final WeeklyReportRepository weeklyReportRepository;
+    private final WeeklyReportQueryService weeklyReportQueryService;
 
     @GetMapping("/{programId}/weekly-reports/{weekNumber}")
     public ResponseEntity<WeeklyReportResponse> getWeeklyReport(
@@ -30,13 +25,20 @@ public class WeeklyReportController {
             @PathVariable Long programId,
             @PathVariable int weekNumber
     ) {
-        Program program = programRepository.findById(programId)
-                .orElseThrow(() -> new NoSuchElementException("Program을 찾을 수 없습니다."));
-        if (!program.getMemberId().equals(memberId)) {
-            throw new ForbiddenException("접근 권한이 없습니다.");
-        }
-        WeeklyReport report = weeklyReportRepository.findByProgramIdAndWeekNumber(programId, weekNumber)
-                .orElseThrow(() -> new NoSuchElementException("WeeklyReport를 찾을 수 없습니다."));
-        return ResponseEntity.ok(WeeklyReportResponse.from(report));
+        WeeklyReportResponse response =
+                WeeklyReportResponse.from(weeklyReportQueryService.getReport(memberId, programId, weekNumber));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{programId}/weekly-reports")
+    public ResponseEntity<List<WeeklyReportResponse>> getWeeklyReports(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long programId
+    ) {
+        List<WeeklyReportResponse> responses = weeklyReportQueryService.getReports(memberId, programId)
+                .stream()
+                .map(WeeklyReportResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

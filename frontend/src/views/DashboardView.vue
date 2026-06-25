@@ -1,137 +1,137 @@
 <template>
-  <!-- Header -->
-  <header class="flex justify-between items-center mb-10">
-    <div>
+  <div class="max-w-4xl mx-auto w-full">
+
+    <!-- Header -->
+    <header class="mb-8">
       <h1 class="text-display-md text-on-background">대시보드</h1>
       <p class="text-body-md text-on-surface-variant mt-1">{{ todayFormatted }}</p>
-    </div>
-  </header>
+    </header>
 
-  <!-- Row 1: 주간 달성 현황 + 목표 달성률 -->
-  <div class="grid grid-cols-12 gap-8 mb-8">
-    <!-- 주간 달성 현황 -->
-    <div class="col-span-8 bg-surface neo-brutal-border rounded-xl p-6 neo-brutal-card-hover">
-      <div class="flex items-center justify-between mb-10">
-        <h2 class="text-headline-lg text-on-background">주간 달성 현황</h2>
-        <!-- 주차 네비게이션 -->
-        <div class="flex items-center gap-2 bg-white neo-brutal-border rounded-xl overflow-hidden">
-          <button
-            class="w-10 h-10 flex items-center justify-center hover:bg-surface transition-colors"
-            @click="prevWeek"
-          >
-            <span class="material-symbols-outlined">chevron_left</span>
-          </button>
-          <span class="text-label-lg font-bold px-3 min-w-[120px] text-center">{{ weekLabel }}</span>
-          <button
-            class="w-10 h-10 flex items-center justify-center transition-colors"
-            :class="weekOffset >= 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-surface'"
-            :disabled="weekOffset >= 0"
-            @click="nextWeek"
-          >
-            <span class="material-symbols-outlined">chevron_right</span>
-          </button>
+    <!-- Program 진행 현황 -->
+    <div v-if="program" class="bg-white neo-brutal-border rounded-xl p-7 mb-6">
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <h2 class="text-headline-lg font-bold text-on-background">Program 진행</h2>
+          <p class="text-body-md text-on-surface-variant mt-1">{{ goalLabel }}</p>
+        </div>
+        <div class="px-4 py-2 bg-primary text-on-primary neo-brutal-border rounded-xl text-label-lg font-bold shrink-0">
+          {{ programWeekLabel }}
+        </div>
+      </div>
+      <div class="h-7 bg-surface neo-brutal-border rounded-xl overflow-hidden mb-3">
+        <div class="h-full bg-primary transition-all duration-700" :style="{ width: programProgress + '%' }" />
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-label-lg text-on-surface-variant">{{ program.startDate }}</span>
+        <span class="text-body-md font-bold text-on-background">{{ programProgress }}% 완료</span>
+        <span class="text-label-lg text-on-surface-variant">{{ program.endDate }}</span>
+      </div>
+    </div>
+
+    <!-- 주간 달성 현황 (full width) -->
+    <div class="bg-white neo-brutal-border rounded-xl p-7 mb-6">
+
+      <!-- 헤더: 제목 + 주차 네비 + 달성률 한 줄 -->
+      <div class="flex items-center justify-between mb-7">
+        <div class="flex items-center gap-5">
+          <h2 class="text-headline-lg font-bold text-on-background">주간 달성 현황</h2>
+          <!-- 주차 네비게이션 -->
+          <div class="flex items-center bg-surface neo-brutal-border rounded-xl overflow-hidden">
+            <button
+              class="w-10 h-10 flex items-center justify-center hover:bg-white transition-colors"
+              @click="prevWeek"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <span class="text-label-lg font-bold px-3 min-w-[64px] text-center">{{ weekLabel }}</span>
+            <button
+              class="w-10 h-10 flex items-center justify-center transition-colors"
+              :class="weekOffset >= 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white'"
+              :disabled="weekOffset >= 0"
+              @click="nextWeek"
+            >
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+        <!-- 이번 주 달성률 -->
+        <div class="flex items-baseline gap-1">
+          <span class="text-numeral-xl text-primary leading-none">{{ weekAchievementRate }}</span>
+          <span class="text-headline-md text-on-surface-variant pb-1">%</span>
         </div>
       </div>
 
+      <!-- 7일 그리드 -->
       <div v-if="state.calendarLoading" class="flex items-center gap-3 text-on-surface-variant py-6">
         <span class="material-symbols-outlined animate-spin">progress_activity</span>
-        <span>불러오는 중...</span>
+        <span class="text-body-md">불러오는 중...</span>
       </div>
 
-      <div class="neo-brutal-border rounded-2xl bg-white px-6 py-5">
-        <div class="grid grid-cols-7">
+      <div v-else class="grid grid-cols-7 gap-3">
+        <div
+          v-for="day in weekDays"
+          :key="day.date"
+          class="flex flex-col items-center gap-3"
+        >
+          <!-- 요일 -->
+          <span
+            class="text-label-lg font-bold"
+            :class="day.isToday ? 'text-primary' : 'text-on-surface-variant'"
+          >{{ day.label }}</span>
+
+          <!-- 상태 배지 -->
           <div
-            v-for="day in weekDays"
-            :key="day.date"
-            class="flex flex-col items-center gap-3"
+            class="w-full aspect-square rounded-xl neo-brutal-border flex items-center justify-center"
+            :class="
+              day.achieved === true  ? 'bg-success' :
+              day.achieved === false ? 'bg-danger'  : 'bg-surface'
+            "
           >
-            <!-- 요일 레이블 -->
             <span
-              class="text-xs font-black tracking-wider"
-              :class="day.isToday ? 'text-primary' : 'text-on-surface-variant'"
-            >{{ day.label }}</span>
-            <!-- 상태 배지 -->
-            <div
-              class="w-12 h-12 rounded-full neo-brutal-border flex items-center justify-center"
-              :class="
-                day.achieved === true  ? 'bg-success' :
-                day.achieved === false ? 'bg-danger'  : 'bg-surface'
-              "
-            >
-              <span
-                class="material-symbols-outlined text-2xl"
-                :class="day.achieved !== null ? 'text-white' : 'text-on-surface-variant opacity-20'"
-                style="font-variation-settings:'FILL' 1;"
-              >{{ day.achieved === true ? 'check' : day.achieved === false ? 'close' : 'remove' }}</span>
-            </div>
+              class="material-symbols-outlined text-2xl"
+              :class="day.achieved !== null ? 'text-white' : 'text-on-surface-variant opacity-20'"
+              style="font-variation-settings:'FILL' 1;"
+            >{{ day.achieved === true ? 'check' : day.achieved === false ? 'close' : 'remove' }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 목표 달성률 -->
-    <div class="col-span-4 bg-surface neo-brutal-border rounded-xl p-8 flex flex-col justify-between neo-brutal-card-hover">
-      <div>
-        <p class="text-label-lg text-on-surface-variant uppercase tracking-widest mb-4">이번 주 달성률</p>
-        <div class="flex items-end gap-2 mb-2">
-          <span class="text-numeral-xl text-primary leading-none">{{ weekAchievementRate }}</span>
-          <span class="text-headline-md text-on-surface-variant pb-2">%</span>
-        </div>
-        <p class="text-body-md text-on-surface-variant">
-          {{ weekAchievementRate >= 90 ? '이번 주도 잘 하고 있어요!' : weekAchievementRate >= 50 ? '조금만 더 노력해봐요.' : '오늘부터 다시 시작해요!' }}
-        </p>
-      </div>
-      <div class="space-y-3 mt-6">
-        <div class="flex justify-between text-label-lg">
-          <span class="text-on-surface-variant font-bold">달성한 날</span>
-          <span class="font-black text-success">{{ achievedDays }}일</span>
-        </div>
-        <div class="flex justify-between text-label-lg">
-          <span class="text-on-surface-variant font-bold">미달성</span>
-          <span class="font-black text-danger">{{ failedDays }}일</span>
-        </div>
-        <div class="flex justify-between text-label-lg">
-          <span class="text-on-surface-variant font-bold">데이터 없음</span>
-          <span class="font-black text-on-surface-variant">{{ noDataDays }}일</span>
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- 체중 추세 -->
+    <div class="bg-white neo-brutal-border rounded-xl p-7">
 
-  <!-- 체중 추세 -->
-  <div class="bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
       <!-- 헤더 -->
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-headline-lg text-on-background">체중 추세</h2>
-        <div class="flex items-center gap-3">
-          <span v-if="latestWeight" class="text-headline-md font-black text-primary">
-            {{ latestWeight }} kg
-          </span>
-          <!-- 일/주 토글 -->
-          <div class="flex neo-brutal-border rounded-lg overflow-hidden">
-            <button
-              class="px-3 py-1.5 text-xs font-black transition-colors"
-              :class="viewMode === 'daily' ? 'bg-on-background text-white' : 'bg-white hover:bg-surface'"
-              @click="viewMode = 'daily'"
-            >일</button>
-            <button
-              class="px-3 py-1.5 text-xs font-black border-l-[3px] border-on-background transition-colors"
-              :class="viewMode === 'weekly' ? 'bg-on-background text-white' : 'bg-white hover:bg-surface'"
-              @click="viewMode = 'weekly'"
-            >주</button>
-          </div>
+      <div class="flex items-start justify-between mb-7">
+        <div>
+          <h2 class="text-headline-lg font-bold text-on-background">체중 추세</h2>
+          <p v-if="latestWeight" class="text-body-md text-on-surface-variant mt-1">
+            최근 <span class="font-bold text-on-background">{{ latestWeight }} kg</span>
+          </p>
+        </div>
+        <!-- 일/주 토글 -->
+        <div class="flex neo-brutal-border rounded-xl overflow-hidden shrink-0">
+          <button
+            class="px-5 py-2.5 text-label-lg font-bold transition-colors"
+            :class="viewMode === 'daily' ? 'bg-on-background text-white' : 'bg-white hover:bg-surface'"
+            @click="viewMode = 'daily'"
+          >일</button>
+          <button
+            class="px-5 py-2.5 text-label-lg font-bold border-l-[3px] border-on-background transition-colors"
+            :class="viewMode === 'weekly' ? 'bg-on-background text-white' : 'bg-white hover:bg-surface'"
+            @click="viewMode = 'weekly'"
+          >주</button>
         </div>
       </div>
 
       <div v-if="state.weightsLoading" class="flex items-center gap-3 text-on-surface-variant py-10">
         <span class="material-symbols-outlined animate-spin">progress_activity</span>
-        <span>불러오는 중...</span>
+        <span class="text-body-md">불러오는 중...</span>
       </div>
 
       <div v-else-if="!weightPoints.length" class="py-12 text-center text-on-surface-variant">
         <span class="material-symbols-outlined text-5xl block mb-3 opacity-30" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
-        <p class="text-body-md">아직 체중 기록이 없어요.</p>
-        <p class="text-body-sm opacity-60 mt-1">체중을 기록하면 추세 그래프가 표시됩니다.</p>
+        <p class="text-body-lg">아직 체중 기록이 없어요.</p>
+        <p class="text-label-lg opacity-60 mt-1">체중을 기록하면 추세 그래프가 표시됩니다.</p>
       </div>
 
       <template v-else>
@@ -172,28 +172,45 @@
             fill="#AAAAAA"
           >{{ p.label }}</text>
         </svg>
-        <div class="flex justify-between text-xs font-bold mt-3 px-1">
-          <span class="text-on-surface-variant">최저 <span class="text-on-background">{{ weightMin }}kg</span></span>
-          <span class="text-on-surface-variant">최고 <span class="text-on-background">{{ weightMax }}kg</span></span>
-          <span class="text-on-surface-variant">평균 <span class="text-on-background">{{ weightAvg }}kg</span></span>
+
+        <!-- 체중 통계 -->
+        <div class="grid grid-cols-3 gap-4 mt-7 pt-6 border-t-[3px] border-on-background">
+          <div class="text-center">
+            <p class="text-label-lg text-on-surface-variant mb-1">최저</p>
+            <p class="text-headline-lg font-bold text-on-background">
+              {{ weightMin }}<span class="text-body-md font-normal ml-0.5">kg</span>
+            </p>
+          </div>
+          <div class="text-center">
+            <p class="text-label-lg text-on-surface-variant mb-1">평균</p>
+            <p class="text-headline-lg font-bold text-primary">
+              {{ weightAvg }}<span class="text-body-md font-normal ml-0.5">kg</span>
+            </p>
+          </div>
+          <div class="text-center">
+            <p class="text-label-lg text-on-surface-variant mb-1">최고</p>
+            <p class="text-headline-lg font-bold text-on-background">
+              {{ weightMax }}<span class="text-body-md font-normal ml-0.5">kg</span>
+            </p>
+          </div>
         </div>
       </template>
 
       <!-- 체중 입력 폼 -->
-      <div class="border-t-[3px] border-on-background mt-6 pt-5">
-        <p v-if="weightSubmitError" class="text-danger text-xs font-bold mb-2">{{ weightSubmitError }}</p>
+      <div class="border-t-[3px] border-on-background mt-7 pt-6">
+        <p v-if="weightSubmitError" class="text-danger text-label-lg font-bold mb-3">{{ weightSubmitError }}</p>
         <form class="flex gap-3" @submit.prevent="submitWeight">
           <input
             v-model.number="newWeight"
             type="number"
             step="0.1"
             placeholder="오늘 체중 (kg)"
-            class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-body-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+            class="flex-1 neo-brutal-border rounded-xl px-4 py-3 text-body-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
           <button
             type="submit"
-            class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-label-lg disabled:opacity-50"
+            class="px-6 py-3 bg-primary text-white neo-brutal-border rounded-xl text-label-lg font-bold hover:-translate-y-0.5 transition-all duration-150 disabled:opacity-50"
             :disabled="submitting"
           >
             {{ submitting ? '저장 중' : '기록' }}
@@ -201,6 +218,8 @@
         </form>
       </div>
     </div>
+
+  </div>
 </template>
 
 <script setup>
@@ -210,6 +229,7 @@ import {
   getWeeklyCalendar,
   getWeightHistory,
 } from '@/api/dashboard'
+import { getCurrentProgram } from '@/api/my'
 import { apiClient } from '@/services/apiClient'
 import { getEffectiveToday } from '@/utils/effectiveDate'
 
@@ -222,6 +242,32 @@ const CHART_PAD_T = 12
 const CHART_PAD_B = 28
 
 const weekOffset = ref(0)
+const program = ref(null)
+
+const GOAL_LABELS = { DIET: '다이어트', MUSCLE: '근육 증가', HEALTH: '건강 유지', DISEASE: '질환 관리' }
+
+const goalLabel = computed(() => {
+  if (!program.value) return ''
+  return GOAL_LABELS[program.value.healthGoal] ?? program.value.healthGoal ?? ''
+})
+
+const programWeekLabel = computed(() => {
+  if (!program.value) return ''
+  const start = new Date(program.value.startDate + 'T00:00:00')
+  const diffDays = Math.floor((getEffectiveToday() - start) / (1000 * 60 * 60 * 24))
+  const currentWeek = Math.min(Math.floor(diffDays / 7) + 1, program.value.durationWeeks)
+  return `${currentWeek}주차 / ${program.value.durationWeeks}주`
+})
+
+const programProgress = computed(() => {
+  if (!program.value) return 0
+  const start = new Date(program.value.startDate + 'T00:00:00')
+  const end = new Date(program.value.endDate + 'T00:00:00')
+  const now = getEffectiveToday()
+  const total = end - start
+  const elapsed = now - start
+  return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)))
+})
 
 const state = reactive({
   calendarLoading: true,
@@ -462,6 +508,7 @@ watch(weekOffset, loadCalendar)
 onMounted(() => {
   loadCalendar()
   loadWeights()
+  getCurrentProgram().then(p => { program.value = p }).catch(() => {})
 })
 
 // ─── 유틸 ─────────────────────────────────────────────────────────

@@ -2,30 +2,30 @@
   <Transition name="chat-panel">
     <div
       v-if="chat.isOpen"
-      class="fixed bottom-36 right-10 z-50 flex flex-col bg-surface neo-brutal-border rounded-2xl overflow-hidden shadow-2xl"
-      style="width: 420px; height: 560px;"
+      class="fixed bottom-36 right-10 z-50 flex flex-col bg-surface neo-brutal-border rounded-xl overflow-hidden neo-brutal-shadow"
+      style="width: 560px; height: 700px; max-height: calc(100vh - 10rem);"
     >
       <!-- 헤더 -->
-      <div class="flex items-center justify-between px-5 py-4 border-b-[3px] border-on-background flex-shrink-0">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-nyam-mint neo-brutal-border rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-            <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-7 h-7 object-contain" />
+      <div class="flex items-center justify-between px-6 py-5 border-b-[3px] border-on-background flex-shrink-0">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-nyam-mint neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <img src="/nyam/nyam_logo.png" alt="냠냠코치" class="w-9 h-9 object-contain" />
           </div>
           <div>
-            <p class="text-label-lg font-black text-on-background leading-none">AI 영양 상담</p>
-            <p class="text-[11px] text-on-surface-variant">냠냠 코치에게 무엇이든 물어보세요</p>
+            <p class="text-headline-md font-bold text-on-background leading-none mb-1">AI 영양 상담</p>
+            <p class="text-label-lg text-on-surface-variant">냠냠 코치에게 무엇이든 물어보세요</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <button
-            class="text-xs text-on-surface-variant hover:text-danger transition-colors px-2 py-1 rounded"
+            class="text-label-lg font-bold text-on-surface-variant hover:text-danger transition-colors px-3 py-1.5 neo-brutal-border rounded-xl"
             title="대화 초기화"
             @click="chat.clear()"
           >
             새 대화
           </button>
           <button
-            class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-variant transition-colors"
+            class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface transition-colors"
             @click="chat.toggle()"
           >
             <span class="material-symbols-outlined text-on-surface-variant">close</span>
@@ -34,12 +34,12 @@
       </div>
 
       <!-- 메시지 목록 -->
-      <div ref="messagesEl" class="flex-1 overflow-y-auto p-5 space-y-4">
-        <div v-if="!chat.messages.length" class="text-center text-on-surface-variant py-10">
-          <span class="material-symbols-outlined text-5xl block mb-3 opacity-20" style="font-variation-settings:'FILL' 1;">chat_bubble</span>
-          <p class="text-body-sm font-bold">"오늘 식단 어떻게 해야 할까요?"</p>
-          <p class="text-body-sm">"단백질 더 먹으려면 뭘 먹어야 해?"</p>
-          <p class="text-[11px] opacity-50 mt-2">오늘 식단 기록을 바탕으로 답해드려요</p>
+      <div ref="messagesEl" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <div v-if="!chat.messages.length" class="text-center text-on-surface-variant py-12">
+          <span class="material-symbols-outlined text-6xl block mb-4 opacity-20" style="font-variation-settings:'FILL' 1;">chat_bubble</span>
+          <p class="text-body-md font-bold mb-1">"오늘 식단 어떻게 해야 할까요?"</p>
+          <p class="text-body-md mb-3">"단백질 더 먹으려면 뭘 먹어야 해?"</p>
+          <p class="text-label-lg opacity-50">오늘 식단 기록을 바탕으로 답해드려요</p>
         </div>
 
         <div
@@ -51,44 +51,44 @@
           <!-- AI 메시지: 마크다운 렌더링 -->
           <div
             v-if="msg.role === 'ai'"
-            class="max-w-[88%] px-4 py-3 rounded-2xl neo-brutal-border bg-white text-on-background prose-chat"
+            class="max-w-[88%] px-5 py-4 rounded-xl neo-brutal-border bg-white text-on-background prose-chat"
             v-html="renderMd(msg.content)"
           />
           <!-- 사용자 메시지 -->
           <div
             v-else
-            class="max-w-[80%] px-4 py-3 rounded-2xl neo-brutal-border bg-primary text-white text-body-sm font-bold"
+            class="max-w-[80%] px-5 py-4 rounded-xl neo-brutal-border bg-primary text-white text-body-md font-bold"
           >
             {{ msg.content }}
           </div>
         </div>
 
         <div v-if="chat.loading" class="flex justify-start">
-          <div class="bg-white neo-brutal-border px-4 py-3 rounded-2xl flex items-center gap-2">
-            <span class="material-symbols-outlined animate-spin text-sm text-on-surface-variant">progress_activity</span>
-            <span class="text-body-sm text-on-surface-variant">생각 중...</span>
+          <div class="bg-white neo-brutal-border px-5 py-4 rounded-xl flex items-center gap-3">
+            <span class="material-symbols-outlined animate-spin text-on-surface-variant">progress_activity</span>
+            <span class="text-body-md text-on-surface-variant">생각 중...</span>
           </div>
         </div>
       </div>
 
       <!-- 입력창 -->
-      <div class="p-4 border-t-[3px] border-on-background flex-shrink-0">
-        <p v-if="chat.error" class="text-[11px] text-danger font-bold mb-2">{{ chat.error }}</p>
-        <div class="flex gap-2">
+      <div class="p-5 border-t-[3px] border-on-background flex-shrink-0">
+        <p v-if="chat.error" class="text-label-lg text-danger font-bold mb-3">{{ chat.error }}</p>
+        <div class="flex gap-3">
           <input
             v-model="chat.input"
             type="text"
             placeholder="질문을 입력하세요..."
-            class="flex-1 px-4 py-3 neo-brutal-border rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+            class="flex-1 px-4 py-3.5 neo-brutal-border rounded-xl text-body-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             :disabled="chat.loading"
             @keydown.enter.prevent="chat.send()"
           />
           <button
-            class="w-12 h-12 bg-primary neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0 hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:translate-y-0"
+            class="w-14 h-14 bg-primary neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0 hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:translate-y-0"
             :disabled="chat.loading || !chat.input.trim()"
             @click="chat.send()"
           >
-            <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1;">send</span>
+            <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1;">send</span>
           </button>
         </div>
       </div>

@@ -40,7 +40,7 @@
 
       <!-- AI 코멘트 -->
       <div class="bg-nyam-mint neo-brutal-border rounded-xl p-5 mb-6 flex items-start gap-3">
-        <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-variation-settings:'FILL' 1;">smart_toy</span>
+        <img src="/nyam/nyam_coach.png" alt="냠냠코치" class="w-9 h-9 object-contain flex-shrink-0" />
         <p class="text-body-md">{{ analysisResult.aiComment }}</p>
       </div>
 

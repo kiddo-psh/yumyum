@@ -1,31 +1,43 @@
 <template>
-  <section class="neo-brutal-border rounded-xl p-8 flex items-center gap-8 neo-brutal-card-hover"
-           :class="bgClass">
+  <section class="neo-brutal-border rounded-xl p-8 neo-brutal-card-hover" :class="bgClass">
+
     <!-- 에러 -->
     <template v-if="error">
-      <span class="material-symbols-outlined text-4xl text-on-surface-variant">error</span>
-      <p class="text-label-lg text-on-surface-variant">냠냠이 상태를 불러올 수 없어요</p>
+      <div class="flex items-center gap-3 text-on-surface-variant">
+        <span class="material-symbols-outlined text-3xl">error</span>
+        <p class="text-body-md">냠냠이 상태를 불러올 수 없어요</p>
+      </div>
     </template>
 
     <!-- 로딩 -->
     <template v-else-if="!nyam">
-      <span class="material-symbols-outlined text-5xl animate-spin text-on-surface-variant">progress_activity</span>
+      <div class="flex items-center gap-3 text-on-surface-variant">
+        <span class="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
+        <p class="text-body-md">불러오는 중...</p>
+      </div>
     </template>
 
     <!-- 데이터 -->
     <template v-else>
-      <div class="w-24 h-24 neo-brutal-border rounded-full flex items-center justify-center bg-white flex-shrink-0 overflow-hidden"
-           :class="iconAnimationClass">
-        <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-20 h-20 object-contain" />
-      </div>
+      <div class="flex items-center gap-8">
 
-      <div>
-        <p class="text-display-md font-sans text-on-background leading-tight">냠냠이</p>
-        <p class="text-body-md text-on-surface-variant mt-1">{{ healthGoalLabel }} 중</p>
-        <p class="text-headline-lg text-on-background mt-3">{{ nyam.message }}</p>
-        <p class="text-label-lg text-on-surface-variant mt-2">
-          오늘 달성률: {{ Math.round(nyam.achievementRate * 100) }}%
-        </p>
+        <!-- 냠냠이 -->
+        <div class="shrink-0" :class="iconAnimationClass">
+          <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-36 h-36 object-contain" />
+        </div>
+
+        <!-- 정보 -->
+        <div class="flex-1 min-w-0">
+          <p class="text-label-lg text-on-surface-variant">{{ healthGoalLabel }} 중</p>
+          <p class="text-display-md font-bold text-on-background mt-1 leading-tight">냠냠이</p>
+          <p class="text-headline-md text-on-background mt-4 leading-snug">{{ nyam.message }}</p>
+          <div class="flex items-baseline gap-1.5 mt-5">
+            <span class="text-numeral-xl text-primary leading-none">{{ Math.round(nyam.achievementRate * 100) }}</span>
+            <span class="text-headline-md text-on-surface-variant">%</span>
+            <span class="text-body-md text-on-surface-variant ml-1">오늘 달성률</span>
+          </div>
+        </div>
+
       </div>
     </template>
   </section>

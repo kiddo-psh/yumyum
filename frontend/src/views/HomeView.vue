@@ -64,25 +64,25 @@
   </div>
 
   <!-- Row 1: Achievement & Calories -->
-  <div v-if="isProgramReady" class="grid grid-cols-12 gap-8 mb-8">
+  <div v-if="isProgramReady" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-6 lg:mb-8">
     <!-- Achievement Card -->
-    <div class="col-span-7 bg-surface neo-brutal-border rounded-xl p-8 relative overflow-hidden neo-brutal-card-hover">
-      <div class="flex items-center justify-between gap-8 h-full">
-        <div class="flex-1">
+    <div class="col-span-1 lg:col-span-7 bg-surface neo-brutal-border rounded-xl p-6 lg:p-8 relative overflow-hidden neo-brutal-card-hover">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:h-full">
+        <div class="lg:flex-1">
           <div class="inline-block px-4 py-2 bg-white border-[3px] border-on-background rounded-full text-label-lg mb-4">
             목표 달성도
           </div>
-          <h3 class="text-display-md mb-2">{{ achievementMessage }}</h3>
-          <p class="text-body-lg text-on-surface-variant mb-6">
-            목표까지 단 {{ 100 - calorieProgress }}% 남았네요. <br />조금만 더 힘내볼까요?
+          <h3 class="text-headline-lg lg:text-display-md mb-2">{{ achievementMessage }}</h3>
+          <p class="text-body-md lg:text-body-lg text-on-surface-variant mb-4 lg:mb-6">
+            목표까지 단 {{ 100 - calorieProgress }}% 남았네요. 조금만 더 힘내볼까요?
           </p>
-          <div class="relative w-48 h-48 bg-nyam-mint neo-brutal-border rounded-2xl p-4 flex items-center justify-center">
+          <div class="relative w-32 h-32 lg:w-48 lg:h-48 bg-nyam-mint neo-brutal-border rounded-2xl p-3 lg:p-4 flex items-center justify-center">
             <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-full h-full object-contain" />
           </div>
         </div>
 
         <!-- Progress Circle -->
-        <div class="relative w-56 h-56 flex-shrink-0 flex items-center justify-center">
+        <div class="relative w-44 h-44 lg:w-56 lg:h-56 flex-shrink-0 flex items-center justify-center mx-auto lg:mx-0">
           <svg
             role="progressbar"
             :aria-valuenow="calorieProgress"
@@ -112,18 +112,18 @@
             <span class="text-label-lg text-on-surface-variant">%</span>
           </div>
           <div class="absolute -bottom-2 bg-on-background text-white px-4 py-1 rounded-full text-sm font-black">
-            Progress
+            진행률
           </div>
         </div>
       </div>
     </div>
 
     <!-- Today's Calories Card -->
-    <div class="col-span-5 bg-surface neo-brutal-border rounded-xl px-8 pt-14 pb-8 neo-brutal-card-hover">
-      <div class="flex justify-between items-start mb-8">
+    <div class="col-span-1 lg:col-span-5 bg-surface neo-brutal-border rounded-xl px-6 lg:px-8 pt-8 lg:pt-14 pb-6 lg:pb-8 neo-brutal-card-hover">
+      <div class="flex justify-between items-start mb-6 lg:mb-8">
         <div>
-          <p class="text-label-lg text-on-surface-variant uppercase tracking-widest">오늘의 칼로리</p>
-          <h3 class="text-numeral-xl mt-2">
+          <p class="text-label-lg text-on-surface-variant">오늘의 칼로리</p>
+          <h3 class="text-display-md lg:text-numeral-xl mt-2">
             {{ formatNumber(intakeCalories) }}
             <span class="text-headline-md text-on-surface-variant">kcal</span>
           </h3>
@@ -146,8 +146,8 @@
               :style="{ width: calorieProgress + '%' }"
             />
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span class="text-[10px] font-black uppercase text-on-background">
-                Goal: {{ formatNumber(targetCalories) }} kcal
+              <span class="text-[10px] font-black text-on-background">
+                목표 {{ formatNumber(targetCalories) }} kcal
               </span>
             </div>
           </div>
@@ -174,22 +174,22 @@
   </div>
 
   <!-- Row 2: Quick Actions -->
-  <div v-if="isProgramReady" class="grid grid-cols-3 gap-4">
+  <div v-if="isProgramReady" class="grid grid-cols-3 gap-2 lg:gap-4">
     <RouterLink
       to="/meals/search"
-      class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
+      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
     >
       <span class="material-symbols-outlined text-4xl mb-2 text-primary">edit_note</span>
-      <span class="font-bold">식단 기록</span>
+      <span class="font-bold text-sm lg:text-base">식단 기록</span>
     </RouterLink>
     <RouterLink
       to="/meals/photo"
-      class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
+      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
     >
       <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
-      <span class="font-bold">사진 분석</span>
+      <span class="font-bold text-sm lg:text-base">사진 분석</span>
     </RouterLink>
-    <div class="bg-white neo-brutal-border rounded-xl p-5 neo-brutal-card-hover">
+    <div class="bg-white neo-brutal-border rounded-xl p-3 lg:p-5 neo-brutal-card-hover">
       <div class="flex items-center gap-2 mb-3">
         <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
         <span class="font-bold text-sm">오늘 체중</span>

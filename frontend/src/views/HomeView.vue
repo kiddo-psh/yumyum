@@ -49,6 +49,9 @@
     </div>
   </header>
 
+  <!-- 주간 리포트 발행 알림 -->
+  <ReportNotificationBanner />
+
   <!-- 프로그램 생성 대기 중 로딩 카드 -->
   <div v-if="!state.loading && !isProgramReady" class="mb-8">
     <div class="bg-surface neo-brutal-border rounded-xl p-12 flex flex-col items-center justify-center gap-6 text-center" style="min-height: 320px;">
@@ -233,6 +236,7 @@ import {
 } from '@/api/dashboard'
 import { apiClient } from '@/services/apiClient'
 import { getEffectiveToday } from '@/utils/effectiveDate'
+import ReportNotificationBanner from '@/components/home/ReportNotificationBanner.vue'
 
 const RADIUS = 42
 const circumference = 2 * Math.PI * RADIUS

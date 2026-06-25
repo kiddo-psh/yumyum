@@ -301,13 +301,7 @@ const hasRecommendation = computed(() => Boolean(state.recommendData?.recommenda
 
 const recommendation = computed(() => {
   const rec = state.recommendData?.recommendations?.[0]
-  if (rec) return { name: rec.name, reason: rec.reason ?? '잔여 영양소 기반 AI 추천' }
-  return {
-    name: remainingCalories.value > 0 ? '추천 받기' : '오늘 목표 달성!',
-    reason: state.balance?.lastMealRecommendTrigger
-      ? '아래 버튼으로 AI 추천을 받아보세요.'
-      : '조건이 충족되면 자동으로 추천됩니다.',
-  }
+  return { name: rec?.name ?? '', reason: rec?.reason ?? '잔여 영양소 기반 AI 추천' }
 })
 
 onMounted(async () => {

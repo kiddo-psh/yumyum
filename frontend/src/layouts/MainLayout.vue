@@ -204,7 +204,6 @@ const asideStyle = computed(() => ({
 const mainStyle = computed(() => ({
   marginLeft: sidebarOpen.value && isLg.value ? SIDEBAR_WIDTH : '0',
   padding: '40px',
-  maxWidth: sidebarOpen.value && isLg.value ? `calc(1440px - ${SIDEBAR_WIDTH})` : '1440px',
   transition: MAIN_TRANSITION,
 }))
 

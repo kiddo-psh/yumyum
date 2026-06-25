@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#fee500",
+        "reason": "Kakao official brand color required by Kakao brand guidelines",
+        "createdAt": "2026-06-25T03:18:57.967Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.85)",
+        "reason": "Kakao official brand text color required by Kakao brand guidelines",
+        "createdAt": "2026-06-25T03:25:39.350Z"
+      }
+    ]
+  }
+}

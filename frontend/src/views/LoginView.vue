@@ -219,7 +219,7 @@ function onKakaoLogin() {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.6;
-  color: #3f5a4d;
+  color: #2d2d2d;
 }
 
 /* 단일 행동 */
@@ -270,7 +270,7 @@ function onKakaoLogin() {
   margin: 14px 0 0;
   font-size: 13px;
   font-weight: 600;
-  color: #3f5a4d;
+  color: #2d2d2d;
 }
 
 @keyframes nyam-bob {

@@ -1,227 +1,195 @@
 <template>
-  <!-- TopAppBar -->
-  <header class="flex justify-between items-center mb-10 w-full">
-    <div class="flex items-center gap-4">
-      <div class="relative w-16 h-16 bg-nyam-mint rounded-xl neo-brutal-border flex items-center justify-center overflow-visible flex-shrink-0">
-        <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-12 h-12 object-contain" />
-        <div v-if="currentStreak > 0" class="absolute -top-2 -right-2 bg-warning neo-brutal-border px-2 py-1 rounded-full text-[10px] font-bold text-on-background">
-          🔥 {{ currentStreak }}일
-        </div>
-        <div v-else class="absolute -top-2 -right-2 bg-warning neo-brutal-border px-2 py-1 rounded-full text-[10px] font-bold text-on-background">
-          New!
-        </div>
-      </div>
-      <div>
-        <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
-        <!-- 추천 준비됨 -->
-        <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
-          <p class="text-body-md text-on-surface-variant">
-            <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
-            {{ recommendation.reason }}
-          </p>
-          <RouterLink
-            :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
-            class="shrink-0 bg-primary text-white px-4 py-1.5 neo-brutal-border rounded-lg text-label-sm font-bold hover:-translate-y-0.5 transition-transform"
-          >
-            식단에 추가
-          </RouterLink>
-        </div>
-        <!-- 추천 로딩 중 -->
-        <p
-          v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
-          class="text-body-md text-on-surface-variant"
-        >
-          마지막 끼니 추천을 가져오는 중...
-        </p>
-        <!-- 기본 AI 멘트 -->
-        <p v-else class="text-body-md text-on-surface-variant">
-          {{ coachMessage }}
-        </p>
-      </div>
-    </div>
-    <div class="flex gap-4">
-      <button aria-label="알림" class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
-        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-      </button>
-      <RouterLink to="/my" aria-label="설정" class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
-        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-      </RouterLink>
-    </div>
-  </header>
+  <div class="max-w-4xl mx-auto w-full">
 
-  <!-- 주간 리포트 발행 알림 -->
-  <ReportNotificationBanner />
-
-  <!-- 프로그램 생성 대기 중 로딩 카드 -->
-  <div v-if="!state.loading && !isProgramReady" class="mb-8">
-    <div class="bg-surface neo-brutal-border rounded-xl p-12 flex flex-col items-center justify-center gap-6 text-center" style="min-height: 320px;">
-      <div class="plan-spinner" />
-      <div>
-        <p class="text-headline-lg text-on-background mb-2">맞춤 플랜을 생성하고 있어요</p>
-        <p class="text-body-md text-on-surface-variant">BMR·TDEE를 계산해 목표 칼로리와 영양소를 설정 중이에요.<br/>잠시만 기다려 주세요!</p>
-      </div>
-      <div class="flex gap-3">
-        <span v-for="i in 3" :key="i" class="plan-dot" :style="{ animationDelay: (i - 1) * 0.25 + 's' }" />
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 1: Achievement & Calories -->
-  <div v-if="isProgramReady" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-6 lg:mb-8">
-    <!-- Achievement Card -->
-    <div class="col-span-1 lg:col-span-7 bg-surface neo-brutal-border rounded-xl p-6 lg:p-8 relative overflow-hidden neo-brutal-card-hover">
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:h-full">
-        <div class="lg:flex-1">
-          <div class="inline-block px-4 py-2 bg-white border-[3px] border-on-background rounded-full text-label-lg mb-4">
-            목표 달성도
-          </div>
-          <h3 class="text-headline-lg lg:text-display-md mb-2">{{ achievementMessage }}</h3>
-          <p class="text-body-md lg:text-body-lg text-on-surface-variant mb-4 lg:mb-6">
-            목표까지 단 {{ 100 - calorieProgress }}% 남았네요. 조금만 더 힘내볼까요?
-          </p>
-          <div class="relative w-32 h-32 lg:w-48 lg:h-48 bg-nyam-mint neo-brutal-border rounded-2xl p-3 lg:p-4 flex items-center justify-center">
-            <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-full h-full object-contain" />
-          </div>
-        </div>
-
-        <!-- Progress Circle -->
-        <div class="relative w-44 h-44 lg:w-56 lg:h-56 flex-shrink-0 flex items-center justify-center mx-auto lg:mx-0">
-          <svg
-            role="progressbar"
-            :aria-valuenow="calorieProgress"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            :aria-label="`오늘 칼로리 달성률 ${calorieProgress}%`"
-            class="w-full h-full progress-circle-svg absolute"
-            viewBox="0 0 100 100"
-          >
-            <title>오늘 칼로리 달성률 {{ calorieProgress }}%</title>
-            <circle class="text-outline" cx="50" cy="50" r="42" fill="transparent" stroke="currentColor" stroke-width="6" />
-            <circle
-              ref="progressCircle"
-              class="text-success"
-              cx="50" cy="50" r="42"
-              fill="transparent"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-width="12"
-              :stroke-dasharray="circumference"
-              :stroke-dashoffset="strokeDashoffset"
-              style="transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);"
-            />
-          </svg>
-          <div class="flex flex-col items-center justify-center z-10">
-            <span class="text-display-md leading-none">{{ calorieProgress }}</span>
-            <span class="text-label-lg text-on-surface-variant">%</span>
-          </div>
-          <div class="absolute -bottom-2 bg-on-background text-white px-4 py-1 rounded-full text-sm font-black">
-            진행률
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Today's Calories Card -->
-    <div class="col-span-1 lg:col-span-5 bg-surface neo-brutal-border rounded-xl px-6 lg:px-8 pt-8 lg:pt-14 pb-6 lg:pb-8 neo-brutal-card-hover">
-      <div class="flex justify-between items-start mb-6 lg:mb-8">
-        <div>
-          <p class="text-label-lg text-on-surface-variant">오늘의 칼로리</p>
-          <h3 class="text-display-md lg:text-numeral-xl mt-2">
-            {{ formatNumber(intakeCalories) }}
-            <span class="text-headline-md text-on-surface-variant">kcal</span>
-          </h3>
-        </div>
-        <div class="w-16 h-16 bg-primary neo-brutal-border rounded-2xl flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings:'FILL' 1;">restaurant</span>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <!-- Calorie Progress Bar -->
-        <div>
-          <div class="flex justify-between mb-2">
-            <span class="font-bold">남은 칼로리</span>
-            <span class="font-bold text-primary">{{ formatNumber(remainingCalories) }} kcal</span>
-          </div>
-          <div class="w-full h-8 bg-white neo-brutal-border rounded-full overflow-hidden relative">
-            <div
-              class="h-full bg-primary border-r-[3px] border-on-background transition-all duration-700"
-              :style="{ width: calorieProgress + '%' }"
-            />
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span class="text-[10px] font-black text-on-background">
-                목표 {{ formatNumber(targetCalories) }} kcal
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Macro Bars -->
-        <div class="grid grid-cols-3 gap-4">
-          <div v-for="macro in macros" :key="macro.key" class="text-center">
-            <p class="text-xs font-bold text-on-surface-variant mb-1">{{ macro.label }}</p>
-            <div class="h-16 w-full bg-white neo-brutal-border rounded-lg relative flex flex-col justify-end overflow-hidden">
-              <div
-                class="w-full border-t-[3px] border-on-background transition-all duration-700"
-                :class="macro.colorClass"
-                :style="{ height: macro.percent + '%' }"
-              />
-              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                {{ formatNumber(macro.current) }}g
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 2: Quick Actions -->
-  <div v-if="isProgramReady" class="grid grid-cols-3 gap-2 lg:gap-4">
-    <RouterLink
-      to="/meals/search"
-      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-    >
-      <span class="material-symbols-outlined text-4xl mb-2 text-primary">edit_note</span>
-      <span class="font-bold text-sm lg:text-base">식단 기록</span>
-    </RouterLink>
-    <RouterLink
-      to="/meals/photo"
-      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-    >
-      <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
-      <span class="font-bold text-sm lg:text-base">사진 분석</span>
-    </RouterLink>
-    <div class="bg-white neo-brutal-border rounded-xl p-3 lg:p-5 neo-brutal-card-hover">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
-        <span class="font-bold text-sm">오늘 체중</span>
-        <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
-          <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
-        </span>
-      </div>
-      <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
-      <form class="flex gap-2" @submit.prevent="submitWeight">
-        <input
-          v-model.number="newWeight"
-          type="number"
-          step="0.1"
-          placeholder="kg 입력"
-          aria-label="오늘 체중 (kg)"
-          class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
-          required
+    <!-- Header -->
+    <header class="flex justify-between items-start gap-4 mb-8 w-full">
+      <div class="flex items-center gap-4 min-w-0">
+        <img
+          src="/nyam/nyam_coach_01.png"
+          alt="냠냠코치"
+          class="w-20 h-20 object-contain flex-shrink-0"
         />
-        <button
-          type="submit"
-          class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
-          :disabled="weightSubmitting"
-          :aria-busy="weightSubmitting"
-          :aria-label="weightSubmitting ? '기록 중' : '체중 기록'"
-        >
-          {{ weightSubmitting ? '...' : '기록' }}
+        <div class="min-w-0">
+          <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
+          <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
+            <p class="text-body-md text-on-surface-variant">
+              <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
+              {{ recommendation.reason }}
+            </p>
+            <RouterLink
+              :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
+              class="shrink-0 bg-primary text-on-primary px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform"
+            >
+              식단에 추가
+            </RouterLink>
+          </div>
+          <p
+            v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
+            class="text-body-md text-on-surface-variant mt-1"
+          >
+            마지막 끼니 추천을 가져오는 중...
+          </p>
+          <p v-else class="text-body-md text-on-surface-variant mt-1">{{ coachMessage }}</p>
+        </div>
+      </div>
+      <div class="flex gap-3 flex-shrink-0">
+        <button aria-label="알림" class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl hover:bg-surface transition-colors">
+          <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
         </button>
-      </form>
+        <RouterLink to="/my" aria-label="설정" class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl hover:bg-surface transition-colors">
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+        </RouterLink>
+      </div>
+    </header>
+
+    <!-- 주간 리포트 발행 알림 -->
+    <ReportNotificationBanner />
+
+    <!-- 플랜 생성 대기 -->
+    <div v-if="!state.loading && !isProgramReady" class="mb-8">
+      <div class="bg-surface neo-brutal-border rounded-xl p-12 flex flex-col items-center justify-center gap-6 text-center" style="min-height: 320px;">
+        <div class="plan-spinner" />
+        <div>
+          <p class="text-headline-lg text-on-background mb-2">맞춤 플랜을 생성하고 있어요</p>
+          <p class="text-body-md text-on-surface-variant">BMR·TDEE를 계산해 목표 칼로리와 영양소를 설정 중이에요.<br/>잠시만 기다려 주세요!</p>
+        </div>
+        <div class="flex gap-3">
+          <span v-for="i in 3" :key="i" class="plan-dot" :style="{ animationDelay: (i - 1) * 0.25 + 's' }" />
+        </div>
+      </div>
     </div>
+
+    <template v-if="isProgramReady">
+
+      <!-- Row 1: 냠냠이 상태 + 스트릭/주간 -->
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+
+        <!-- 달성률 카드 -->
+        <div class="lg:col-span-3 bg-white neo-brutal-border rounded-xl p-7 flex flex-col justify-between">
+          <p class="text-label-lg text-on-surface-variant">오늘의 달성률</p>
+          <div class="flex items-baseline gap-2 mt-3">
+            <span class="text-numeral-xl text-primary leading-none">{{ calorieProgress }}</span>
+            <span class="text-headline-lg text-on-surface-variant">%</span>
+          </div>
+          <p class="text-body-md text-on-surface-variant mt-4">{{ nyamStatusMessage }}</p>
+        </div>
+
+        <!-- 스트릭 + 주간 7도트 카드 -->
+        <div class="lg:col-span-2 bg-white neo-brutal-border rounded-xl p-5 flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-warning neo-brutal-border rounded-xl flex items-center justify-center text-xl flex-shrink-0">🔥</div>
+            <div>
+              <p class="text-headline-lg text-on-background leading-none">
+                {{ currentStreak }}<span class="text-body-md text-on-surface-variant ml-1">일</span>
+              </p>
+              <p class="text-label-lg text-on-surface-variant">연속 달성 중</p>
+            </div>
+          </div>
+
+          <!-- 7도트 주간 캘린더 -->
+          <div class="flex justify-between items-end gap-1.5">
+            <div
+              v-for="dot in weekDots"
+              :key="dot.label"
+              class="flex flex-col items-center gap-1.5 flex-1"
+            >
+              <div
+                class="w-7 h-7 rounded-full transition-all duration-300"
+                :class="dotClass(dot.state)"
+              />
+              <span class="text-xs text-on-surface-variant">{{ dot.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: 오늘의 칼로리 -->
+      <div class="bg-white neo-brutal-border rounded-xl p-7 mb-4">
+
+        <!-- 상단: 칼로리 수치 + 냠냠이 -->
+        <div class="flex items-center gap-6 mb-8">
+
+          <!-- 칼로리 수치 + 프로그레스 바 -->
+          <div class="flex-1 min-w-0">
+            <p class="text-label-lg text-on-surface-variant mb-2">오늘의 칼로리</p>
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-numeral-xl text-on-background leading-none">{{ formatNumber(intakeCalories) }}</span>
+              <span class="text-headline-md text-on-surface-variant">kcal</span>
+            </div>
+            <p class="text-body-md text-on-surface-variant mb-6">
+              목표 <span class="font-bold text-on-background">{{ formatNumber(targetCalories) }}</span> kcal
+            </p>
+            <div class="h-7 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+              <div class="h-full bg-primary transition-all duration-700" :style="{ width: calorieProgress + '%' }" />
+            </div>
+            <div class="flex justify-between mt-3">
+              <span class="text-body-md font-bold text-primary">{{ calorieProgress }}% 달성</span>
+              <span class="text-body-md text-on-surface-variant">{{ formatNumber(remainingCalories) }} kcal 남음</span>
+            </div>
+          </div>
+
+          <!-- 냠냠이 -->
+          <div class="w-[360px] h-[360px] shrink-0">
+            <video
+              src="/nyam/nyam_hovering.mp4"
+              class="w-full h-full object-contain"
+              preload="auto"
+              autoplay
+              muted
+              loop
+              playsinline
+              aria-hidden="true"
+            />
+          </div>
+
+        </div>
+
+        <!-- 하단: 영양소 -->
+        <div class="grid grid-cols-3 gap-8 pt-7 border-t-[3px] border-on-background">
+          <div v-for="macro in macros" :key="macro.key">
+            <p class="text-body-md font-bold text-on-background">{{ macro.label }}</p>
+            <p class="text-label-lg text-on-surface-variant mt-1 mb-4">
+              <span class="font-bold text-on-background">{{ formatNumber(macro.current) }}g</span>
+              <span class="text-on-surface-variant/50"> / {{ macro.target }}g</span>
+            </p>
+            <div class="h-7 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+              <div class="h-full transition-all duration-700" :class="macro.colorClass" :style="{ width: macro.percent + '%' }" />
+            </div>
+            <p class="text-body-md font-bold text-on-background mt-3">{{ macro.percent }}%</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 3: 퀵 액션 -->
+      <div class="grid grid-cols-4 gap-3">
+        <RouterLink
+          :to="{ name: 'log' }"
+          class="col-span-2 bg-primary text-on-primary neo-brutal-border rounded-xl p-5 flex items-center gap-4 neo-brutal-shadow hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-4xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">edit_note</span>
+          <div>
+            <p class="text-label-lg">식단 기록</p>
+            <p class="text-body-md text-on-primary/70 mt-0.5">오늘 먹은 걸 기록해요</p>
+          </div>
+        </RouterLink>
+        <RouterLink
+          to="/meals/photo"
+          class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">camera_enhance</span>
+          <span class="text-label-lg text-on-background">사진 분석</span>
+        </RouterLink>
+        <RouterLink
+          to="/routine"
+          class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">fitness_center</span>
+          <span class="text-label-lg text-on-background">운동 기록</span>
+        </RouterLink>
+      </div>
+
+    </template>
   </div>
 </template>
 
@@ -234,12 +202,9 @@ import {
   getHomeComment,
   getLastMealRecommendation,
 } from '@/api/dashboard'
-import { apiClient } from '@/services/apiClient'
 import { getEffectiveToday } from '@/utils/effectiveDate'
 import ReportNotificationBanner from '@/components/home/ReportNotificationBanner.vue'
 
-const RADIUS = 42
-const circumference = 2 * Math.PI * RADIUS
 
 const state = reactive({
   loading: true,
@@ -249,15 +214,7 @@ const state = reactive({
   recommendData: null,
 })
 
-const progressCircle = ref(null)
-const strokeDashoffset = ref(circumference)
-
 const aiComment = ref(null)
-
-const newWeight = ref(null)
-const weightSubmitting = ref(false)
-const weightError = ref('')
-const weightSuccess = ref(false)
 
 const today = formatDate(getEffectiveToday())
 
@@ -270,13 +227,6 @@ const calorieProgress = computed(() =>
   clamp(targetCalories.value ? Math.round((intakeCalories.value / targetCalories.value) * 100) : 0)
 )
 
-const achievementMessage = computed(() => {
-  const p = calorieProgress.value
-  if (p >= 100) return '완벽해요! 🎉'
-  if (p >= 80) return '거의 다 왔어요!'
-  if (p >= 50) return '잘 하고 있어요!'
-  return '오늘도 화이팅!'
-})
 
 const isProgramReady = computed(() => (state.balance?.targetCalories ?? 0) > 0)
 
@@ -286,31 +236,40 @@ const coachMessage = computed(() => {
   return `${formatNumber(remainingCalories.value)} kcal 남았어요. 기록해볼까요?`
 })
 
+const nyamStatusMessage = computed(() => {
+  const streak = currentStreak.value
+  const progress = calorieProgress.value
+  if (streak >= 30) return '30일 연속 달성! 전설이에요!'
+  if (streak >= 7) return '일주일 연속 달성! 훌륭해요!'
+  if (progress >= 100) return '오늘 목표 달성! 완벽해요!'
+  if (progress >= 80) return '거의 다 왔어요. 조금만 더!'
+  if (progress >= 50) return '반환점 돌파! 화이팅!'
+  if (streak > 0) return `${streak}일 연속 중이에요!`
+  return '오늘도 함께 냠냠해요!'
+})
+
+const weekDots = computed(() => {
+  const todayDate = getEffectiveToday()
+  const todayDay = todayDate.getDay() // 0=Sun, 1=Mon...6=Sat
+  const todayIdx = todayDay === 0 ? 6 : todayDay - 1 // Mon=0...Sun=6
+  const streak = currentStreak.value
+  const progress = calorieProgress.value
+
+  return ['월', '화', '수', '목', '금', '토', '일'].map((label, i) => {
+    const offsetFromToday = i - todayIdx
+    if (offsetFromToday > 0) return { label, state: 'future' }
+    if (offsetFromToday === 0) {
+      return { label, state: progress >= 80 ? 'today-achieved' : 'today-pending' }
+    }
+    const daysAgo = -offsetFromToday
+    return { label, state: daysAgo <= streak ? 'achieved' : 'missed' }
+  })
+})
+
 const macros = computed(() => [
-  {
-    key: 'carbs',
-    label: '탄수화물',
-    current: state.summary?.totalCarbs ?? 0,
-    target: 250,
-    percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0) / 250) * 100)),
-    colorClass: 'bg-carbs',
-  },
-  {
-    key: 'protein',
-    label: '단백질',
-    current: state.summary?.totalProtein ?? 0,
-    target: 120,
-    percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / 120) * 100)),
-    colorClass: 'bg-protein',
-  },
-  {
-    key: 'fat',
-    label: '지방',
-    current: state.summary?.totalFat ?? 0,
-    target: 60,
-    percent: clamp(Math.round(((state.summary?.totalFat ?? 0) / 60) * 100)),
-    colorClass: 'bg-fat',
-  },
+  { key: 'carbs',   label: '탄수화물', current: state.summary?.totalCarbs ?? 0,   target: 250, colorClass: 'bg-carbs',   percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0) / 250) * 100)) },
+  { key: 'protein', label: '단백질',   current: state.summary?.totalProtein ?? 0, target: 120, colorClass: 'bg-protein', percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / 120) * 100)) },
+  { key: 'fat',     label: '지방',     current: state.summary?.totalFat ?? 0,     target: 60,  colorClass: 'bg-fat',     percent: clamp(Math.round(((state.summary?.totalFat ?? 0) / 60) * 100)) },
 ])
 
 const hasRecommendation = computed(() => Boolean(state.recommendData?.recommendations?.[0]))
@@ -319,6 +278,17 @@ const recommendation = computed(() => {
   const rec = state.recommendData?.recommendations?.[0]
   return { name: rec?.name ?? '', reason: rec?.reason ?? '잔여 영양소 기반 AI 추천' }
 })
+
+function dotClass(dotState) {
+  switch (dotState) {
+    case 'achieved':       return 'bg-primary neo-brutal-border'
+    case 'today-achieved': return 'bg-primary border-[3px] border-on-background shadow-[3px_3px_0_0_#2D2D2D]'
+    case 'today-pending':  return 'bg-white border-[3px] border-on-background shadow-[3px_3px_0_0_#2D2D2D]'
+    case 'missed':         return 'bg-white border-2 border-outline opacity-50'
+    case 'future':         return 'bg-surface border-2 border-outline opacity-30'
+    default:               return 'bg-surface border-2 border-outline'
+  }
+}
 
 onMounted(async () => {
   const [summary, balance] = await Promise.allSettled([
@@ -330,39 +300,29 @@ onMounted(async () => {
   state.balance = balance.status === 'fulfilled' ? balance.value : null
   state.loading = false
 
-  // animate progress circle
-  setTimeout(() => {
-    strokeDashoffset.value = circumference - (calorieProgress.value / 100) * circumference
-  }, 300)
-
   if (state.balance?.lastMealRecommendTrigger) {
     loadRecommendation()
   }
 
-  // 온보딩 직후: 목표칼로리가 0이면 Program 비동기 생성 완료를 기다려 자동 갱신
   if (!state.balance?.targetCalories) {
     pollForProgram()
   }
 
-  // AI 코멘트 비동기 로드 (실패 시 정적 fallback 유지)
   try {
     const res = await getHomeComment()
     aiComment.value = res.comment
   } catch {
-    // aiComment null 유지 → coachMessage computed가 정적 fallback 반환
+    // coachMessage computed가 정적 fallback 반환
   }
 })
 
 async function pollForProgram(attempts = 0) {
-  if (attempts >= 6) return   // 최대 12초(2s×6) 시도 후 포기
+  if (attempts >= 6) return
   await new Promise(r => setTimeout(r, 2000))
   try {
     const balance = await getCalorieBalance(today)
     if (balance?.targetCalories > 0) {
       state.balance = balance
-      setTimeout(() => {
-        strokeDashoffset.value = circumference - (calorieProgress.value / 100) * circumference
-      }, 100)
       return
     }
   } catch { /* 무시 */ }
@@ -374,31 +334,13 @@ async function loadRecommendation() {
   try {
     state.recommendData = await getLastMealRecommendation()
   } catch {
-    // recommendation not available yet
+    // recommendation not available
   } finally {
     state.recommendLoading = false
   }
 }
 
-async function submitWeight() {
-  weightSubmitting.value = true
-  weightError.value = ''
-  weightSuccess.value = false
-  try {
-    await apiClient.post('/weights', { weightKg: newWeight.value, recordedDate: today })
-    newWeight.value = null
-    weightSuccess.value = true
-    setTimeout(() => { weightSuccess.value = false }, 3000)
-  } catch {
-    weightError.value = '체중 기록에 실패했어요.'
-  } finally {
-    weightSubmitting.value = false
-  }
-}
-
-function clamp(v) {
-  return Math.max(0, Math.min(100, v))
-}
+function clamp(v) { return Math.max(0, Math.min(100, v)) }
 
 function formatDate(date) {
   const y = date.getFullYear()
@@ -417,7 +359,7 @@ function formatNumber(v) {
   width: 56px;
   height: 56px;
   border: 5px solid #e8e8e8;
-  border-top-color: #1a1a1a;
+  border-top-color: #2D2D2D;
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
@@ -432,7 +374,7 @@ function formatNumber(v) {
   height: 10px;
   border-radius: 50%;
   background: #a8e6cf;
-  border: 2px solid #1a1a1a;
+  border: 2px solid #2D2D2D;
   animation: plan-dot-rise 0.75s ease-in-out infinite alternate;
 }
 
@@ -442,13 +384,7 @@ function formatNumber(v) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .plan-spinner {
-    animation: none;
-    opacity: 0.5;
-  }
-  .plan-dot {
-    animation: none;
-    opacity: 0.7;
-  }
+  .plan-spinner { animation: none; opacity: 0.5; }
+  .plan-dot { animation: none; opacity: 0.7; }
 }
 </style>

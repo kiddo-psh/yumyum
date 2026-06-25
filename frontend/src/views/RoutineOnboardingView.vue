@@ -49,8 +49,8 @@
         :class="optionClass(form.hasExistingRoutine === true)"
         @click="selectHasRoutine(true)"
       >
-        <strong class="block text-body-lg text-on-background">네, 있어요</strong>
-        <small class="text-label-lg text-on-surface-variant">점진적 과부하로 강도를 높여 줘요</small>
+        <strong class="block text-body-lg" :class="form.hasExistingRoutine === true ? 'text-on-primary' : 'text-on-background'">네, 있어요</strong>
+        <small class="text-label-lg" :class="form.hasExistingRoutine === true ? 'text-on-primary/80' : 'text-on-surface-variant'">점진적 과부하로 강도를 높여 줘요</small>
       </button>
       <button
         type="button"
@@ -58,8 +58,8 @@
         :class="optionClass(form.hasExistingRoutine === false)"
         @click="selectHasRoutine(false)"
       >
-        <strong class="block text-body-lg text-on-background">아니요, 처음이에요</strong>
-        <small class="text-label-lg text-on-surface-variant">기본기 위주로 가볍게 시작해요</small>
+        <strong class="block text-body-lg" :class="form.hasExistingRoutine === false ? 'text-on-primary' : 'text-on-background'">아니요, 처음이에요</strong>
+        <small class="text-label-lg" :class="form.hasExistingRoutine === false ? 'text-on-primary/80' : 'text-on-surface-variant'">기본기 위주로 가볍게 시작해요</small>
       </button>
     </div>
   </section>
@@ -80,7 +80,7 @@
         v-for="days in dayOptions"
         :key="days"
         type="button"
-        class="neo-brutal-border rounded-lg py-5 text-body-lg text-on-background transition-all hover:-translate-y-0.5"
+        class="neo-brutal-border rounded-lg py-5 text-body-lg transition-all hover:-translate-y-0.5"
         :class="optionClass(form.daysPerWeek === days)"
         @click="selectDays(days)"
       >
@@ -90,7 +90,7 @@
     <div class="flex justify-start mt-6">
       <button
         type="button"
-        class="neo-brutal-border rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:bg-surface transition-colors"
+        class="neo-brutal-border neo-brutal-shadow rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:-translate-y-0.5 active:translate-y-1 transition-all duration-150"
         @click="step = 1"
       >
         이전
@@ -141,8 +141,8 @@
         :class="optionClass(form.splitType === option.splitType)"
         @click="form.splitType = option.splitType"
       >
-        <strong class="block text-body-lg text-on-background">{{ option.label }}</strong>
-        <small class="text-label-lg text-on-surface-variant">{{ option.splitType }}</small>
+        <strong class="block text-body-lg" :class="form.splitType === option.splitType ? 'text-on-primary' : 'text-on-background'">{{ option.label }}</strong>
+        <small class="text-label-lg" :class="form.splitType === option.splitType ? 'text-on-primary/80' : 'text-on-surface-variant'">{{ option.splitType }}</small>
       </button>
     </div>
 
@@ -156,7 +156,7 @@
     <div class="flex justify-between gap-3 mt-6">
       <button
         type="button"
-        class="neo-brutal-border rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:bg-surface transition-colors"
+        class="neo-brutal-border neo-brutal-shadow rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:-translate-y-0.5 active:translate-y-1 transition-all duration-150"
         @click="step = 2"
       >
         이전
@@ -239,7 +239,7 @@
     <div class="flex justify-between gap-3 mt-8">
       <button
         type="button"
-        class="neo-brutal-border rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:bg-surface transition-colors"
+        class="neo-brutal-border neo-brutal-shadow rounded-xl bg-white px-5 py-3 text-label-lg text-on-background hover:-translate-y-0.5 active:translate-y-1 transition-all duration-150"
         @click="resetOnboarding"
       >
         다시 만들기
@@ -322,15 +322,15 @@ function stepClass(index) {
     return 'bg-primary text-on-primary';
   }
   if (step.value > index) {
-    return 'bg-nyam-mint text-on-background';
+    return 'bg-surface text-on-surface-variant';
   }
   return 'bg-white text-on-surface-variant';
 }
 
 function optionClass(selected) {
   return selected
-    ? 'bg-nyam-mint -translate-y-0.5'
-    : 'bg-white hover:bg-surface';
+    ? 'bg-primary text-on-primary -translate-y-1'
+    : 'bg-white text-on-background hover:bg-surface';
 }
 
 function selectHasRoutine(value) {

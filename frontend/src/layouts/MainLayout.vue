@@ -17,17 +17,9 @@
       :style="asideStyle"
     >
       <!-- Brand + 닫기 버튼 -->
-      <div class="mb-8 flex items-center gap-3">
-        <div class="w-12 h-12 bg-nyam-mint rounded-full flex items-center justify-center neo-brutal-border flex-shrink-0 overflow-hidden">
-          <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-10 h-10 object-contain" />
-        </div>
-        <div class="flex-1 min-w-0">
-          <h1 class="text-display-md font-sans text-on-background tracking-tighter leading-none">
-            NyamNyam
-          </h1>
-          <p class="text-label-lg text-on-surface-variant">
-            Coaching Buddy
-          </p>
+      <div class="mb-8 flex items-start justify-between gap-3">
+        <div class="w-24 h-24 bg-nyam-mint rounded-xl flex items-center justify-center neo-brutal-border flex-shrink-0 overflow-hidden">
+          <img src="/nyam/nyam_logo.png" alt="냠냠코치" class="w-20 h-20 object-contain" />
         </div>
         <button
           type="button"
@@ -79,7 +71,7 @@
         </RouterLink>
         <p
           v-if="badgeStore.error"
-          class="text-xs text-error"
+          class="text-xs text-danger"
         >
           뱃지 불러오기 실패
         </p>
@@ -193,7 +185,7 @@ function closeSidebar() {
 function handleResize() {
   const lg = window.innerWidth >= LG
   isLg.value = lg
-  if (!lg) sidebarOpen.value = false
+  sidebarOpen.value = lg
 }
 
 function handleKeydown(e) {

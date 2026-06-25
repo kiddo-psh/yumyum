@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-25T02:45:00Z",
+  "title": "Design System: 냠냠코치",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "활력 코랄",
+        "canonical": "#FF8C42",
+        "tonalRamp": ["#3D1500", "#6B2A00", "#9B4500", "#C85C00", "#F07A1A", "#FF8C42", "#FFB580", "#FFD9B3"]
+      },
+      "nyam-mint": {
+        "role": "secondary",
+        "displayName": "유쾌한 스피어민트",
+        "canonical": "#A8E6CF",
+        "tonalRamp": ["#002219", "#004433", "#006E50", "#009166", "#40B589", "#A8E6CF", "#C5EFE0", "#E0F8EF"]
+      },
+      "on-background": {
+        "role": "neutral",
+        "displayName": "잉크 블랙",
+        "canonical": "#2D2D2D",
+        "tonalRamp": ["#0A0A0A", "#1A1A1A", "#2D2D2D", "#4A4A4A", "#6B6B6B", "#8A8A8A", "#B0B0B0", "#E0E0E0"]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "순백 캔버스",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#D0D0D0", "#E0E0E0", "#EBEBEB", "#F0F0F0", "#F5F5F5", "#FAFAFA", "#FDFDFD", "#FFFFFF"]
+      },
+      "protein": {
+        "role": "tertiary",
+        "displayName": "스틸 블루 (단백질)",
+        "canonical": "#6B9BD1",
+        "tonalRamp": ["#0D2540", "#1B3E6B", "#2D5E9B", "#4A7DC0", "#6B9BD1", "#8FB5E0", "#B3CFEE", "#D9E8F8"]
+      },
+      "carbs": {
+        "role": "tertiary",
+        "displayName": "골든 옐로우 (탄수화물)",
+        "canonical": "#F4C95D",
+        "tonalRamp": ["#3D2900", "#6B4A00", "#9B7000", "#C89500", "#E8B030", "#F4C95D", "#F8DA8F", "#FCECC4"]
+      },
+      "fat": {
+        "role": "tertiary",
+        "displayName": "살몬 코랄 (지방)",
+        "canonical": "#E8806B",
+        "tonalRamp": ["#3D0A00", "#6B1800", "#9B2D15", "#C04530", "#D96450", "#E8806B", "#F0A895", "#F8D4C8"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Large", "purpose": "온보딩 히어로, 주요 섹션 제목. 화면당 1개." },
+      "display-md": { "displayName": "Display Medium", "purpose": "홈 섹션 주요 헤딩." },
+      "headline": { "displayName": "Headline", "purpose": "카드 제목, 섹션 헤딩." },
+      "headline-md": { "displayName": "Headline Medium", "purpose": "서브섹션, 대화형 패널 제목." },
+      "body-lg": { "displayName": "Body Large", "purpose": "주요 본문, 설명 텍스트." },
+      "body": { "displayName": "Body", "purpose": "일반 본문. 최대 65ch." },
+      "label": { "displayName": "Label", "purpose": "버튼 텍스트, 네비 레이블, 칩. 대문자 변환 금지." },
+      "numeral": { "displayName": "Numeral", "purpose": "칼로리·스트릭·운동 수치 전용." }
+    },
+    "shadows": [
+      {
+        "name": "neo-brutal-rest",
+        "value": "6px 6px 0px 0px #2D2D2D",
+        "purpose": "상호작용 요소 기본 상태 — 버튼, CTA 카드, FAB."
+      },
+      {
+        "name": "neo-brutal-hover",
+        "value": "10px 10px 0px 0px #2D2D2D",
+        "purpose": "hover 시 섀도우 확장 (translate(-4px,-4px)과 함께 적용)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-quart",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "사이드바 슬라이드, 카드 hover, 진행 표시기 애니메이션. 300ms 기본."
+      },
+      {
+        "name": "progress-stroke",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "칼로리 달성률 SVG stroke-dashoffset 전환. 1.5s."
+      }
+    ],
+    "breakpoints": [
+      { "name": "lg", "value": "1024px", "purpose": "사이드바 자동 열림 기준. 미만: 모바일 드로어 모드." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "가장 중요한 단일 CTA. 화면당 1-2개.",
+      "html": "<button class=\"ds-btn-primary\">식단 기록하기</button>",
+      "css": ".ds-btn-primary { background: #FF8C42; color: #ffffff; padding: 12px 24px; border: 3px solid #2D2D2D; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; box-shadow: 6px 6px 0px 0px #2D2D2D; transition: transform 300ms cubic-bezier(0.22,1,0.36,1), box-shadow 300ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary:hover { transform: translate(-4px,-4px); box-shadow: 10px 10px 0px 0px #2D2D2D; } .ds-btn-primary:active { transform: translate(6px,6px); box-shadow: none; } .ds-btn-primary:focus-visible { outline: 2px solid #FF8C42; outline-offset: 3px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "보조 액션. 배경 없이 테두리만.",
+      "html": "<button class=\"ds-btn-ghost\">취소</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #2D2D2D; padding: 12px 24px; border: 3px solid #2D2D2D; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; box-shadow: 6px 6px 0px 0px #2D2D2D; transition: transform 300ms cubic-bezier(0.22,1,0.36,1), box-shadow 300ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-ghost:hover { transform: translate(-4px,-4px); box-shadow: 10px 10px 0px 0px #2D2D2D; background: #F5F5F5; } .ds-btn-ghost:active { transform: translate(6px,6px); box-shadow: none; } .ds-btn-ghost:focus-visible { outline: 2px solid #2D2D2D; outline-offset: 3px; }"
+    },
+    {
+      "name": "Nav Item — Active",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "사이드바 현재 페이지 항목.",
+      "html": "<a class=\"ds-nav-item ds-nav-item--active\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z\"/></svg><span>홈</span></a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-decoration: none; transition: transform 200ms cubic-bezier(0.22,1,0.36,1), background 200ms; color: #2D2D2D; } .ds-nav-item--active { background: #FF8C42; color: #ffffff; border: 3px solid #2D2D2D; transform: translateY(-4px); } .ds-nav-item:not(.ds-nav-item--active):hover { background: #F5F5F5; transform: translateY(-2px); }"
+    },
+    {
+      "name": "Interactive Card",
+      "kind": "card",
+      "refersTo": "button-primary",
+      "description": "클릭 가능한 카드. 섀도우 있음.",
+      "html": "<div class=\"ds-card-interactive\"><p class=\"ds-card-title\">오늘의 칼로리</p><p class=\"ds-card-value\">1,840 kcal</p></div>",
+      "css": ".ds-card-interactive { background: #FFFFFF; border: 3px solid #2D2D2D; border-radius: 16px; padding: 24px; cursor: pointer; box-shadow: 6px 6px 0px 0px #2D2D2D; transition: transform 300ms cubic-bezier(0.22,1,0.36,1), box-shadow 300ms cubic-bezier(0.22,1,0.36,1); } .ds-card-interactive:hover { transform: translate(-4px,-4px); box-shadow: 10px 10px 0px 0px #2D2D2D; } .ds-card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: #8A8A8A; margin: 0 0 8px; } .ds-card-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 800; color: #2D2D2D; margin: 0; }"
+    },
+    {
+      "name": "Info Card",
+      "kind": "card",
+      "refersTo": "button-ghost",
+      "description": "정보 표시 전용 카드. 섀도우 없음, 테두리만.",
+      "html": "<div class=\"ds-card-info\"><p class=\"ds-card-label\">단백질</p><p class=\"ds-card-num\">82g</p></div>",
+      "css": ".ds-card-info { background: #FFFFFF; border: 3px solid #2D2D2D; border-radius: 16px; padding: 24px; } .ds-card-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: #8A8A8A; margin: 0 0 8px; } .ds-card-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 700; color: #2D2D2D; margin: 0; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "description": "기본 텍스트 입력 필드.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-input-1\">체중</label><div class=\"ds-input-wrap\"><input class=\"ds-input\" id=\"ds-input-1\" type=\"number\" placeholder=\"0.0\"><span class=\"ds-input-unit\">kg</span></div></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; } .ds-field-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: #2D2D2D; } .ds-input-wrap { position: relative; } .ds-input { width: 100%; border: 2px solid #E0E0E0; border-radius: 10px; padding: 12px 40px 12px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 600; color: #2D2D2D; background: #FFFFFF; box-sizing: border-box; transition: border-color 150ms; outline: none; } .ds-input:focus { border-color: #2D2D2D; } .ds-input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; color: #8A8A8A; pointer-events: none; }"
+    },
+    {
+      "name": "Nyam Character Avatar",
+      "kind": "custom",
+      "description": "냠냠이 전용 민트 배경 아바타. 스피어민트 독점 사용.",
+      "html": "<div class=\"ds-nyam-avatar\"><img src=\"/nyam/nyamnyam.png\" alt=\"냠냠이\" class=\"ds-nyam-img\"></div>",
+      "css": ".ds-nyam-avatar { width: 48px; height: 48px; background: #A8E6CF; border-radius: 9999px; border: 3px solid #2D2D2D; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; } .ds-nyam-img { width: 40px; height: 40px; object-fit: contain; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Growth Journal",
+    "overview": "냠냠코치는 건강 기록을 일기처럼 쌓아가는 공간이다. 매 기록이 쌓여 뱃지가 붙고, 스트릭이 이어지고, 냠냠이가 자란다 — 성장 일지에 스티커가 채워지듯. 네오-브루탈 하드 엣지는 \"진짜로 기록했다\"는 물성 있는 신호이고, 순백 배경 위의 오렌지 코랄은 다음 기록을 향한 행동 에너지다.\n\n이 시스템은 두 가지를 철저히 거부한다: 부드러운 뉴모피즘 건강 앱 미학(안심되는 파스텔과 둥근 그라데이션 카드)과 피트니스 앱의 고강도 에너지(강렬한 빨강, 어두운 배경, 마초 서체). 냠냠코치는 무겁지 않다 — 솔직하고 따뜻하고 리워딩하다.",
+    "keyCharacteristics": [
+      "순백 캔버스 위의 잉크-블랙 3px 테두리 — 그래픽 직접성",
+      "활력 코랄이 화면의 10% 이하 — 희소성으로 주목도 유지",
+      "유쾌한 스피어민트는 냠냠이 전용 시그니처 컬러",
+      "6px 오프셋 섀도우는 클릭 가능한 요소에만 — 물성으로 상호작용 신호",
+      "Plus Jakarta Sans 800 → 500 폭넓은 웨이트 범위로 위계 형성"
+    ],
+    "rules": [
+      { "name": "The Coral Scarcity Rule", "body": "활력 코랄(#FF8C42)은 화면당 1-2개 요소에만. CTA 버튼과 활성 네비 항목 이외에 코랄을 추가하면 즉시 재검토한다. 희소성이 에너지다.", "section": "colors" },
+      { "name": "The Mint Ownership Rule", "body": "스피어민트(#A8E6CF)는 냠냠이 캐릭터 전용이다. AI 코치 기능, 식단 분석, 일반 UI에 사용하면 두 캐릭터의 정체성이 섞인다.", "section": "colors" },
+      { "name": "The Dead Token Warning", "body": "frontend/src/styles/tokens.css의 초록 팔레트(#58cc02)는 미임포트, 미사용이다. 그 파일의 값을 사용하지 않는다.", "section": "colors" },
+      { "name": "The Label-Not-Caps Rule", "body": "레이블 텍스트는 0.05em 자간을 사용하되 text-transform: uppercase 금지. 한글 레이블에 효과 없고, 영문 레이블에는 경직된 인상을 준다.", "section": "typography" },
+      { "name": "The Numeral Reservation Rule", "body": "64px 800 Numeral 스케일은 칼로리·스트릭·운동 수치에만. 일반 헤딩에 적용하면 위계가 무너진다.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "배경, 텍스트 영역, 비상호작용 컨테이너에는 섀도우 없음. 정보 표시 영역이 뜨면 계층 구조가 무너진다.", "section": "elevation" },
+      { "name": "The No-Blur Rule", "body": "box-shadow blur radius 금지. '6px 6px 0px 0px' — 마지막 두 값은 항상 0. 블러는 네오-브루탈이 아니다.", "section": "elevation" }
+    ],
+    "dos": [
+      "neo-brutal-border (3px solid #2D2D2D)를 모든 상호작용 요소에 적용한다.",
+      "섀도우는 클릭 가능한 요소에만. blur radius는 항상 0.",
+      "숫자(칼로리, 스트릭)는 64px 800 Numeral 스케일을 사용한다.",
+      "스피어민트(#A8E6CF)는 냠냠이 전용으로 보호한다.",
+      "활성 네비 항목의 -translate-y-1 부양을 유지한다.",
+      "모든 트랜지션에 prefers-reduced-motion: reduce 대안을 제공한다."
+    ],
+    "donts": [
+      "파스텔 그라데이션, 뉴모피즘 소프트 섀도우, 글래스모피즘 카드를 사용한다.",
+      "어두운 배경 + neon 액센트를 사용한다.",
+      "box-shadow에 blur를 넣는다 (마지막 두 값은 항상 0).",
+      "활력 코랄(#FF8C42)을 배경색 또는 대형 섹션 채움으로 사용한다.",
+      "레이블에 text-transform: uppercase를 적용한다.",
+      "중첩 카드(카드 안의 카드)를 만든다.",
+      "background-clip: text로 그라데이션 텍스트를 만든다.",
+      "크림·샌드·아이보리 배경색을 사용한다. 배경은 #FFFFFF다.",
+      "tokens.css의 초록 팔레트(#58cc02)를 사용한다 — 미임포트 파일이다."
+    ]
+  }
+}

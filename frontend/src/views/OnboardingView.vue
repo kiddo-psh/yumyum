@@ -1,179 +1,184 @@
 <template>
-  <div class="onboarding-root">
-    <div class="onboarding-card">
-      <!-- 상단 헤더 + 진행 바 -->
-      <div class="onboarding-header">
-        <div class="onboarding-brand">
-          <img src="/nyam/nyamnyam.png" alt="냠냠이" class="brand-icon" />
-          <span class="brand-name">냠냠코치</span>
+  <div class="min-h-screen bg-sub-background flex items-center justify-center p-5">
+    <div class="w-full max-w-[640px] bg-background neo-brutal-border rounded neo-brutal-shadow overflow-hidden">
+
+      <!-- Progress header -->
+      <div class="px-8 pt-7 pb-6 border-b-[3px] border-on-background">
+        <div class="flex items-center gap-2.5 mb-5">
+          <div class="w-8 h-8 bg-nyam-mint rounded-full neo-brutal-border flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img src="/nyam/nyamnyam.png" alt="" aria-hidden="true" class="w-6 h-6 object-contain" />
+          </div>
+          <span class="text-label-lg text-on-background">냠냠코치</span>
         </div>
-        <div class="step-progress">
+        <div class="flex gap-1.5 mb-3" role="progressbar" :aria-valuenow="step" aria-valuemin="1" :aria-valuemax="TOTAL_STEPS" :aria-label="`${step}단계 / ${TOTAL_STEPS}단계 완료`">
           <div
             v-for="i in TOTAL_STEPS"
             :key="i"
-            :class="['step-bar', i <= step ? 'step-bar--active' : '']"
+            class="h-1.5 flex-1 rounded-full transition-colors duration-300"
+            :class="i <= step ? 'bg-primary' : 'bg-outline'"
           />
         </div>
-        <p class="step-label">{{ STEP_TITLES[step - 1] }}</p>
+        <p class="text-label-lg text-on-surface-variant">{{ step }} / {{ TOTAL_STEPS }} — {{ STEP_TITLES[step - 1] }}</p>
       </div>
 
-      <!-- 단계 콘텐츠 -->
-      <div class="onboarding-body">
+      <!-- Step content -->
+      <div class="px-8 py-8 min-h-[380px]">
         <Transition :name="transitionName" mode="out-in">
 
           <!-- Step 1: 기본 정보 -->
-          <div v-if="step === 1" key="step1" class="step-content">
-            <h2 class="step-heading">기본 정보를 알려주세요</h2>
-            <p class="step-sub">맞춤형 칼로리와 운동 계획을 만들어 드릴게요.</p>
+          <div v-if="step === 1" key="step1">
+            <h2 class="text-headline-lg text-on-background mb-1">기본 정보를 알려주세요</h2>
+            <p class="text-body-md text-on-surface-variant mb-8">맞춤형 칼로리와 운동 계획을 만들어 드릴게요.</p>
 
-            <!-- 성별 -->
-            <div class="field-group">
-              <label class="field-label">성별</label>
-              <div class="sex-buttons">
-                <button
-                  v-for="opt in SEX_OPTIONS"
-                  :key="opt.value"
-                  type="button"
-                  @click="form.sex = opt.value"
-                  :class="['sex-btn', form.sex === opt.value ? 'sex-btn--active' : '']"
-                >
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">{{ opt.icon }}</span>
-                  {{ opt.label }}
-                </button>
-              </div>
+            <p class="text-label-lg text-on-background mb-3">성별</p>
+            <div class="flex gap-3 mb-7">
+              <button
+                v-for="opt in SEX_OPTIONS"
+                :key="opt.value"
+                type="button"
+                class="flex-1 flex items-center justify-center gap-2 py-4 rounded neo-brutal-border text-label-lg transition-all duration-150"
+                :class="form.sex === opt.value
+                  ? 'bg-primary text-on-primary -translate-y-1'
+                  : 'bg-background text-on-background hover:bg-surface hover:-translate-y-0.5'"
+                :aria-pressed="form.sex === opt.value"
+                @click="form.sex = opt.value"
+              >
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">{{ opt.icon }}</span>
+                {{ opt.label }}
+              </button>
             </div>
 
-            <!-- 출생연도 / 키 / 몸무게 -->
-            <div class="info-grid">
-              <div class="field-group">
-                <label class="field-label">출생연도</label>
-                <div class="input-wrap">
+            <div class="grid grid-cols-3 gap-4">
+              <div v-for="f in bodyFields" :key="f.key">
+                <label :for="'field-' + f.key" class="text-label-lg text-on-background mb-2 block">{{ f.label }}</label>
+                <div class="relative">
                   <input
-                    v-model.number="form.birthYear"
+                    :id="'field-' + f.key"
+                    v-model.number="form[f.key]"
                     type="number"
-                    min="1924"
-                    :max="currentYear - 10"
-                    placeholder="1995"
-                    class="text-input"
+                    :min="f.min"
+                    :max="f.max"
+                    :step="f.step"
+                    :placeholder="f.placeholder"
+                    class="w-full border-2 border-outline rounded-[10px] py-3 pl-4 pr-10 text-body-md text-on-background bg-background focus:border-on-background focus:outline-none transition-colors"
                   />
-                  <span class="input-unit">년</span>
-                </div>
-              </div>
-              <div class="field-group">
-                <label class="field-label">키</label>
-                <div class="input-wrap">
-                  <input
-                    v-model.number="form.heightCm"
-                    type="number"
-                    step="0.1"
-                    min="100"
-                    max="250"
-                    placeholder="170"
-                    class="text-input"
-                  />
-                  <span class="input-unit">cm</span>
-                </div>
-              </div>
-              <div class="field-group">
-                <label class="field-label">몸무게</label>
-                <div class="input-wrap">
-                  <input
-                    v-model.number="form.weightKg"
-                    type="number"
-                    step="0.1"
-                    min="20"
-                    max="300"
-                    placeholder="65"
-                    class="text-input"
-                  />
-                  <span class="input-unit">kg</span>
+                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-label-lg text-on-surface-variant pointer-events-none">{{ f.unit }}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Step 2: 활동 수준 -->
-          <div v-else-if="step === 2" key="step2" class="step-content">
-            <h2 class="step-heading">평소 활동 수준을 선택해 주세요</h2>
-            <p class="step-sub">TDEE(총 에너지 소비량) 계산에 사용돼요.</p>
+          <div v-else-if="step === 2" key="step2">
+            <h2 class="text-headline-lg text-on-background mb-1">평소 활동 수준을 선택해 주세요</h2>
+            <p class="text-body-md text-on-surface-variant mb-8">TDEE(총 에너지 소비량) 계산에 사용돼요.</p>
 
-            <div class="activity-list">
+            <div class="flex flex-col gap-2.5">
               <button
                 v-for="opt in ACTIVITY_OPTIONS"
                 :key="opt.value"
                 type="button"
+                class="flex items-center justify-between px-5 py-4 rounded neo-brutal-border text-left transition-all duration-150"
+                :class="form.activityLevel === opt.value
+                  ? 'bg-primary -translate-y-1'
+                  : 'bg-background hover:bg-surface hover:-translate-y-0.5'"
+                :aria-pressed="form.activityLevel === opt.value"
                 @click="form.activityLevel = opt.value"
-                :class="['activity-item', form.activityLevel === opt.value ? 'activity-item--active' : '']"
               >
-                <div class="activity-info">
-                  <span class="activity-name">{{ opt.label }}</span>
-                  <span class="activity-desc">{{ opt.desc }}</span>
+                <div>
+                  <p class="text-label-lg" :class="form.activityLevel === opt.value ? 'text-on-primary' : 'text-on-background'">{{ opt.label }}</p>
+                  <p class="text-body-md mt-0.5" :class="form.activityLevel === opt.value ? 'text-on-primary/80' : 'text-on-surface-variant'">{{ opt.desc }}</p>
                 </div>
-                <div :class="['activity-radio', form.activityLevel === opt.value ? 'activity-radio--checked' : '']" />
+                <span
+                  class="material-symbols-outlined flex-shrink-0 ml-4"
+                  :class="form.activityLevel === opt.value ? 'text-on-primary' : 'text-outline'"
+                  style="font-variation-settings:'FILL' 1;"
+                >{{ form.activityLevel === opt.value ? 'check_circle' : 'radio_button_unchecked' }}</span>
               </button>
             </div>
           </div>
 
           <!-- Step 3: 건강 목표 -->
-          <div v-else key="step3" class="step-content">
-            <h2 class="step-heading">건강 목표를 선택해 주세요</h2>
-            <p class="step-sub">목표에 따라 칼로리 계획과 AI 코멘트가 달라져요.</p>
+          <div v-else key="step3">
+            <h2 class="text-headline-lg text-on-background mb-1">건강 목표를 선택해 주세요</h2>
+            <p class="text-body-md text-on-surface-variant mb-8">목표에 따라 칼로리 계획과 AI 코멘트가 달라져요.</p>
 
-            <div class="goal-grid">
+            <div class="grid grid-cols-2 gap-3 mb-6">
               <button
                 v-for="opt in GOAL_OPTIONS"
                 :key="opt.value"
                 type="button"
+                class="flex flex-col items-center gap-2 py-7 rounded neo-brutal-border transition-all duration-150"
+                :class="form.healthGoal === opt.value
+                  ? 'bg-primary -translate-y-1'
+                  : 'bg-background hover:bg-surface hover:-translate-y-0.5'"
+                :aria-pressed="form.healthGoal === opt.value"
                 @click="form.healthGoal = opt.value"
-                :class="['goal-card', form.healthGoal === opt.value ? 'goal-card--active' : '']"
               >
-                <span class="material-symbols-outlined goal-icon" style="font-variation-settings:'FILL' 1;">{{ opt.icon }}</span>
-                <span class="goal-label">{{ opt.label }}</span>
-                <span class="goal-desc">{{ opt.desc }}</span>
+                <span
+                  class="material-symbols-outlined text-3xl"
+                  :class="form.healthGoal === opt.value ? 'text-on-primary' : 'text-on-background'"
+                  style="font-variation-settings:'FILL' 1;"
+                >{{ opt.icon }}</span>
+                <p class="text-label-lg" :class="form.healthGoal === opt.value ? 'text-on-primary' : 'text-on-background'">{{ opt.label }}</p>
+                <p class="text-xs" :class="form.healthGoal === opt.value ? 'text-on-primary/70' : 'text-on-surface-variant'">{{ opt.desc }}</p>
               </button>
             </div>
 
-            <!-- 목표 날짜 (선택) -->
-            <div class="target-date-wrap">
-              <label class="field-label">목표 날짜 <span class="optional">(선택사항)</span></label>
+            <div>
+              <label for="target-date" class="text-label-lg text-on-background mb-2 block">
+                목표 날짜
+                <span class="text-on-surface-variant font-normal ml-1">(선택사항)</span>
+              </label>
               <input
+                id="target-date"
                 v-model="form.targetDate"
                 type="date"
                 :min="minTargetDate"
-                class="text-input date-input"
+                class="border-2 border-outline rounded-[10px] py-3 px-4 text-body-md text-on-background bg-background focus:border-on-background focus:outline-none transition-colors"
               />
-              <p class="date-hint">목표일을 정해두면 동기부여에 도움이 돼요.</p>
+              <p class="text-body-md text-on-surface-variant mt-2">목표일을 정해두면 동기부여에 도움이 돼요.</p>
             </div>
 
-            <p v-if="error" class="error-msg">{{ error }}</p>
+            <p v-if="error" class="text-label-lg text-danger mt-4">{{ error }}</p>
           </div>
 
         </Transition>
       </div>
 
-      <!-- 하단 네비게이션 -->
-      <div class="onboarding-footer">
+      <!-- Footer nav -->
+      <div class="px-8 pt-6 pb-8 flex items-center justify-between border-t-[3px] border-on-background">
         <button
           v-if="step > 1"
           type="button"
-          class="btn-prev"
+          class="flex items-center gap-1.5 px-5 py-3 neo-brutal-border rounded neo-brutal-shadow bg-background text-label-lg text-on-background hover:-translate-y-0.5 active:translate-y-1 transition-all duration-150"
           @click="prev"
         >
-          ← 이전
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          이전
         </button>
         <div v-else />
 
         <button
           type="button"
           :disabled="!canProceed || submitting"
-          :class="['btn-next', step === TOTAL_STEPS ? 'btn-next--submit' : '']"
+          class="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary neo-brutal-border rounded text-label-lg neo-brutal-shadow transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+          :class="canProceed && !submitting ? 'hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#2D2D2D] active:translate-y-1 active:shadow-none' : ''"
           @click="next"
         >
+          <span v-if="submitting" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
           <template v-if="submitting">저장 중...</template>
-          <template v-else-if="step === TOTAL_STEPS">시작하기 🎉</template>
-          <template v-else>다음 단계 →</template>
+          <template v-else-if="step === TOTAL_STEPS">
+            시작하기
+            <span class="material-symbols-outlined text-base">rocket_launch</span>
+          </template>
+          <template v-else>
+            다음 단계
+            <span class="material-symbols-outlined text-base">arrow_forward</span>
+          </template>
         </button>
       </div>
+
     </div>
   </div>
 </template>
@@ -237,6 +242,12 @@ const GOAL_OPTIONS = [
   { value: 'DISEASE', label: '질환 관리', desc: '맞춤 식단 관리', icon: 'medical_services' },
 ]
 
+const bodyFields = [
+  { key: 'birthYear', label: '출생연도', min: 1924, max: currentYear - 10, step: 1, placeholder: '1995', unit: '년' },
+  { key: 'heightCm',  label: '키',       min: 100,  max: 250,              step: 0.1, placeholder: '170', unit: 'cm' },
+  { key: 'weightKg',  label: '몸무게',   min: 20,   max: 300,              step: 0.1, placeholder: '65',  unit: 'kg' },
+]
+
 function prev() {
   direction.value = 'back'
   step.value--
@@ -277,438 +288,29 @@ async function submit() {
 </script>
 
 <style scoped>
-/* ── 레이아웃 ── */
-.onboarding-root {
-  min-height: 100vh;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.onboarding-card {
-  width: 100%;
-  max-width: 680px;
-  background: #fff;
-  border: 3px solid #1a1a1a;
-  border-radius: 20px;
-  box-shadow: 6px 6px 0 #1a1a1a;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── 헤더 ── */
-.onboarding-header {
-  background: #1a1a1a;
-  padding: 1.75rem 2.5rem 1.5rem;
-}
-
-.onboarding-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-  color: #fff;
-}
-
-.brand-icon {
-  width: 1.75rem;
-  height: 1.75rem;
-  object-fit: contain;
-}
-
-.brand-name {
-  font-size: 1.125rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-.step-progress {
-  display: flex;
-  gap: 0.375rem;
-  margin-bottom: 0.625rem;
-}
-
-.step-bar {
-  height: 4px;
-  flex: 1;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.2);
-  transition: background 0.3s ease;
-}
-
-.step-bar--active {
-  background: #a8e6cf;
-}
-
-.step-label {
-  font-size: 0.8125rem;
-  color: rgba(255,255,255,0.55);
-  margin: 0;
-}
-
-/* ── 바디 ── */
-.onboarding-body {
-  padding: 2.25rem 2.5rem;
-  min-height: 340px;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-.step-content {
-  width: 100%;
-}
-
-.step-heading {
-  font-size: 1.375rem;
-  font-weight: 900;
-  color: #1a1a1a;
-  margin: 0 0 0.375rem;
-  letter-spacing: -0.02em;
-}
-
-.step-sub {
-  font-size: 0.875rem;
-  color: #777;
-  margin: 0 0 1.75rem;
-}
-
-/* ── 성별 ── */
-.sex-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.sex-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1rem;
-  border: 2px solid #ddd;
-  border-radius: 12px;
-  background: #f9f9f9;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.sex-btn:hover {
-  border-color: #1a1a1a;
-  background: #f0f0f0;
-}
-
-.sex-btn--active {
-  border-color: #1a1a1a;
-  background: #1a1a1a;
-  color: #fff;
-  box-shadow: 3px 3px 0 #a8e6cf;
-}
-
-/* ── 정보 그리드 ── */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.field-label {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: #444;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.optional {
-  font-weight: 400;
-  color: #999;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.input-wrap {
-  position: relative;
-}
-
-.text-input {
-  width: 100%;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  padding: 0.75rem 2.5rem 0.75rem 0.875rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  background: #fff;
-  box-sizing: border-box;
-  transition: border-color 0.15s;
-  outline: none;
-}
-
-.text-input:focus {
-  border-color: #1a1a1a;
-}
-
-.input-unit {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #999;
-  pointer-events: none;
-}
-
-/* ── 활동 수준 ── */
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.activity-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.875rem 1.125rem;
-  border: 2px solid #e8e8e8;
-  border-radius: 12px;
-  background: #fafafa;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.activity-item:hover {
-  border-color: #bbb;
-  background: #f3f3f3;
-}
-
-.activity-item--active {
-  border-color: #1a1a1a;
-  background: #fff;
-  box-shadow: 3px 3px 0 #a8e6cf;
-}
-
-.activity-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.activity-name {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.activity-desc {
-  font-size: 0.8125rem;
-  color: #888;
-}
-
-.activity-radio {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-}
-
-.activity-radio--checked {
-  border-color: #1a1a1a;
-  background: #1a1a1a;
-  box-shadow: inset 0 0 0 4px #fff;
-}
-
-/* ── 건강 목표 ── */
-.goal-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 1.75rem;
-}
-
-.goal-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 1.125rem 0.75rem;
-  border: 2px solid #e8e8e8;
-  border-radius: 14px;
-  background: #fafafa;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.goal-card:hover {
-  border-color: #bbb;
-  background: #f3f3f3;
-}
-
-.goal-card--active {
-  border-color: #1a1a1a;
-  background: #1a1a1a;
-  box-shadow: 3px 3px 0 #a8e6cf;
-}
-
-.goal-icon {
-  font-size: 1.75rem;
-  color: #888;
-  transition: color 0.15s;
-}
-
-.goal-card--active .goal-icon {
-  color: #a8e6cf;
-}
-
-.goal-label {
-  font-size: 0.875rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  transition: color 0.15s;
-}
-
-.goal-card--active .goal-label {
-  color: #fff;
-}
-
-.goal-desc {
-  font-size: 0.75rem;
-  color: #999;
-  transition: color 0.15s;
-}
-
-.goal-card--active .goal-desc {
-  color: rgba(255,255,255,0.6);
-}
-
-/* ── 목표 날짜 ── */
-.target-date-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-top: 0.25rem;
-}
-
-.date-input {
-  padding-right: 0.875rem;
-  max-width: 240px;
-}
-
-.date-hint {
-  font-size: 0.8125rem;
-  color: #aaa;
-  margin: 0;
-}
-
-.error-msg {
-  margin-top: 1rem;
-  color: #e53e3e;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* ── 푸터 ── */
-.onboarding-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 2.5rem 2rem;
-  border-top: 1px solid #f0f0f0;
-}
-
-.btn-prev {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  background: #fff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-prev:hover {
-  border-color: #bbb;
-  background: #f5f5f5;
-}
-
-.btn-next {
-  padding: 0.75rem 1.75rem;
-  border: 2px solid #1a1a1a;
-  border-radius: 10px;
-  background: #1a1a1a;
-  font-size: 0.9375rem;
-  font-weight: 800;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 3px 3px 0 #a8e6cf;
-  transition: all 0.15s ease;
-}
-
-.btn-next:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 #a8e6cf;
-}
-
-.btn-next:active:not(:disabled) {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #a8e6cf;
-}
-
-.btn-next:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.btn-next--submit {
-  background: #2d7a5e;
-  border-color: #2d7a5e;
-}
-
-/* ── 슬라이드 트랜지션 ── */
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.slide-left-enter-from { opacity: 0; transform: translateX(40px); }
+.slide-left-leave-to  { opacity: 0; transform: translateX(-40px); }
+.slide-right-enter-from { opacity: 0; transform: translateX(-40px); }
+.slide-right-leave-to   { opacity: 0; transform: translateX(40px); }
 
-.slide-left-enter-from {
-  opacity: 0;
-  transform: translateX(48px);
-}
-
-.slide-left-leave-to {
-  opacity: 0;
-  transform: translateX(-48px);
-}
-
-.slide-right-enter-from {
-  opacity: 0;
-  transform: translateX(-48px);
-}
-
-.slide-right-leave-to {
-  opacity: 0;
-  transform: translateX(48px);
+@media (prefers-reduced-motion: reduce) {
+  .slide-left-enter-active,
+  .slide-left-leave-active,
+  .slide-right-enter-active,
+  .slide-right-leave-active {
+    transition: opacity 0.15s ease;
+  }
+  .slide-left-enter-from,
+  .slide-left-leave-to,
+  .slide-right-enter-from,
+  .slide-right-leave-to {
+    transform: none;
+  }
 }
 </style>

@@ -13,7 +13,28 @@
       </div>
       <div>
         <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
-        <p class="text-body-md text-on-surface-variant">
+        <!-- 추천 준비됨 -->
+        <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
+          <p class="text-body-md text-on-surface-variant">
+            <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
+            {{ recommendation.reason }}
+          </p>
+          <RouterLink
+            :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
+            class="shrink-0 bg-primary text-white px-4 py-1.5 neo-brutal-border rounded-lg text-label-sm font-bold hover:-translate-y-0.5 transition-transform"
+          >
+            식단에 추가
+          </RouterLink>
+        </div>
+        <!-- 추천 로딩 중 -->
+        <p
+          v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
+          class="text-body-md text-on-surface-variant"
+        >
+          마지막 끼니 추천을 가져오는 중...
+        </p>
+        <!-- 기본 AI 멘트 -->
+        <p v-else class="text-body-md text-on-surface-variant">
           {{ coachMessage }}
         </p>
       </div>
@@ -289,7 +310,6 @@ const isProgramReady = computed(() => (state.balance?.targetCalories ?? 0) > 0)
 const coachMessage = computed(() => {
   if (!isProgramReady.value) return 'AI가 맞춤 플랜을 생성하고 있어요...'
   if (aiComment.value) return aiComment.value
-  if (state.balance?.lastMealRecommendTrigger) return '마지막 끼니 추천이 준비됐어요!'
   return `${formatNumber(remainingCalories.value)} kcal 남았어요. 기록해볼까요?`
 })
 

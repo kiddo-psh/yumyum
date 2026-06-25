@@ -26,7 +26,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,7 +62,7 @@ class GrowthControllerTest {
                 DailyGoal.of(MEMBER_ID, monday, 2000),
                 DailyGoal.of(MEMBER_ID, monday.plusDays(1), 2000)
         );
-        given(dailyGoalSummaryService.weeklyCalendar(any(), any()))
+        given(dailyGoalSummaryService.weeklyCalendar(any(), any(), anyInt()))
                 .willReturn(WeeklyAchievementSummary.of(monday, goals));
 
         mockMvc.perform(get("/growth/weekly-calendar")
@@ -69,6 +72,35 @@ class GrowthControllerTest {
                 .andExpect(jsonPath("$.weekEnd").value("2026-06-14"))
                 .andExpect(jsonPath("$.days").isArray())
                 .andExpect(jsonPath("$.days.length()").value(7));
+    }
+
+    @Test
+    void weekOffset_파라미터를_서비스로_전달한다() throws Exception {
+        LocalDate monday = LocalDate.of(2026, 6, 1);
+        given(dailyGoalSummaryService.weeklyCalendar(any(), any(), anyInt()))
+                .willReturn(WeeklyAchievementSummary.of(monday, List.of()));
+
+        mockMvc.perform(get("/growth/weekly-calendar")
+                        .param("weekOffset", "-1")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk());
+
+        verify(dailyGoalSummaryService)
+                .weeklyCalendar(eq(MEMBER_ID), any(LocalDate.class), eq(-1));
+    }
+
+    @Test
+    void weekOffset가_없으면_기본값_0으로_서비스를_호출한다() throws Exception {
+        LocalDate monday = LocalDate.of(2026, 6, 8);
+        given(dailyGoalSummaryService.weeklyCalendar(any(), any(), anyInt()))
+                .willReturn(WeeklyAchievementSummary.of(monday, List.of()));
+
+        mockMvc.perform(get("/growth/weekly-calendar")
+                        .with(authentication(AUTH)))
+                .andExpect(status().isOk());
+
+        verify(dailyGoalSummaryService)
+                .weeklyCalendar(eq(MEMBER_ID), any(LocalDate.class), eq(0));
     }
 
     @Test

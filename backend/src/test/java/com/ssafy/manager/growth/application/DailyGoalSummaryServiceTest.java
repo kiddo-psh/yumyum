@@ -42,10 +42,38 @@ class DailyGoalSummaryServiceTest {
         given(dailyGoalRepository.findAllByMemberIdAndDateBetween(MEMBER_ID, MONDAY, SUNDAY))
                 .willReturn(List.of(mondayGoal));
 
-        WeeklyAchievementSummary result = dailyGoalSummaryService.weeklyCalendar(MEMBER_ID, wednesday);
+        WeeklyAchievementSummary result = dailyGoalSummaryService.weeklyCalendar(MEMBER_ID, wednesday, 0);
 
 
         assertThat(result.achievementRateFor(MONDAY)).isEqualTo(achievementRate);
+    }
+
+    @Test
+    void weekOffset가_음수면_이전_주의_DailyGoal을_조회한다() {
+        LocalDate thisWednesday = LocalDate.of(2026, 6, 10);
+        LocalDate prevMonday = LocalDate.of(2026, 6, 1);
+        LocalDate prevSunday = LocalDate.of(2026, 6, 7);
+        given(dailyGoalRepository.findAllByMemberIdAndDateBetween(MEMBER_ID, prevMonday, prevSunday))
+                .willReturn(List.of());
+
+        WeeklyAchievementSummary result = dailyGoalSummaryService.weeklyCalendar(MEMBER_ID, thisWednesday, -1);
+
+        assertThat(result.weekStart()).isEqualTo(prevMonday);
+        assertThat(result.weekEnd()).isEqualTo(prevSunday);
+    }
+
+    @Test
+    void weekOffset가_양수면_다음_주의_DailyGoal을_조회한다() {
+        LocalDate thisWednesday = LocalDate.of(2026, 6, 10);
+        LocalDate nextMonday = LocalDate.of(2026, 6, 15);
+        LocalDate nextSunday = LocalDate.of(2026, 6, 21);
+        given(dailyGoalRepository.findAllByMemberIdAndDateBetween(MEMBER_ID, nextMonday, nextSunday))
+                .willReturn(List.of());
+
+        WeeklyAchievementSummary result = dailyGoalSummaryService.weeklyCalendar(MEMBER_ID, thisWednesday, 1);
+
+        assertThat(result.weekStart()).isEqualTo(nextMonday);
+        assertThat(result.weekEnd()).isEqualTo(nextSunday);
     }
 
     @Test

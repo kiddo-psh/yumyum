@@ -94,16 +94,14 @@
         </div>
       </div>
 
-      <!-- Row 2: 칼로리 + 아크 게이지 + 매크로 -->
+      <!-- Row 2: 칼로리 + 아크 게이지 + 매크로 (3열 그리드) -->
       <div class="bg-surface neo-brutal-border rounded-xl p-6 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
 
-        <!-- 칼로리 숫자 + 반원 게이지 -->
-        <div class="flex flex-col md:flex-row items-center gap-6 mb-5">
-
-          <!-- 칼로리 수치 -->
-          <div class="flex-1 text-center md:text-left">
+          <!-- Col 1: 칼로리 수치 -->
+          <div>
             <p class="text-label-lg text-on-surface-variant mb-2">오늘의 칼로리</p>
-            <div class="flex items-baseline gap-2 justify-center md:justify-start">
+            <div class="flex items-baseline gap-2">
               <span class="text-numeral-xl text-on-background">{{ formatNumber(intakeCalories) }}</span>
               <span class="text-headline-md text-on-surface-variant">kcal</span>
             </div>
@@ -115,18 +113,18 @@
             </p>
           </div>
 
-          <!-- 반원 아크 게이지 -->
-          <div class="w-52 flex-shrink-0">
+          <!-- Col 2: 반원 아크 게이지 -->
+          <div class="flex flex-col items-center">
             <svg
               viewBox="0 0 200 115"
-              class="w-full"
+              class="w-full max-w-[200px]"
               role="img"
               :aria-label="`오늘 칼로리 달성률 ${calorieProgress}%`"
             >
               <title>오늘 칼로리 달성률 {{ calorieProgress }}%</title>
-              <!-- 배경 트랙 -->
+              <!-- 배경 트랙 (sweep-flag=1 → 위쪽 반원) -->
               <path
-                d="M 20,100 A 80,80 0 0,0 180,100"
+                d="M 20,100 A 80,80 0 0,1 180,100"
                 fill="none"
                 stroke="#E0E0E0"
                 stroke-width="16"
@@ -134,7 +132,7 @@
               />
               <!-- 진행 아크 -->
               <path
-                d="M 20,100 A 80,80 0 0,0 180,100"
+                d="M 20,100 A 80,80 0 0,1 180,100"
                 fill="none"
                 stroke="#FF8C42"
                 stroke-width="16"
@@ -155,36 +153,41 @@
               >{{ calorieProgress }}</text>
               <text
                 x="100"
-                y="100"
+                y="98"
                 text-anchor="middle"
                 fill="#8A8A8A"
-                font-size="14"
+                font-size="13"
                 font-weight="700"
                 font-family="inherit"
               >%</text>
             </svg>
+            <p class="text-label-lg text-on-surface-variant -mt-1">달성률</p>
           </div>
-        </div>
 
-        <!-- 가로 매크로 바 -->
-        <div class="space-y-3 pt-5 border-t-[3px] border-on-background">
-          <div
-            v-for="macro in macros"
-            :key="macro.key"
-            class="flex items-center gap-3"
-          >
-            <span class="text-label-lg text-on-surface-variant w-16 flex-shrink-0 text-right">{{ macro.label }}</span>
-            <div class="flex-1 h-3 bg-white neo-brutal-border rounded-full overflow-hidden">
-              <div
-                class="h-full border-r-[3px] border-on-background transition-all duration-700"
-                :class="macro.colorClass"
-                :style="{ width: macro.percent + '%' }"
-              />
+          <!-- Col 3: 영양소 바 -->
+          <div class="space-y-4">
+            <p class="text-label-lg text-on-surface-variant">영양소 섭취</p>
+            <div
+              v-for="macro in macros"
+              :key="macro.key"
+              class="space-y-1.5"
+            >
+              <div class="flex justify-between items-center">
+                <span class="text-label-lg text-on-background">{{ macro.label }}</span>
+                <span class="text-label-lg text-on-surface-variant">
+                  {{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ macro.target }}g</span>
+                </span>
+              </div>
+              <div class="h-2.5 bg-white neo-brutal-border rounded-full overflow-hidden">
+                <div
+                  class="h-full transition-all duration-700"
+                  :class="macro.colorClass"
+                  :style="{ width: macro.percent + '%' }"
+                />
+              </div>
             </div>
-            <span class="text-label-lg text-on-surface-variant w-24 text-right flex-shrink-0">
-              {{ formatNumber(macro.current) }}g <span class="text-on-surface-variant/60">/ {{ macro.target }}g</span>
-            </span>
           </div>
+
         </div>
       </div>
 

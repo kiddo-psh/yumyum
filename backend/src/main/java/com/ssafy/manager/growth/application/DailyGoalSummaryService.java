@@ -19,14 +19,15 @@ public class DailyGoalSummaryService {
     private final DailyGoalRepository dailyGoalRepository;
 
     @Transactional(readOnly = true)
-    public WeeklyAchievementSummary weeklyCalendar(Long memberId, LocalDate today) {
-        LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+    public WeeklyAchievementSummary weeklyCalendar(Long memberId, LocalDate today, int weekOffset) {
+        LocalDate target = today.plusWeeks(weekOffset);
+        LocalDate weekStart = target.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
 
         List<DailyGoal> goals = dailyGoalRepository
                 .findAllByMemberIdAndDateBetween(memberId, weekStart, weekEnd);
 
-        return WeeklyAchievementSummary.of(today, goals);
+        return WeeklyAchievementSummary.of(target, goals);
     }
 
     @Transactional(readOnly = true)

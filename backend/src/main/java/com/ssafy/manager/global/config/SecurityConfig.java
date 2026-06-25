@@ -46,6 +46,7 @@ public class SecurityConfig {
                 ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/reissue", "/error").permitAll()
+                        .requestMatchers("/dev/**").permitAll() // TEMP: 주간 리포트 평가용. 평가 후 제거
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

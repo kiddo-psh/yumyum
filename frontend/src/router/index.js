@@ -14,6 +14,7 @@ import NotFoundView from '@/views/NotFoundView.vue';
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import OnboardingView from '@/views/OnboardingView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
+import ReportView from '@/views/ReportView.vue';
 import RoutineDetailView from '@/views/RoutineDetailView.vue';
 import RoutineHistoryView from '@/views/RoutineHistoryView.vue';
 import RoutineOnboardingView from '@/views/RoutineOnboardingView.vue';
@@ -150,12 +151,10 @@ const routes = [
       {
         path: 'report',
         name: 'report',
-        component: PlaceholderView,
+        component: ReportView,
         meta: {
           title: '리포트',
           navLabel: 'Report',
-          heading: '리포트',
-          description: '주간 달성률과 WeeklyReport 흐름으로 이동하는 화면입니다.',
         },
       },
       {

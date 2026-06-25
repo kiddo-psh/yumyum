@@ -2,28 +2,35 @@
   <div class="max-w-4xl mx-auto w-full">
 
     <!-- Header -->
-    <header class="flex justify-between items-start mb-8 w-full">
-      <div>
-        <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
-        <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
-          <p class="text-body-md text-on-surface-variant">
-            <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
-            {{ recommendation.reason }}
-          </p>
-          <RouterLink
-            :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
-            class="shrink-0 bg-primary text-on-primary px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform"
+    <header class="flex justify-between items-start gap-4 mb-8 w-full">
+      <div class="flex items-center gap-4 min-w-0">
+        <img
+          src="/nyam/nyam_coach_01.png"
+          alt="냠냠코치"
+          class="w-20 h-20 object-contain flex-shrink-0"
+        />
+        <div class="min-w-0">
+          <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
+          <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
+            <p class="text-body-md text-on-surface-variant">
+              <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
+              {{ recommendation.reason }}
+            </p>
+            <RouterLink
+              :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
+              class="shrink-0 bg-primary text-on-primary px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform"
+            >
+              식단에 추가
+            </RouterLink>
+          </div>
+          <p
+            v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
+            class="text-body-md text-on-surface-variant mt-1"
           >
-            식단에 추가
-          </RouterLink>
+            마지막 끼니 추천을 가져오는 중...
+          </p>
+          <p v-else class="text-body-md text-on-surface-variant mt-1">{{ coachMessage }}</p>
         </div>
-        <p
-          v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
-          class="text-body-md text-on-surface-variant mt-1"
-        >
-          마지막 끼니 추천을 가져오는 중...
-        </p>
-        <p v-else class="text-body-md text-on-surface-variant mt-1">{{ coachMessage }}</p>
       </div>
       <div class="flex gap-3 flex-shrink-0">
         <button aria-label="알림" class="w-11 h-11 flex items-center justify-center neo-brutal-border rounded-xl hover:bg-surface transition-colors">
@@ -54,15 +61,14 @@
       <!-- Row 1: 냠냠이 상태 + 스트릭/주간 -->
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
 
-        <!-- 냠냠이 카드 -->
-        <div class="lg:col-span-3 bg-nyam-mint neo-brutal-border rounded-xl p-5 flex items-center gap-5">
-          <div class="w-24 h-24 bg-white neo-brutal-border rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-            <img src="/nyam/nyamnyam.png" alt="냠냠이" class="w-20 h-20 object-contain" />
+        <!-- 달성률 카드 -->
+        <div class="lg:col-span-3 bg-white neo-brutal-border rounded-xl p-7 flex flex-col justify-between">
+          <p class="text-label-lg text-on-surface-variant">오늘의 달성률</p>
+          <div class="flex items-baseline gap-2 mt-3">
+            <span class="text-numeral-xl text-primary leading-none">{{ calorieProgress }}</span>
+            <span class="text-headline-lg text-on-surface-variant">%</span>
           </div>
-          <div class="min-w-0">
-            <p class="text-label-lg text-on-background">냠냠이 현황</p>
-            <h3 class="text-headline-md text-on-background mt-1 leading-snug">{{ nyamStatusMessage }}</h3>
-          </div>
+          <p class="text-body-md text-on-surface-variant mt-4">{{ nyamStatusMessage }}</p>
         </div>
 
         <!-- 스트릭 + 주간 7도트 카드 -->
@@ -94,156 +100,90 @@
         </div>
       </div>
 
-      <!-- Row 2: 칼로리 + 아크 게이지 + 매크로 (3열 그리드) -->
-      <div class="bg-surface neo-brutal-border rounded-xl p-6 mb-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+      <!-- Row 2: 오늘의 칼로리 -->
+      <div class="bg-white neo-brutal-border rounded-xl p-7 mb-4">
 
-          <!-- Col 1: 칼로리 수치 -->
-          <div>
+        <!-- 상단: 칼로리 수치 + 냠냠이 -->
+        <div class="flex items-center gap-6 mb-8">
+
+          <!-- 칼로리 수치 + 프로그레스 바 -->
+          <div class="flex-1 min-w-0">
             <p class="text-label-lg text-on-surface-variant mb-2">오늘의 칼로리</p>
-            <div class="flex items-baseline gap-2">
-              <span class="text-numeral-xl text-on-background">{{ formatNumber(intakeCalories) }}</span>
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-numeral-xl text-on-background leading-none">{{ formatNumber(intakeCalories) }}</span>
               <span class="text-headline-md text-on-surface-variant">kcal</span>
             </div>
-            <p class="text-body-md text-on-surface-variant mt-2">
-              목표 <span class="font-bold text-on-background">{{ formatNumber(targetCalories) }}</span> kcal 중
+            <p class="text-body-md text-on-surface-variant mb-6">
+              목표 <span class="font-bold text-on-background">{{ formatNumber(targetCalories) }}</span> kcal
             </p>
-            <p class="text-label-lg text-primary mt-1">
-              {{ formatNumber(remainingCalories) }} kcal 남음
-            </p>
-          </div>
-
-          <!-- Col 2: 영양소 바 -->
-          <div class="space-y-4">
-            <p class="text-label-lg text-on-surface-variant">영양소 섭취</p>
-            <div
-              v-for="macro in macros"
-              :key="macro.key"
-              class="space-y-1.5"
-            >
-              <div class="flex justify-between items-center">
-                <span class="text-label-lg text-on-background">{{ macro.label }}</span>
-                <span class="text-label-lg text-on-surface-variant">
-                  {{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ macro.target }}g</span>
-                </span>
-              </div>
-              <div class="h-2.5 bg-white neo-brutal-border rounded-full overflow-hidden">
-                <div
-                  class="h-full transition-all duration-700"
-                  :class="macro.colorClass"
-                  :style="{ width: macro.percent + '%' }"
-                />
-              </div>
+            <div class="h-7 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+              <div class="h-full bg-primary transition-all duration-700" :style="{ width: calorieProgress + '%' }" />
+            </div>
+            <div class="flex justify-between mt-3">
+              <span class="text-body-md font-bold text-primary">{{ calorieProgress }}% 달성</span>
+              <span class="text-body-md text-on-surface-variant">{{ formatNumber(remainingCalories) }} kcal 남음</span>
             </div>
           </div>
 
-          <!-- Col 3: 반원 아크 게이지 -->
-          <div class="flex flex-col items-center">
-            <svg
-              viewBox="0 0 200 115"
-              class="w-full max-w-[200px]"
-              role="img"
-              :aria-label="`오늘 칼로리 달성률 ${calorieProgress}%`"
-            >
-              <title>오늘 칼로리 달성률 {{ calorieProgress }}%</title>
-              <!-- 배경 트랙 (sweep-flag=1 → 위쪽 반원) -->
-              <path
-                d="M 20,100 A 80,80 0 0,1 180,100"
-                fill="none"
-                stroke="#E0E0E0"
-                stroke-width="16"
-                stroke-linecap="round"
-              />
-              <!-- 진행 아크 -->
-              <path
-                d="M 20,100 A 80,80 0 0,1 180,100"
-                fill="none"
-                stroke="#FF8C42"
-                stroke-width="16"
-                stroke-linecap="round"
-                :stroke-dasharray="ARC_LENGTH"
-                :stroke-dashoffset="arcOffset"
-                style="transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);"
-              />
-              <!-- 퍼센트 텍스트 -->
-              <text
-                x="100"
-                y="76"
-                text-anchor="middle"
-                fill="#2D2D2D"
-                font-size="30"
-                font-weight="800"
-                font-family="inherit"
-              >{{ calorieProgress }}</text>
-              <text
-                x="100"
-                y="98"
-                text-anchor="middle"
-                fill="#8A8A8A"
-                font-size="13"
-                font-weight="700"
-                font-family="inherit"
-              >%</text>
-            </svg>
-            <p class="text-label-lg text-on-surface-variant -mt-1">달성률</p>
+          <!-- 냠냠이 -->
+          <div class="w-[360px] h-[360px] shrink-0">
+            <video
+              src="/nyam/nyam_hovering.mp4"
+              class="w-full h-full object-contain"
+              preload="auto"
+              autoplay
+              muted
+              loop
+              playsinline
+              aria-hidden="true"
+            />
           </div>
 
         </div>
+
+        <!-- 하단: 영양소 -->
+        <div class="grid grid-cols-3 gap-8 pt-7 border-t-[3px] border-on-background">
+          <div v-for="macro in macros" :key="macro.key">
+            <p class="text-body-md font-bold text-on-background">{{ macro.label }}</p>
+            <p class="text-label-lg text-on-surface-variant mt-1 mb-4">
+              <span class="font-bold text-on-background">{{ formatNumber(macro.current) }}g</span>
+              <span class="text-on-surface-variant/50"> / {{ macro.target }}g</span>
+            </p>
+            <div class="h-7 bg-surface neo-brutal-border rounded-xl overflow-hidden">
+              <div class="h-full transition-all duration-700" :class="macro.colorClass" :style="{ width: macro.percent + '%' }" />
+            </div>
+            <p class="text-body-md font-bold text-on-background mt-3">{{ macro.percent }}%</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- Row 3: 퀵 액션 -->
-      <div class="space-y-3">
-        <div class="grid grid-cols-3 gap-3">
-          <RouterLink
-            to="/meals/search"
-            class="col-span-2 bg-primary text-on-primary neo-brutal-border rounded-xl p-5 flex items-center gap-4 neo-brutal-shadow hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <span class="material-symbols-outlined text-4xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">edit_note</span>
-            <div>
-              <p class="text-label-lg">식단 기록</p>
-              <p class="text-body-md text-on-primary/70 mt-0.5">오늘 먹은 걸 기록해요</p>
-            </div>
-          </RouterLink>
-          <RouterLink
-            to="/meals/photo"
-            class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">camera_enhance</span>
-            <span class="text-label-lg text-on-background">사진 분석</span>
-          </RouterLink>
-        </div>
-
-        <!-- 체중 위젯 -->
-        <div class="bg-white neo-brutal-border rounded-xl p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
-            <span class="text-label-lg text-on-background">오늘 체중</span>
-            <span v-if="weightSuccess" class="ml-auto text-success text-label-lg flex items-center gap-1">
-              <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
-            </span>
+      <div class="grid grid-cols-4 gap-3">
+        <RouterLink
+          :to="{ name: 'log' }"
+          class="col-span-2 bg-primary text-on-primary neo-brutal-border rounded-xl p-5 flex items-center gap-4 neo-brutal-shadow hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-4xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">edit_note</span>
+          <div>
+            <p class="text-label-lg">식단 기록</p>
+            <p class="text-body-md text-on-primary/70 mt-0.5">오늘 먹은 걸 기록해요</p>
           </div>
-          <p v-if="weightError" class="text-label-lg text-danger mb-2">{{ weightError }}</p>
-          <form class="flex gap-2" @submit.prevent="submitWeight">
-            <input
-              v-model.number="newWeight"
-              type="number"
-              step="0.1"
-              placeholder="오늘 체중 (kg)"
-              aria-label="오늘 체중 (kg)"
-              class="flex-1 border-2 border-outline rounded-[10px] px-3 py-2.5 text-body-md text-on-background bg-background focus:border-on-background focus:outline-none transition-colors"
-              required
-            />
-            <button
-              type="submit"
-              class="px-5 py-2.5 bg-primary text-on-primary neo-brutal-border rounded-[10px] text-label-lg disabled:opacity-40 hover:-translate-y-0.5 transition-all duration-150"
-              :disabled="weightSubmitting"
-              :aria-busy="weightSubmitting"
-              :aria-label="weightSubmitting ? '기록 중' : '체중 기록'"
-            >
-              {{ weightSubmitting ? '...' : '기록' }}
-            </button>
-          </form>
-        </div>
+        </RouterLink>
+        <RouterLink
+          to="/meals/photo"
+          class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">camera_enhance</span>
+          <span class="text-label-lg text-on-background">사진 분석</span>
+        </RouterLink>
+        <RouterLink
+          to="/routine"
+          class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">fitness_center</span>
+          <span class="text-label-lg text-on-background">운동 기록</span>
+        </RouterLink>
       </div>
 
     </template>
@@ -259,10 +199,8 @@ import {
   getHomeComment,
   getLastMealRecommendation,
 } from '@/api/dashboard'
-import { apiClient } from '@/services/apiClient'
 import { getEffectiveToday } from '@/utils/effectiveDate'
 
-const ARC_LENGTH = Math.PI * 80
 
 const state = reactive({
   loading: true,
@@ -273,10 +211,6 @@ const state = reactive({
 })
 
 const aiComment = ref(null)
-const newWeight = ref(null)
-const weightSubmitting = ref(false)
-const weightError = ref('')
-const weightSuccess = ref(false)
 
 const today = formatDate(getEffectiveToday())
 
@@ -289,7 +223,6 @@ const calorieProgress = computed(() =>
   clamp(targetCalories.value ? Math.round((intakeCalories.value / targetCalories.value) * 100) : 0)
 )
 
-const arcOffset = computed(() => ARC_LENGTH * (1 - calorieProgress.value / 100))
 
 const isProgramReady = computed(() => (state.balance?.targetCalories ?? 0) > 0)
 
@@ -400,22 +333,6 @@ async function loadRecommendation() {
     // recommendation not available
   } finally {
     state.recommendLoading = false
-  }
-}
-
-async function submitWeight() {
-  weightSubmitting.value = true
-  weightError.value = ''
-  weightSuccess.value = false
-  try {
-    await apiClient.post('/weights', { weightKg: newWeight.value, recordedDate: today })
-    newWeight.value = null
-    weightSuccess.value = true
-    setTimeout(() => { weightSuccess.value = false }, 3000)
-  } catch {
-    weightError.value = '체중 기록에 실패했어요.'
-  } finally {
-    weightSubmitting.value = false
   }
 }
 

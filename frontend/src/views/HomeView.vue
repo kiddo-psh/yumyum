@@ -113,7 +113,31 @@
             </p>
           </div>
 
-          <!-- Col 2: 반원 아크 게이지 -->
+          <!-- Col 2: 영양소 바 -->
+          <div class="space-y-4">
+            <p class="text-label-lg text-on-surface-variant">영양소 섭취</p>
+            <div
+              v-for="macro in macros"
+              :key="macro.key"
+              class="space-y-1.5"
+            >
+              <div class="flex justify-between items-center">
+                <span class="text-label-lg text-on-background">{{ macro.label }}</span>
+                <span class="text-label-lg text-on-surface-variant">
+                  {{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ macro.target }}g</span>
+                </span>
+              </div>
+              <div class="h-2.5 bg-white neo-brutal-border rounded-full overflow-hidden">
+                <div
+                  class="h-full transition-all duration-700"
+                  :class="macro.colorClass"
+                  :style="{ width: macro.percent + '%' }"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Col 3: 반원 아크 게이지 -->
           <div class="flex flex-col items-center">
             <svg
               viewBox="0 0 200 115"
@@ -162,30 +186,6 @@
               >%</text>
             </svg>
             <p class="text-label-lg text-on-surface-variant -mt-1">달성률</p>
-          </div>
-
-          <!-- Col 3: 영양소 바 -->
-          <div class="space-y-4">
-            <p class="text-label-lg text-on-surface-variant">영양소 섭취</p>
-            <div
-              v-for="macro in macros"
-              :key="macro.key"
-              class="space-y-1.5"
-            >
-              <div class="flex justify-between items-center">
-                <span class="text-label-lg text-on-background">{{ macro.label }}</span>
-                <span class="text-label-lg text-on-surface-variant">
-                  {{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ macro.target }}g</span>
-                </span>
-              </div>
-              <div class="h-2.5 bg-white neo-brutal-border rounded-full overflow-hidden">
-                <div
-                  class="h-full transition-all duration-700"
-                  :class="macro.colorClass"
-                  :style="{ width: macro.percent + '%' }"
-                />
-              </div>
-            </div>
           </div>
 
         </div>

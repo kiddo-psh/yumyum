@@ -65,7 +65,7 @@
               <div v-for="macro in macros" :key="macro.key">
                 <div class="flex justify-between items-baseline mb-3">
                   <span class="text-body-md font-bold text-on-background">{{ macro.label }}</span>
-                  <span class="text-label-lg text-on-surface-variant">{{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ MACRO_TARGETS[macro.key] }}g</span></span>
+                  <span class="text-label-lg text-on-surface-variant">{{ formatNumber(macro.current) }}<span class="text-on-surface-variant/60">/{{ Math.round(macro.target) }}g</span></span>
                 </div>
                 <div class="h-5 bg-surface neo-brutal-border rounded-xl overflow-hidden">
                   <div class="h-full transition-all duration-700" :class="macro.colorClass" :style="{ width: macro.percent + '%' }" />
@@ -245,7 +245,7 @@ import { getEffectiveToday } from '@/utils/effectiveDate'
 
 const badgeStore = useBadgeStore()
 
-const MACRO_TARGETS = { carbs: 250, protein: 120, fat: 60 }
+const MACRO_TARGETS_FALLBACK = { carbs: 250, protein: 120, fat: 60 }
 const ORDINALS = ['첫', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열']
 
 const currentDate = ref(getEffectiveToday())
@@ -308,9 +308,9 @@ const primaryRecommendation = computed(() => {
 })
 
 const macros = computed(() => [
-  { key: 'carbs',   label: '탄수화물', current: state.summary?.totalCarbs ?? 0,   colorClass: 'bg-carbs',   percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0)   / MACRO_TARGETS.carbs)   * 100)) },
-  { key: 'protein', label: '단백질',   current: state.summary?.totalProtein ?? 0, colorClass: 'bg-protein', percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / MACRO_TARGETS.protein) * 100)) },
-  { key: 'fat',     label: '지방',     current: state.summary?.totalFat ?? 0,     colorClass: 'bg-fat',     percent: clamp(Math.round(((state.summary?.totalFat ?? 0)     / MACRO_TARGETS.fat)     * 100)) },
+  { key: 'carbs',   label: '탄수화물', current: state.summary?.totalCarbs ?? 0,   target: state.summary?.targetCarbG   ?? MACRO_TARGETS_FALLBACK.carbs,   colorClass: 'bg-carbs',   percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0)   / (state.summary?.targetCarbG   ?? MACRO_TARGETS_FALLBACK.carbs))   * 100)) },
+  { key: 'protein', label: '단백질',   current: state.summary?.totalProtein ?? 0, target: state.summary?.targetProteinG ?? MACRO_TARGETS_FALLBACK.protein, colorClass: 'bg-protein', percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / (state.summary?.targetProteinG ?? MACRO_TARGETS_FALLBACK.protein)) * 100)) },
+  { key: 'fat',     label: '지방',     current: state.summary?.totalFat ?? 0,     target: state.summary?.targetFatG   ?? MACRO_TARGETS_FALLBACK.fat,     colorClass: 'bg-fat',     percent: clamp(Math.round(((state.summary?.totalFat ?? 0)     / (state.summary?.targetFatG   ?? MACRO_TARGETS_FALLBACK.fat))     * 100)) },
 ])
 
 function mealCalories(meal) {
@@ -466,6 +466,7 @@ async function refreshSummary() {
   ])
   if (summary.status === 'fulfilled') state.summary = summary.value
   if (balance.status === 'fulfilled') state.balance = balance.value
+  if (canRecommend.value && !recommend.response) loadRecommendation()
 }
 
 function prevDay() {

@@ -10,18 +10,30 @@
           class="w-20 h-20 object-contain flex-shrink-0"
         />
         <div class="min-w-0">
-          <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
+          <h2 class="text-headline-lg text-on-background">
+            {{ hasRecommendation ? '마지막 끼니 이거 어떠세요?' : '안녕! 오늘 하루는 어때요?' }}
+          </h2>
           <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
             <p class="text-body-md text-on-surface-variant">
-              <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
+              <span class="font-bold text-on-background">{{ recommendation.name }}</span>
               {{ recommendation.reason }}
             </p>
-            <RouterLink
-              :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
-              class="shrink-0 bg-primary text-on-primary px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform"
-            >
-              식단에 추가
-            </RouterLink>
+            <div class="flex gap-2 flex-wrap">
+              <button
+                class="shrink-0 bg-primary text-on-primary px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform disabled:opacity-50"
+                :disabled="addingMeal"
+                @click="addLastRecommendToLog"
+              >
+                {{ addingMeal ? '추가 중...' : '식단에 추가' }}
+              </button>
+              <button
+                class="shrink-0 bg-surface text-on-background px-4 py-1.5 neo-brutal-border rounded-lg text-label-lg hover:-translate-y-0.5 transition-transform disabled:opacity-50"
+                :disabled="state.recommendLoading || addingMeal"
+                @click="refreshRecommendation"
+              >
+                다른 음식 추천 받기
+              </button>
+            </div>
           </div>
           <p
             v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
@@ -195,6 +207,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import {
   getCalorieBalance,
@@ -202,9 +215,14 @@ import {
   getHomeComment,
   getLastMealRecommendation,
 } from '@/api/dashboard'
+import { recordPhotoMeal } from '@/api/meal'
 import { getEffectiveToday } from '@/utils/effectiveDate'
 import ReportNotificationBanner from '@/components/home/ReportNotificationBanner.vue'
+import { useBadgeStore } from '@/stores/badge'
 
+const router = useRouter()
+const badgeStore = useBadgeStore()
+const addingMeal = ref(false)
 
 const state = reactive({
   loading: true,
@@ -267,16 +285,18 @@ const weekDots = computed(() => {
 })
 
 const macros = computed(() => [
-  { key: 'carbs',   label: '탄수화물', current: state.summary?.totalCarbs ?? 0,   target: 250, colorClass: 'bg-carbs',   percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0) / 250) * 100)) },
-  { key: 'protein', label: '단백질',   current: state.summary?.totalProtein ?? 0, target: 120, colorClass: 'bg-protein', percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / 120) * 100)) },
-  { key: 'fat',     label: '지방',     current: state.summary?.totalFat ?? 0,     target: 60,  colorClass: 'bg-fat',     percent: clamp(Math.round(((state.summary?.totalFat ?? 0) / 60) * 100)) },
+  { key: 'carbs',   label: '탄수화물', current: state.summary?.totalCarbs ?? 0,   target: state.summary?.targetCarbG ?? 250,   colorClass: 'bg-carbs',   percent: clamp(Math.round(((state.summary?.totalCarbs ?? 0)   / (state.summary?.targetCarbG ?? 250))   * 100)) },
+  { key: 'protein', label: '단백질',   current: state.summary?.totalProtein ?? 0, target: state.summary?.targetProteinG ?? 120, colorClass: 'bg-protein', percent: clamp(Math.round(((state.summary?.totalProtein ?? 0) / (state.summary?.targetProteinG ?? 120)) * 100)) },
+  { key: 'fat',     label: '지방',     current: state.summary?.totalFat ?? 0,     target: state.summary?.targetFatG ?? 60,     colorClass: 'bg-fat',     percent: clamp(Math.round(((state.summary?.totalFat ?? 0)     / (state.summary?.targetFatG ?? 60))     * 100)) },
 ])
 
-const hasRecommendation = computed(() => Boolean(state.recommendData?.recommendations?.[0]))
+const recommendIndex = ref(0)
+
+const hasRecommendation = computed(() => Boolean(state.recommendData?.recommendations?.[recommendIndex.value]))
 
 const recommendation = computed(() => {
-  const rec = state.recommendData?.recommendations?.[0]
-  return { name: rec?.name ?? '', reason: rec?.reason ?? '잔여 영양소 기반 AI 추천' }
+  const rec = state.recommendData?.recommendations?.[recommendIndex.value]
+  return { name: rec?.name ?? '', reason: rec?.reason ?? '잔여 영양소 기반 AI 추천', raw: rec }
 })
 
 function dotClass(dotState) {
@@ -301,7 +321,7 @@ onMounted(async () => {
   state.loading = false
 
   if (state.balance?.lastMealRecommendTrigger) {
-    loadRecommendation()
+    loadRecommendation({ useCache: true })
   }
 
   if (!state.balance?.targetCalories) {
@@ -329,14 +349,57 @@ async function pollForProgram(attempts = 0) {
   pollForProgram(attempts + 1)
 }
 
-async function loadRecommendation() {
+const RECOMMEND_CACHE_KEY = `nyam_last_recommend_${today}`
+
+async function loadRecommendation({ useCache = false } = {}) {
+  if (useCache) {
+    try {
+      const cached = localStorage.getItem(RECOMMEND_CACHE_KEY)
+      if (cached) {
+        state.recommendData = JSON.parse(cached)
+        recommendIndex.value = 0
+        return
+      }
+    } catch { /* 캐시 파싱 실패 시 API 호출 */ }
+  }
   state.recommendLoading = true
   try {
     state.recommendData = await getLastMealRecommendation()
+    recommendIndex.value = 0
+    localStorage.setItem(RECOMMEND_CACHE_KEY, JSON.stringify(state.recommendData))
   } catch {
     // recommendation not available
   } finally {
     state.recommendLoading = false
+  }
+}
+
+function refreshRecommendation() {
+  const total = state.recommendData?.recommendations?.length ?? 0
+  if (total === 0) return
+  recommendIndex.value = (recommendIndex.value + 1) % total
+}
+
+async function addLastRecommendToLog() {
+  const rec = recommendation.value.raw
+  if (!rec) return
+  addingMeal.value = true
+  try {
+    const meal = await recordPhotoMeal(null, [{
+      name: rec.name,
+      estimatedGrams: 100,
+      kcal: rec.kcal,
+      proteinG: rec.proteinG,
+      carbG: rec.carbG,
+      fatG: rec.fatG,
+    }])
+    badgeStore.celebrate(meal)
+    localStorage.removeItem(RECOMMEND_CACHE_KEY)
+    router.push('/log')
+  } catch {
+    // 실패 시 조용히 무시
+  } finally {
+    addingMeal.value = false
   }
 }
 

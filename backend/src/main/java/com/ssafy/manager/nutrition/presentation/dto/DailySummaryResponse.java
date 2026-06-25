@@ -8,5 +8,8 @@ public record DailySummaryResponse(
         int maxStreak,
         double totalCarbs,
         double totalProtein,
-        double totalFat
+        double totalFat,
+        double targetCarbG,
+        double targetProteinG,
+        double targetFatG
 ) {}

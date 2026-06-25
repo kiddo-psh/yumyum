@@ -41,7 +41,7 @@
     <!-- 종합 코멘트 -->
     <section class="bg-white neo-brutal-border rounded-2xl p-5">
       <h2 class="text-label-lg text-on-surface-variant mb-2">💬 종합 코멘트</h2>
-      <p class="text-body-lg text-on-background whitespace-pre-line">{{ report.content }}</p>
+      <div class="prose-report text-on-background" v-html="renderMd(report.content)"></div>
     </section>
 
     <!-- 섹션 카드 3개 -->
@@ -51,7 +51,7 @@
       class="bg-white neo-brutal-border rounded-2xl p-5"
     >
       <h2 class="text-label-lg text-on-surface-variant mb-2">{{ s.label }}</h2>
-      <p class="text-body-lg text-on-background whitespace-pre-line">{{ s.value }}</p>
+      <div class="prose-report text-on-background" v-html="renderMd(s.value)"></div>
     </section>
   </div>
 </template>
@@ -59,8 +59,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { marked } from 'marked';
 import { getCurrentProgram } from '@/api/my';
 import { getWeeklyReport } from '@/api/report';
+
+marked.setOptions({ breaks: true });
+
+function renderMd(content) {
+  return marked.parse(content ?? '');
+}
 
 const route = useRoute();
 const weekNumber = Number(route.params.weekNumber);
@@ -103,3 +110,56 @@ async function load() {
 
 onMounted(load);
 </script>
+
+<style scoped>
+/* AI 리포트 마크다운 스타일 */
+:deep(.prose-report) {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+:deep(.prose-report p) {
+  margin: 0 0 0.6em;
+}
+:deep(.prose-report p:last-child) {
+  margin-bottom: 0;
+}
+:deep(.prose-report strong) {
+  font-weight: 800;
+}
+:deep(.prose-report ul),
+:deep(.prose-report ol) {
+  margin: 0.4em 0 0.4em 1.2em;
+  padding: 0;
+}
+:deep(.prose-report li) {
+  margin-bottom: 0.25em;
+}
+:deep(.prose-report h1),
+:deep(.prose-report h2),
+:deep(.prose-report h3) {
+  font-weight: 800;
+  margin: 0.7em 0 0.35em;
+  line-height: 1.3;
+}
+:deep(.prose-report h1) { font-size: 1.2em; }
+:deep(.prose-report h2) { font-size: 1.1em; }
+:deep(.prose-report h3) { font-size: 1.02em; }
+:deep(.prose-report code) {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.85em;
+  font-family: monospace;
+}
+:deep(.prose-report pre) {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+:deep(.prose-report pre code) {
+  background: none;
+  padding: 0;
+}
+</style>

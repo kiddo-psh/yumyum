@@ -21,59 +21,18 @@
   </div>
 
   <ul v-else class="flex flex-col gap-4">
-    <li
-      v-for="r in reports"
-      :key="r.weekNumber"
-      class="bg-white neo-brutal-border rounded-2xl p-5 cursor-pointer hover:bg-surface transition-colors"
-      @click="goDetail(r.weekNumber)"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-headline-md text-on-background font-bold">{{ r.weekNumber }}주차</span>
-        <span class="text-label-lg text-on-surface-variant neo-brutal-border rounded-full px-3 py-1">
-          달성 {{ r.achievementDays }}/7
-        </span>
-      </div>
-      <div class="flex items-center justify-between mt-3">
-        <span class="text-label-lg text-on-surface-variant">평균 칼로리 {{ Math.round(r.avgCalorieRate) }}%</span>
-        <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
-      </div>
+    <li v-for="r in reports" :key="r.weekNumber">
+      <WeeklyReportCard :report="r" />
     </li>
   </ul>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { getCurrentProgram } from '@/api/my';
-import { getWeeklyReports } from '@/api/report';
+import { onMounted } from 'vue';
+import WeeklyReportCard from '@/components/WeeklyReportCard.vue';
+import { useWeeklyReports } from '@/composables/useWeeklyReports';
 
-const router = useRouter();
-const reports = ref([]);
-const loading = ref(true);
-const error = ref(false);
-const noProgram = ref(false);
-
-async function load() {
-  loading.value = true;
-  error.value = false;
-  noProgram.value = false;
-  try {
-    const program = await getCurrentProgram();
-    reports.value = await getWeeklyReports(program.programId);
-  } catch (e) {
-    if (e?.status === 404) {
-      noProgram.value = true;
-    } else {
-      error.value = true;
-    }
-  } finally {
-    loading.value = false;
-  }
-}
-
-function goDetail(weekNumber) {
-  router.push({ name: 'report-detail', params: { weekNumber } });
-}
+const { reports, loading, error, noProgram, load } = useWeeklyReports();
 
 onMounted(load);
 </script>

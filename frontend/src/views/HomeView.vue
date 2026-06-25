@@ -13,7 +13,28 @@
       </div>
       <div>
         <h2 class="text-headline-lg text-on-background">안녕! 오늘 하루는 어때요?</h2>
-        <p class="text-body-md text-on-surface-variant">
+        <!-- 추천 준비됨 -->
+        <div v-if="hasRecommendation" class="flex items-center gap-3 mt-1 flex-wrap">
+          <p class="text-body-md text-on-surface-variant">
+            <span class="font-bold text-on-background">{{ recommendation.name }}</span> 어때요?
+            {{ recommendation.reason }}
+          </p>
+          <RouterLink
+            :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
+            class="shrink-0 bg-primary text-white px-4 py-1.5 neo-brutal-border rounded-lg text-label-sm font-bold hover:-translate-y-0.5 transition-transform"
+          >
+            식단에 추가
+          </RouterLink>
+        </div>
+        <!-- 추천 로딩 중 -->
+        <p
+          v-else-if="state.balance?.lastMealRecommendTrigger && state.recommendLoading"
+          class="text-body-md text-on-surface-variant"
+        >
+          마지막 끼니 추천을 가져오는 중...
+        </p>
+        <!-- 기본 AI 멘트 -->
+        <p v-else class="text-body-md text-on-surface-variant">
           {{ coachMessage }}
         </p>
       </div>
@@ -143,91 +164,48 @@
     </div>
   </div>
 
-  <!-- Row 2: Recommendation & Quick Actions -->
-  <div v-if="isProgramReady" class="grid grid-cols-12 gap-8">
-    <!-- Meal Recommendation Card -->
-    <div class="col-span-8 bg-surface neo-brutal-border rounded-xl p-8 neo-brutal-card-hover">
-      <div v-if="state.loading" class="flex items-center gap-4 text-on-surface-variant">
-        <span class="material-symbols-outlined animate-spin">progress_activity</span>
-        <span class="text-body-md">AI 추천을 불러오는 중...</span>
+  <!-- Row 2: Quick Actions -->
+  <div v-if="isProgramReady" class="grid grid-cols-3 gap-4">
+    <RouterLink
+      to="/meals/search"
+      class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
+    >
+      <span class="material-symbols-outlined text-4xl mb-2 text-primary">edit_note</span>
+      <span class="font-bold">식단 기록</span>
+    </RouterLink>
+    <RouterLink
+      to="/meals/photo"
+      class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
+    >
+      <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
+      <span class="font-bold">사진 분석</span>
+    </RouterLink>
+    <div class="bg-white neo-brutal-border rounded-xl p-5 neo-brutal-card-hover">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
+        <span class="font-bold text-sm">오늘 체중</span>
+        <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
+        </span>
       </div>
-      <div v-else class="flex items-center gap-8">
-        <div class="w-40 h-40 neo-brutal-border rounded-2xl overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
-          <span class="material-symbols-outlined text-[64px] text-on-surface-variant" style="font-variation-settings:'FILL' 1;">restaurant_menu</span>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">recommend</span>
-            <span class="font-bold text-on-surface-variant">마지막 끼니 추천</span>
-          </div>
-          <h4 class="text-headline-lg mb-2">{{ recommendation.name }}</h4>
-          <p class="text-body-md mb-6 text-on-surface-variant">{{ recommendation.reason }}</p>
-          <div class="flex gap-4">
-            <RouterLink
-              v-if="hasRecommendation"
-              :to="{ name: 'meal-manual', query: { q: recommendation.name } }"
-              class="bg-primary text-white px-8 py-3 neo-brutal-border rounded-lg font-bold flex items-center gap-2 hover:-translate-y-1 transition-transform"
-            >
-              <span class="material-symbols-outlined">add_circle</span>
-              식단에 추가
-            </RouterLink>
-            <button
-              class="bg-white px-8 py-3 neo-brutal-border rounded-lg font-bold flex items-center gap-2 hover:-translate-y-1 transition-transform"
-              :disabled="state.recommendLoading"
-              @click="loadRecommendation"
-            >
-              <span class="material-symbols-outlined">refresh</span>
-              {{ state.recommendLoading ? '요청 중...' : (hasRecommendation ? '다시 추천' : '추천 받기') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Action Bento -->
-    <div class="col-span-4 grid grid-cols-2 gap-4">
-      <RouterLink
-        to="/meals/search"
-        class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-      >
-        <span class="material-symbols-outlined text-4xl mb-2 text-primary">edit_note</span>
-        <span class="font-bold">식단 기록</span>
-      </RouterLink>
-      <RouterLink
-        to="/meals/photo"
-        class="bg-white neo-brutal-border rounded-xl p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-      >
-        <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
-        <span class="font-bold">사진 분석</span>
-      </RouterLink>
-      <!-- 체중 입력 -->
-      <div class="col-span-2 bg-white neo-brutal-border rounded-xl p-5 neo-brutal-card-hover">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
-          <span class="font-bold text-sm">오늘 체중</span>
-          <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
-          </span>
-        </div>
-        <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
-        <form class="flex gap-2" @submit.prevent="submitWeight">
-          <input
-            v-model.number="newWeight"
-            type="number"
-            step="0.1"
-            placeholder="kg 입력"
-            class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
-            required
-          />
-          <button
-            type="submit"
-            class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
-            :disabled="weightSubmitting"
-          >
-            {{ weightSubmitting ? '...' : '기록' }}
-          </button>
-        </form>
-      </div>
+      <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
+      <form class="flex gap-2" @submit.prevent="submitWeight">
+        <input
+          v-model.number="newWeight"
+          type="number"
+          step="0.1"
+          placeholder="kg 입력"
+          class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
+          required
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
+          :disabled="weightSubmitting"
+        >
+          {{ weightSubmitting ? '...' : '기록' }}
+        </button>
+      </form>
     </div>
   </div>
 </template>
@@ -289,7 +267,6 @@ const isProgramReady = computed(() => (state.balance?.targetCalories ?? 0) > 0)
 const coachMessage = computed(() => {
   if (!isProgramReady.value) return 'AI가 맞춤 플랜을 생성하고 있어요...'
   if (aiComment.value) return aiComment.value
-  if (state.balance?.lastMealRecommendTrigger) return '마지막 끼니 추천이 준비됐어요!'
   return `${formatNumber(remainingCalories.value)} kcal 남았어요. 기록해볼까요?`
 })
 
@@ -324,13 +301,7 @@ const hasRecommendation = computed(() => Boolean(state.recommendData?.recommenda
 
 const recommendation = computed(() => {
   const rec = state.recommendData?.recommendations?.[0]
-  if (rec) return { name: rec.name, reason: rec.reason ?? '잔여 영양소 기반 AI 추천' }
-  return {
-    name: remainingCalories.value > 0 ? '추천 받기' : '오늘 목표 달성!',
-    reason: state.balance?.lastMealRecommendTrigger
-      ? '아래 버튼으로 AI 추천을 받아보세요.'
-      : '조건이 충족되면 자동으로 추천됩니다.',
-  }
+  return { name: rec?.name ?? '', reason: rec?.reason ?? '잔여 영양소 기반 AI 추천' }
 })
 
 onMounted(async () => {

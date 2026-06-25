@@ -76,8 +76,8 @@
       <!-- AI 코멘트 -->
       <div v-if="program.aiComment" class="bg-surface neo-brutal-border rounded-xl p-7">
         <div class="flex items-center gap-3 mb-5">
-          <img src="/nyam/nyam_coach.png" alt="냠냠코치" class="w-9 h-9 object-contain flex-shrink-0" />
-          <p class="text-headline-md font-bold text-on-background">AI 플랜 안내</p>
+          <img src="/nyam/nyam_coach_01.png" alt="냠냠코치" class="w-14 h-14 object-contain flex-shrink-0" />
+          <p class="text-headline-md font-bold text-on-background">닭코치의 한마디</p>
         </div>
         <p class="text-body-lg text-on-background" style="line-height: 1.8;">{{ program.aiComment }}</p>
       </div>

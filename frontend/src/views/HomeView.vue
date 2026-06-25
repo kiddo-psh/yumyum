@@ -40,11 +40,11 @@
       </div>
     </div>
     <div class="flex gap-4">
-      <button class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
-        <span class="material-symbols-outlined">notifications</span>
+      <button aria-label="알림" class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
       </button>
-      <RouterLink to="/my" class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
-        <span class="material-symbols-outlined">settings</span>
+      <RouterLink to="/my" aria-label="설정" class="w-12 h-12 flex items-center justify-center neo-brutal-border rounded-full hover:bg-surface transition-colors">
+        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
       </RouterLink>
     </div>
   </header>
@@ -83,7 +83,16 @@
 
         <!-- Progress Circle -->
         <div class="relative w-56 h-56 flex-shrink-0 flex items-center justify-center">
-          <svg class="w-full h-full progress-circle-svg absolute" viewBox="0 0 100 100">
+          <svg
+            role="progressbar"
+            :aria-valuenow="calorieProgress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            :aria-label="`오늘 칼로리 달성률 ${calorieProgress}%`"
+            class="w-full h-full progress-circle-svg absolute"
+            viewBox="0 0 100 100"
+          >
+            <title>오늘 칼로리 달성률 {{ calorieProgress }}%</title>
             <circle class="text-outline" cx="50" cy="50" r="42" fill="transparent" stroke="currentColor" stroke-width="6" />
             <circle
               ref="progressCircle"
@@ -95,7 +104,7 @@
               stroke-width="12"
               :stroke-dasharray="circumference"
               :stroke-dashoffset="strokeDashoffset"
-              style="transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"
+              style="transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);"
             />
           </svg>
           <div class="flex flex-col items-center justify-center z-10">
@@ -195,6 +204,7 @@
           type="number"
           step="0.1"
           placeholder="kg 입력"
+          aria-label="오늘 체중 (kg)"
           class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
           required
         />
@@ -202,6 +212,8 @@
           type="submit"
           class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
           :disabled="weightSubmitting"
+          :aria-busy="weightSubmitting"
+          :aria-label="weightSubmitting ? '기록 중' : '체중 기록'"
         >
           {{ weightSubmitting ? '...' : '기록' }}
         </button>
@@ -417,11 +429,22 @@ function formatNumber(v) {
   border-radius: 50%;
   background: #a8e6cf;
   border: 2px solid #1a1a1a;
-  animation: bounce 0.75s ease-in-out infinite alternate;
+  animation: plan-dot-rise 0.75s ease-in-out infinite alternate;
 }
 
-@keyframes bounce {
+@keyframes plan-dot-rise {
   from { transform: translateY(0); opacity: 0.4; }
   to   { transform: translateY(-8px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-spinner {
+    animation: none;
+    opacity: 0.5;
+  }
+  .plan-dot {
+    animation: none;
+    opacity: 0.7;
+  }
 }
 </style>

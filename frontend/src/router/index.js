@@ -14,6 +14,7 @@ import NotFoundView from '@/views/NotFoundView.vue';
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue';
 import OnboardingView from '@/views/OnboardingView.vue';
 import PlaceholderView from '@/views/PlaceholderView.vue';
+import ReportDetailView from '@/views/ReportDetailView.vue';
 import ReportView from '@/views/ReportView.vue';
 import RoutineDetailView from '@/views/RoutineDetailView.vue';
 import RoutineHistoryView from '@/views/RoutineHistoryView.vue';
@@ -155,6 +156,14 @@ const routes = [
         meta: {
           title: '리포트',
           navLabel: 'Report',
+        },
+      },
+      {
+        path: 'report/:weekNumber',
+        name: 'report-detail',
+        component: ReportDetailView,
+        meta: {
+          title: '주간 리포트',
         },
       },
       {

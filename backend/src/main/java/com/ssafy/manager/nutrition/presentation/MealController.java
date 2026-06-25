@@ -64,10 +64,10 @@ public class MealController {
             @PathVariable Long id,
             @RequestBody MealItemRequest request
     ) {
-        return ResponseEntity.ok(
-                MealResponse.from(mealService.addItem(id, memberId,
-                        new MealItemCommand(request.foodCode(), request.amountGrams())))
-        );
+        Meal meal = mealService.addItem(id, memberId,
+                new MealItemCommand(request.foodCode(), request.amountGrams()));
+        return ResponseEntity.ok(MealResponse.from(meal, earnedBadgeCollector.getEarned(),
+                StreakChangeResponse.from(streakChangeHolder)));
     }
 
     @DeleteMapping("/{id}")

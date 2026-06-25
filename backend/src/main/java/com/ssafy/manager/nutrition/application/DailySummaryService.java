@@ -44,7 +44,10 @@ public class DailySummaryService {
                 stats.getMaxStreak().count(),
                 totalCarbs,
                 totalProtein,
-                totalFat
+                totalFat,
+                goal.getTargetCarbG(),
+                goal.getTargetProteinG(),
+                goal.getTargetFatG()
         );
     }
 }

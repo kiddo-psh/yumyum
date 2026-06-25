@@ -1,5 +1,6 @@
 package com.ssafy.manager.nutrition.presentation;
 
+import com.ssafy.manager.global.time.EffectiveDateResolver;
 import com.ssafy.manager.nutrition.application.AiMealService;
 import com.ssafy.manager.nutrition.presentation.dto.LastMealRecommendResponse;
 import com.ssafy.manager.nutrition.presentation.dto.PhotoAnalysisRequest;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-
 @RestController
 @RequestMapping("/meals")
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class AiMealController {
     public ResponseEntity<LastMealRecommendResponse> lastRecommend(
             @AuthenticationPrincipal Long memberId
     ) {
-        return ResponseEntity.ok(LastMealRecommendResponse.from(aiMealService.lastRecommend(memberId, LocalDate.now())));
+        return ResponseEntity.ok(LastMealRecommendResponse.from(aiMealService.lastRecommend(memberId, EffectiveDateResolver.today())));
     }
 
     @PostMapping("/photo/analyze")

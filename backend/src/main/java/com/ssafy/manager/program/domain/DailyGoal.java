@@ -63,13 +63,11 @@ public class DailyGoal {
         achievedProteinG = proteinG;
         achievedCarbG = carbG;
         achievedFatG = fatG;
-        achieved = isWithin(targetValue, calories)
-                && isWithin(targetProteinG, proteinG)
-                && isWithin(targetCarbG, carbG)
-                && isWithin(targetFatG, fatG);
+        achieved = isWithin(targetValue, calories);
     }
 
     private boolean isWithin(double target, double achieved) {
+        if (target == 0) return true;
         return target * 0.9 <= achieved && achieved <= target * 1.1;
     }
 }

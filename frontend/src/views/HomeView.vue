@@ -137,19 +137,18 @@
         <!-- Calorie Progress Bar -->
         <div>
           <div class="flex justify-between mb-2">
-            <span class="font-bold">남은 칼로리</span>
-            <span class="font-bold text-primary">{{ formatNumber(remainingCalories) }} kcal</span>
+            <span class="text-label-lg text-on-background">남은 칼로리</span>
+            <span class="text-label-lg text-primary">{{ formatNumber(remainingCalories) }} kcal</span>
           </div>
-          <div class="w-full h-8 bg-white neo-brutal-border rounded-full overflow-hidden relative">
+          <div class="w-full h-3 bg-white neo-brutal-border rounded-full overflow-hidden">
             <div
               class="h-full bg-primary border-r-[3px] border-on-background transition-all duration-700"
               :style="{ width: calorieProgress + '%' }"
             />
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span class="text-[10px] font-black text-on-background">
-                목표 {{ formatNumber(targetCalories) }} kcal
-              </span>
-            </div>
+          </div>
+          <div class="flex justify-between mt-1.5">
+            <span class="text-xs text-on-surface-variant">{{ calorieProgress }}% 달성</span>
+            <span class="text-xs text-on-surface-variant">목표 {{ formatNumber(targetCalories) }} kcal</span>
           </div>
         </div>
 
@@ -174,43 +173,51 @@
   </div>
 
   <!-- Row 2: Quick Actions -->
-  <div v-if="isProgramReady" class="grid grid-cols-3 gap-2 lg:gap-4">
-    <RouterLink
-      to="/meals/search"
-      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-    >
-      <span class="material-symbols-outlined text-4xl mb-2 text-primary">edit_note</span>
-      <span class="font-bold text-sm lg:text-base">식단 기록</span>
-    </RouterLink>
-    <RouterLink
-      to="/meals/photo"
-      class="bg-white neo-brutal-border rounded-xl p-4 lg:p-6 flex flex-col items-center justify-center text-center neo-brutal-card-hover"
-    >
-      <span class="material-symbols-outlined text-4xl mb-2 text-primary">camera_enhance</span>
-      <span class="font-bold text-sm lg:text-base">사진 분석</span>
-    </RouterLink>
-    <div class="bg-white neo-brutal-border rounded-xl p-3 lg:p-5 neo-brutal-card-hover">
+  <div v-if="isProgramReady" class="space-y-3">
+    <!-- Primary CTA + secondary side by side -->
+    <div class="grid grid-cols-3 gap-3">
+      <RouterLink
+        to="/meals/search"
+        class="col-span-2 bg-primary text-on-primary neo-brutal-border rounded-xl p-5 flex items-center gap-4 neo-brutal-shadow hover:-translate-y-0.5 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined text-4xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">edit_note</span>
+        <div>
+          <p class="text-label-lg">식단 기록</p>
+          <p class="text-body-md text-on-primary/70 mt-0.5">오늘 먹은 걸 기록해요</p>
+        </div>
+      </RouterLink>
+      <RouterLink
+        to="/meals/photo"
+        class="bg-white neo-brutal-border rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-0.5 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings:'FILL' 1;">camera_enhance</span>
+        <span class="text-label-lg text-on-background">사진 분석</span>
+      </RouterLink>
+    </div>
+
+    <!-- Weight widget — full width -->
+    <div class="bg-white neo-brutal-border rounded-xl p-5">
       <div class="flex items-center gap-2 mb-3">
         <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">monitor_weight</span>
-        <span class="font-bold text-sm">오늘 체중</span>
-        <span v-if="weightSuccess" class="ml-auto text-success text-xs font-bold flex items-center gap-1">
-          <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
+        <span class="text-label-lg text-on-background">오늘 체중</span>
+        <span v-if="weightSuccess" class="ml-auto text-success text-label-lg flex items-center gap-1">
+          <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1;">check_circle</span>기록 완료
         </span>
       </div>
-      <p v-if="weightError" class="text-danger text-xs font-bold mb-2">{{ weightError }}</p>
+      <p v-if="weightError" class="text-label-lg text-danger mb-2">{{ weightError }}</p>
       <form class="flex gap-2" @submit.prevent="submitWeight">
         <input
           v-model.number="newWeight"
           type="number"
           step="0.1"
-          placeholder="kg 입력"
+          placeholder="오늘 체중 (kg)"
           aria-label="오늘 체중 (kg)"
-          class="flex-1 neo-brutal-border rounded-lg px-3 py-2 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary"
+          class="flex-1 border-2 border-outline rounded-[10px] px-3 py-2.5 text-body-md text-on-background bg-background focus:border-on-background focus:outline-none transition-colors"
           required
         />
         <button
           type="submit"
-          class="px-4 py-2 bg-primary text-white neo-brutal-border rounded-lg text-sm font-bold disabled:opacity-50"
+          class="px-5 py-2.5 bg-primary text-on-primary neo-brutal-border rounded-[10px] text-label-lg disabled:opacity-40 hover:-translate-y-0.5 transition-all duration-150"
           :disabled="weightSubmitting"
           :aria-busy="weightSubmitting"
           :aria-label="weightSubmitting ? '기록 중' : '체중 기록'"

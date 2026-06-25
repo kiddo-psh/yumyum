@@ -79,7 +79,7 @@
         </RouterLink>
         <p
           v-if="badgeStore.error"
-          class="text-xs text-error"
+          class="text-xs text-danger"
         >
           뱃지 불러오기 실패
         </p>

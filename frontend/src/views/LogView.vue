@@ -37,7 +37,7 @@
         <div class="bg-surface neo-brutal-border rounded-xl p-6 neo-brutal-card-hover">
           <div class="flex items-center justify-between mb-5">
             <div>
-              <p class="text-label-lg text-on-surface-variant uppercase tracking-widest mb-1">오늘의 칼로리</p>
+              <p class="text-label-lg text-on-surface-variant mb-1">오늘의 칼로리</p>
               <h3 class="text-headline-lg font-black text-on-background">
                 {{ formatNumber(totalCalories) }}
                 <span class="text-body-lg text-on-surface-variant font-normal">/ {{ formatNumber(targetCalories) }} kcal</span>
@@ -47,13 +47,12 @@
               <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1;">restaurant</span>
             </div>
           </div>
-          <div class="w-full h-8 bg-white neo-brutal-border rounded-full overflow-hidden relative mb-5">
+          <div class="w-full h-3 bg-white neo-brutal-border rounded-full overflow-hidden mb-2">
             <div class="h-full bg-primary border-r-[3px] border-on-background transition-all duration-700" :style="{ width: calorieProgress + '%' }" />
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span class="text-[10px] font-black uppercase text-on-background">
-                {{ calorieProgress }}% 달성 · 남은 {{ formatNumber(remainingCalories) }} kcal
-              </span>
-            </div>
+          </div>
+          <div class="flex justify-between mb-3">
+            <span class="text-xs text-on-surface-variant">{{ calorieProgress }}% 달성</span>
+            <span class="text-xs text-on-surface-variant">남은 {{ formatNumber(remainingCalories) }} kcal</span>
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div v-for="macro in macros" :key="macro.key" class="text-center">
@@ -247,7 +246,7 @@
               <p class="text-xs text-on-surface-variant">{{ primaryRecommendation.reason }}</p>
               <div class="flex justify-between items-center pt-3 border-t-[2px] border-outline">
                 <div>
-                  <p class="text-[10px] text-on-surface-variant font-bold">예상 칼로리</p>
+                  <p class="text-xs text-on-surface-variant font-bold">예상 칼로리</p>
                   <p class="font-black text-primary">{{ formatKcal(primaryRecommendation.kcal) }}</p>
                 </div>
                 <RouterLink
